@@ -18,11 +18,22 @@ namespace BackingUpConsole
             if (command == CommandCollections.RunFile)
                 return RunFile(args, messagePrinter, flags);
 
+            else if (command == CommandCollections.Exit)
+                return Exit(args, messagePrinter, flags);
+
             else
                 return MessageProvider.UnknownCommand(command.cmd);
         }
 
         private static bool CheckArgsLength(string[] args, int min, int max) => (args.Length <= max || max == -1) && (args.Length >= min || min == -1);
+
+        private static MessageHandler Exit(string[] args, MessagePrinter messagePrinter, UInt16 flags)
+        {
+            if (!CheckArgsLength(args, 0, 0))
+                return MessageProvider.IncorrectArgumentCount();
+
+            return MessageProvider.QuitProgram();
+        }
 
         private static MessageHandler RunFile(string[] args, MessagePrinter messagePrinter, UInt16 flags)
         {
