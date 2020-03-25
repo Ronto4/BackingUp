@@ -1,6 +1,9 @@
 ﻿#define DEBUG_MSG
 
+using System;
 using BackingUpConsole.Utilities.Messages;
+using BackingUpConsole.Utilities.Commands;
+using BackingUpConsole.Utilities;
 
 namespace BackingUpConsole
 {
@@ -15,18 +18,23 @@ namespace BackingUpConsole
 #endif
             if (args.Length > 0)
             {
-                MessageHandler result = CLIInterpreter(args);
+                MessageHandler result = CLIInterpreter(args, messagePrinter);
+                messagePrinter.Print(result);
                 if (result == MessageProvider.QuitProgram())
-                {
-                    messagePrinter.Print(result);
                     return;
-                }
             }
         }
 
-        private static MessageHandler CLIInterpreter(string[] args)
+        private static MessageHandler CLIInterpreter(string[] args, MessagePrinter messagePrinter)
         {
-            return MessageProvider.QuitProgram();
+            Command cmd = CommandCollections.GetCommand(args[0]);
+            string[] arg = new string[args.Length - 1];
+            for (int i = 0; i < arg.Length; i++)
+            {
+                arg[i] = args[i + 1];
+            }
+            return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE));
+            //return MessageProvider.QuitProgram();
         }
     }
 }
