@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BackingUpConsole.Utilities.Commands
+﻿namespace BackingUpConsole.Utilities.Commands
 {
     public class CommandCollections
     {

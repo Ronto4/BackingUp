@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 #nullable enable
 
@@ -27,9 +25,9 @@ namespace BackingUpConsole.Utilities.Messages
             if (Level < message.Level)
                 return;
 
-            Console.ForegroundColor = 
-                message.Color != null 
-                    ? (ConsoleColor)message.Color 
+            Console.ForegroundColor =
+                message.Color != null
+                    ? (ConsoleColor)message.Color
                     : DefaultColor;
             Console.WriteLine(message.Message);
             Console.ForegroundColor = DefaultColor;

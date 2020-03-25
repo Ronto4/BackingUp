@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using BackingUpConsole.Utilities.Messages;
+﻿using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
-using BackingUpConsole.Utilities;
+using BackingUpConsole.Utilities.Messages;
+using System;
+using System.IO;
 
 namespace BackingUpConsole
 {

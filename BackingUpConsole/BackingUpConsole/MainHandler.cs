@@ -1,9 +1,9 @@
 ﻿#define DEBUG_MSG
 
-using System;
-using BackingUpConsole.Utilities.Messages;
-using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities;
+using BackingUpConsole.Utilities.Commands;
+using BackingUpConsole.Utilities.Messages;
+using System;
 using System.Runtime.InteropServices;
 
 namespace BackingUpConsole
