@@ -48,5 +48,16 @@ namespace BackingUpConsole.Utilities.Messages
             messageString += $"Description: {description}";
             return new MessageHandler(MessageCollections.Codes.InvalidMethodExecution, messageString, MessageCollections.Levels.Fatal);
         }
+        public static MessageHandler ExecutionDebug(Commands.Command cmd, UInt16 flags, string[] args)
+        {
+            string messageString = $"Executing command '{cmd.cmd}'{Environment.NewLine}";
+            messageString += $" Flags (Base 2): {Convert.ToString(flags, 2)}{Environment.NewLine}";
+            messageString += $" Arguments:";
+            for (int i = 0; i < args.Length; i++)
+            {
+                messageString += $"{Environment.NewLine}  {args[i]}";
+            }
+            return new MessageHandler(MessageCollections.Codes.ExecutionDebug, messageString, MessageCollections.Levels.Debug);
+        }
     }
 }

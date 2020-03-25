@@ -19,6 +19,7 @@ namespace BackingUpConsole
             //    Console.Write($"\"{args[i]}\"");
             //}
             //Console.WriteLine($": {Convert.ToString(flags, 2)}");
+            messagePrinter.Print(MessageProvider.ExecutionDebug(command, flags, args));
 
             if (command == CommandCollections.RunFile)
                 return RunFile(args, messagePrinter, flags);

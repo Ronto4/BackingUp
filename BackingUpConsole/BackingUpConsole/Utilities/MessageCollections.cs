@@ -15,7 +15,8 @@ namespace BackingUpConsole.Utilities.Messages
             ParseError,
             ParseSuccess,
             RuntimeError,
-            InvalidMethodExecution
+            InvalidMethodExecution,
+            ExecutionDebug
         }
         public enum Levels
         {
