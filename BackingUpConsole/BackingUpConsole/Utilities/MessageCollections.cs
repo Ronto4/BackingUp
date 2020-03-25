@@ -4,7 +4,11 @@
     {
         public enum Codes
         {
-            QuitProgram
+            QuitProgram,
+            UnknownCommand,
+            Success,
+            IncorrectArgumentCount,
+            FileNotFound
         }
         public enum Levels
         {
