@@ -32,6 +32,7 @@ namespace BackingUpConsole.Utilities.Messages
                     ? (ConsoleColor)message.Color 
                     : DefaultColor;
             Console.WriteLine(message.Message);
+            Console.ForegroundColor = DefaultColor;
         }
     }
 }

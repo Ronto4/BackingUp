@@ -17,7 +17,7 @@
                                                                                     MessageCollections.Levels.Error,
                                                                                     System.ConsoleColor.Red);
         public static MessageHandler FileNotFound(string path) => new MessageHandler(MessageCollections.Codes.FileNotFound,
-                                                                                     $"Cannot find file {path}",
+                                                                                     $"Cannot find file '{path}'",
                                                                                      MessageCollections.Levels.Error,
                                                                                      System.ConsoleColor.Red);
         public static MessageHandler ParseError(MessageHandler message, string position) => new MessageHandler(MessageCollections.Codes.ParseError,

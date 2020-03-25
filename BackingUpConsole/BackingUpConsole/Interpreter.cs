@@ -12,6 +12,9 @@ namespace BackingUpConsole
     {
         public static MessageHandler Interprete(Command command, string[] args, MessagePrinter messagePrinter, UInt16 flags)
         {
+            if (command.cmd.StartsWith(';'))
+                return MessageProvider.Success();
+
             if (command == CommandCollections.RunFile)
                 return RunFile(args, messagePrinter, flags);
 
@@ -19,7 +22,7 @@ namespace BackingUpConsole
                 return MessageProvider.UnknownCommand(command.cmd);
         }
 
-        private static bool CheckArgsLength(string[] args, int min, int max) => args.Length <= max && args.Length >= min;
+        private static bool CheckArgsLength(string[] args, int min, int max) => (args.Length <= max || max == -1) && (args.Length >= min || min == -1);
 
         private static MessageHandler RunFile(string[] args, MessagePrinter messagePrinter, UInt16 flags)
         {
@@ -51,7 +54,7 @@ namespace BackingUpConsole
                     }
                     //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
                     MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags | Flags.ONLY_COMPILE));
-                    if (result != MessageProvider.Success())
+                    if (result != MessageProvider.Success() && result != MessageProvider.ParseSuccess())
                         return MessageProvider.ParseError(result, $"{path} at line {line}");
                 }
             }
