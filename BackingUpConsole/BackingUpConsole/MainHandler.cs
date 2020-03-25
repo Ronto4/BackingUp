@@ -4,7 +4,6 @@ using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities.Messages;
 using System;
-using System.Runtime.InteropServices;
 
 namespace BackingUpConsole
 {
@@ -21,18 +20,18 @@ namespace BackingUpConsole
             {
                 MessageHandler result = CLIInterpreter(args, messagePrinter);
                 messagePrinter.Print(result);
-                if (result == MessageProvider.QuitProgram())
-                    return;
+                //if (result == MessageProvider.QuitProgram())
+                //    return;
             }
             bool exit = false;
             while (!exit)
             {
                 string input = Console.ReadLine();
-                string[] arg = CommandLineToArgs(input);
+                string[] arg = Miscellaneous.CommandLineToArgs(input);
                 MessageHandler result = CLIInterpreter(arg, messagePrinter);
                 messagePrinter.Print(result);
-                if (result == MessageProvider.QuitProgram())
-                    exit = true;
+                //if (result == MessageProvider.QuitProgram())
+                //    exit = true;
             }
         }
 
@@ -49,32 +48,6 @@ namespace BackingUpConsole
         }
 
 
-        //Source: https://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp
-        [DllImport("shell32.dll", SetLastError = true)]
-        static extern IntPtr CommandLineToArgvW(
-    [MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
 
-        public static string[] CommandLineToArgs(string commandLine)
-        {
-            int argc;
-            var argv = CommandLineToArgvW(commandLine, out argc);
-            if (argv == IntPtr.Zero)
-                throw new System.ComponentModel.Win32Exception();
-            try
-            {
-                var args = new string[argc];
-                for (var i = 0; i < args.Length; i++)
-                {
-                    var p = Marshal.ReadIntPtr(argv, i * IntPtr.Size);
-                    args[i] = Marshal.PtrToStringUni(p);
-                }
-
-                return args;
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(argv);
-            }
-        }
     }
 }

@@ -13,6 +13,13 @@ namespace BackingUpConsole
             if (command.cmd.StartsWith(';'))
                 return MessageProvider.Success();
 
+            //Console.Write(command.cmd);
+            //for (int i = 0; i < args.Length; i++)
+            //{
+            //    Console.Write($"\"{args[i]}\"");
+            //}
+            //Console.WriteLine($": {Convert.ToString(flags, 2)}");
+
             if (command == CommandCollections.RunFile)
                 return RunFile(args, messagePrinter, flags);
 
@@ -30,7 +37,12 @@ namespace BackingUpConsole
             if (!CheckArgsLength(args, 0, 0))
                 return MessageProvider.IncorrectArgumentCount();
 
-            return MessageProvider.QuitProgram();
+            if ((flags & Flags.ONLY_COMPILE) != 0)
+                return MessageProvider.Success();
+
+            //return MessageProvider.QuitProgram();
+            Miscellaneous.ExitProgram(0, "User input or script");
+            return MessageProvider.RuntimeError(MessageProvider.InvalidMethodExecution(nameof(Exit), flags, args, "'Miscellaneous.ExitProgram(0, \"User input or script\");' was called, but the program did not stop."), "Interpreter.Exit");
         }
 
         private static MessageHandler RunFile(string[] args, MessagePrinter messagePrinter, UInt16 flags)
@@ -48,27 +60,60 @@ namespace BackingUpConsole
 
             int line = 0;
 
+            if ((flags & Flags.NO_COMPILE) == 0)
+            {
+
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    while (!sr.EndOfStream)
+                    {
+                        line++;
+                        string cmds = sr.ReadLine();
+                        string[] parts = Miscellaneous.CommandLineToArgs(cmds);
+                        //string[] parts = cmds.Split(" ");
+                        Command cmd = CommandCollections.GetCommand(parts[0]);
+                        string[] cmdargs = new string[parts.Length - 1];
+                        for (int i = 0; i < cmdargs.Length; i++)
+                        {
+                            cmdargs[i] = parts[i + 1];
+                        }
+                        //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
+                        MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags | Flags.ONLY_COMPILE));
+                        if (result != MessageProvider.Success() && result != MessageProvider.ParseSuccess())
+                            return MessageProvider.ParseError(result, $"{path} at line {line}");
+                    }
+                }
+
+                if ((flags & Flags.ONLY_COMPILE) != 0)
+                    return MessageProvider.ParseSuccess();
+
+                messagePrinter.Print(MessageProvider.ParseSuccess());
+            }
+            //Console.WriteLine("Executing...");
+            //return MessageProvider.ParseSuccess();
+
+            line = 0;
+
             using (StreamReader sr = new StreamReader(path))
             {
                 while (!sr.EndOfStream)
                 {
                     line++;
                     string cmds = sr.ReadLine();
-                    string[] parts = cmds.Split(" ");
+                    string[] parts = Miscellaneous.CommandLineToArgs(cmds);
                     Command cmd = CommandCollections.GetCommand(parts[0]);
                     string[] cmdargs = new string[parts.Length - 1];
                     for (int i = 0; i < cmdargs.Length; i++)
                     {
                         cmdargs[i] = parts[i + 1];
                     }
-                    //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
-                    MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags | Flags.ONLY_COMPILE));
-                    if (result != MessageProvider.Success() && result != MessageProvider.ParseSuccess())
-                        return MessageProvider.ParseError(result, $"{path} at line {line}");
+                    MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags | Flags.NO_COMPILE));
+                    if (result != MessageProvider.Success())
+                        return MessageProvider.RuntimeError(result, $"{path} at line {line}");
                 }
             }
 
-            return MessageProvider.ParseSuccess();
+            return MessageProvider.Success();
         }
     }
 }
