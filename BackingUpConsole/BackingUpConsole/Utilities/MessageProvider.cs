@@ -20,5 +20,13 @@
                                                                                      $"Cannot find file {path}",
                                                                                      MessageCollections.Levels.Error,
                                                                                      System.ConsoleColor.Red);
+        public static MessageHandler ParseError(MessageHandler message, string position) => new MessageHandler(MessageCollections.Codes.ParseError,
+                                                                                                               $"Parse error at {position}:\n{message.Message}",
+                                                                                                               MessageCollections.Levels.Error,
+                                                                                                               System.ConsoleColor.Red);
+        public static MessageHandler ParseSuccess() => new MessageHandler(MessageCollections.Codes.ParseSuccess,
+                                                                          "Parsing successful",
+                                                                          MessageCollections.Levels.Information,
+                                                                          System.ConsoleColor.Green);
     }
 }

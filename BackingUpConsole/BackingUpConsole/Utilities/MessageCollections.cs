@@ -8,7 +8,9 @@
             UnknownCommand,
             Success,
             IncorrectArgumentCount,
-            FileNotFound
+            FileNotFound,
+            ParseError,
+            ParseSuccess
         }
         public enum Levels
         {
