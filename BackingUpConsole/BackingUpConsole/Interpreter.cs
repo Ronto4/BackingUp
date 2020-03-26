@@ -45,7 +45,8 @@ namespace BackingUpConsole
 
             //return MessageProvider.QuitProgram();
             Miscellaneous.ExitProgram(0, "User input or script");
-            return MessageProvider.RuntimeError(MessageProvider.InvalidMethodExecution(nameof(Exit), flags, args, "'Miscellaneous.ExitProgram(0, \"User input or script\");' was called, but the program did not stop."), "Interpreter.Exit");
+            return MessageProvider.InvalidMethodExecution(flags, args, "'Miscellaneous.ExitProgram(0, \"User input or script\");' was called, but the program did not stop.");
+            //return MessageProvider.RuntimeError(MessageProvider.InvalidMethodExecution(nameof(Exit), flags, args, "'Miscellaneous.ExitProgram(0, \"User input or script\");' was called, but the program did not stop."), "BackingUpConsole.Interpreter.Exit");
         }
 
         private static MessageHandler RunFile(string[] args, MessagePrinter messagePrinter, UInt16 flags)

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace BackingUpConsole.Utilities.Messages
 {
@@ -31,9 +32,12 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler RuntimeError(MessageHandler message, string position) => new MessageHandler(MessageCollections.Codes.RuntimeError,
                                                                                                                  $"Error while executing code at {position}:{Environment.NewLine}{message.Message}",
                                                                                                                  message.Level < MessageCollections.Levels.Error ? message.Level : MessageCollections.Levels.Error);
-        public static MessageHandler InvalidMethodExecution(string method, UInt16? flags, string[]? args, string description)
+        public static MessageHandler InvalidMethodExecution(UInt16? flags, string[]? args, string description,
+                                                            [CallerLineNumber] int lineNumber = 0,
+                                                            [CallerMemberName] string caller = "",
+                                                            [CallerFilePath] string filePath = "")
         {
-            string messageString = $"Fatal error while executing method '{method}'{Environment.NewLine}";
+            string messageString = $"Fatal error while executing '{caller}' at line {lineNumber} in file '{filePath}{Environment.NewLine}";
             if (flags != null)
                 messageString += $"Flags (Base 2): {Convert.ToString((UInt16)flags, toBase: 2)}{Environment.NewLine}";
             if (args != null && args.Length > 0)
