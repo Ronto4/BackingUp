@@ -43,7 +43,7 @@ namespace BackingUpConsole
             {
                 arg[i] = args[i + 1];
             }
-            return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE));
+            return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE | Flags.COMPILE | Flags.RUN));
             //return MessageProvider.QuitProgram();
         }
 

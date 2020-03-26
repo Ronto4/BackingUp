@@ -35,10 +35,12 @@ namespace BackingUpConsole
 
         private static MessageHandler Exit(string[] args, MessagePrinter messagePrinter, UInt16 flags)
         {
-            if (!CheckArgsLength(args, 0, 0))
-                return MessageProvider.IncorrectArgumentCount();
+            if((flags & Flags.COMPILE) != 0){
+                if (!CheckArgsLength(args, 0, 0))
+                    return MessageProvider.IncorrectArgumentCount();
+            }
 
-            if ((flags & Flags.ONLY_COMPILE) != 0)
+            if ((flags & Flags.RUN) == 0)
                 return MessageProvider.Success();
 
             //return MessageProvider.QuitProgram();
@@ -48,21 +50,26 @@ namespace BackingUpConsole
 
         private static MessageHandler RunFile(string[] args, MessagePrinter messagePrinter, UInt16 flags)
         {
-            if (!CheckArgsLength(args, 1, 1))
-                return MessageProvider.IncorrectArgumentCount();
-
-            string path = args[0];
-
-            if (!File.Exists(path))
-                return MessageProvider.FileNotFound(path);
-
-            if (((flags & Flags.ONLY_COMPILE) != 0) && ((flags & Flags.CHAIN_COMPILE) == 0))
-                return MessageProvider.Success();
-
-            int line = 0;
-
-            if ((flags & Flags.NO_COMPILE) == 0)
+            string path;
+            int line;
+            bool compiled;
+            if (compiled = (flags & Flags.COMPILE) != 0)
             {
+                if (!CheckArgsLength(args, 1, 1))
+                    return MessageProvider.IncorrectArgumentCount();
+
+                path = args[0];
+
+                if (!File.Exists(path))
+                    return MessageProvider.FileNotFound(path);
+
+                if (((flags & Flags.RUN) == 0) && ((flags & Flags.CHAIN_COMPILE) == 0))
+                    return MessageProvider.ParseSuccess();
+
+                line = 0;
+
+                //if ((flags & Flags.NO_COMPILE) == 0)
+                //{
 
                 using (StreamReader sr = new StreamReader(path))
                 {
@@ -79,21 +86,34 @@ namespace BackingUpConsole
                             cmdargs[i] = parts[i + 1];
                         }
                         //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
-                        MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags | Flags.ONLY_COMPILE));
+                        MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.RUN));
                         if (result != MessageProvider.Success() && result != MessageProvider.ParseSuccess())
                             return MessageProvider.ParseError(result, $"{path} at line {line}");
                     }
                 }
 
-                if ((flags & Flags.ONLY_COMPILE) != 0)
-                    return MessageProvider.ParseSuccess();
+                //if ((flags & Flags.ONLY_COMPILE) != 0)
+                //    return MessageProvider.ParseSuccess();
 
-                messagePrinter.Print(MessageProvider.ParseSuccess());
+                //messagePrinter.Print(MessageProvider.ParseSuccess());
+                //}
+                //Console.WriteLine("Executing...");
+                //return MessageProvider.ParseSuccess();
+                //compiled = true;
             }
-            //Console.WriteLine("Executing...");
-            //return MessageProvider.ParseSuccess();
-
+            else
+            {
+                path = args[0];
+                //compiled = false;
+            }
             line = 0;
+
+            if ((flags & Flags.RUN) == 0)
+                return compiled
+                        ? MessageProvider.ParseSuccess()
+                        : MessageProvider.Success();
+            if (compiled)
+                messagePrinter.Print(MessageProvider.ParseSuccess());
 
             using (StreamReader sr = new StreamReader(path))
             {
@@ -108,7 +128,7 @@ namespace BackingUpConsole
                     {
                         cmdargs[i] = parts[i + 1];
                     }
-                    MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags | Flags.NO_COMPILE));
+                    MessageHandler result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.COMPILE));
                     if (result != MessageProvider.Success())
                         return MessageProvider.RuntimeError(result, $"{path} at line {line}");
                 }
