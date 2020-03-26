@@ -1,4 +1,4 @@
-﻿//#define DEBUG_MSG
+﻿#define DEBUG_MSG
 
 #nullable enable
 
