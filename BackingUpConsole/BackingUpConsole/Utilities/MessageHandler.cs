@@ -31,5 +31,24 @@ namespace BackingUpConsole.Utilities.Messages
 
         //Methods
         public bool IsSuccess(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess() || this == MessageProvider.ParseDirectoryChanged()) && parsing);
+
+        public override bool Equals(object? message)
+        {
+            if (message is MessageHandler m)
+            {
+                return this == m;
+            }
+            throw new ArgumentException($"'{nameof(message)}' is not an '{typeof(MessageHandler)}' object.");
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string? ToString()
+        {
+            return base.ToString();
+        }
     }
 }

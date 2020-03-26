@@ -1,4 +1,6 @@
-﻿namespace BackingUpConsole.Utilities.Commands
+﻿using System;
+
+namespace BackingUpConsole.Utilities.Commands
 {
     public class Command
     {
@@ -11,9 +13,13 @@
         }
 
         //overrides
-        public override bool Equals(object obj)
+        public override bool Equals(object? command)
         {
-            return this == (Command)obj;
+            if (command is Command c)
+            {
+                return this == c;
+            }
+            throw new ArgumentException($"'{nameof(command)}' is not an '{typeof(Command)}' object.");
         }
 
         public override int GetHashCode()

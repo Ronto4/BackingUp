@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using BackingUpConsole.Utilities;
+﻿using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities.Messages;
 using System;
@@ -88,7 +86,7 @@ namespace BackingUpConsole
             string path;
             int line;
             bool compiled;
-            Paths localPaths;
+            Paths localPaths = paths;
             if (compiled = (flags & Flags.COMPILE) != 0)
             {
                 if (!CheckArgsLength(args, 1, 1))
@@ -106,33 +104,32 @@ namespace BackingUpConsole
 
                 //if ((flags & Flags.NO_COMPILE) == 0)
                 //{
-                localPaths.currentWorkingDirectory = Path.GetDirectoryName(path);
+                localPaths.currentWorkingDirectory = Path.GetDirectoryName(path) ?? localPaths.currentWorkingDirectory;
                 Paths parsingPaths = localPaths;
-                using (StreamReader sr = new StreamReader(path))
+                using StreamReader sr = new StreamReader(path);
+                while (!sr.EndOfStream)
                 {
-                    while (!sr.EndOfStream)
-                    {
-                        line++;
-                        string? cmds = sr.ReadLine();
-                        if (cmds == null)
-                            return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected."), null);
+                    line++;
+                    string? cmds = sr.ReadLine();
+                    if (cmds == null)
+                        return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected."), null);
 
-                        string[] parts = Miscellaneous.CommandLineToArgs(cmds);
-                        Command cmd = CommandCollections.GetCommand(parts[0]);
-                        string[] cmdargs = new string[parts.Length - 1];
-                        for (int i = 0; i < cmdargs.Length; i++)
-                        {
-                            cmdargs[i] = parts[i + 1];
-                        }
-                        //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
-                        (MessageHandler, string?) result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.RUN), parsingPaths);
-                        if (result.Item1 == MessageProvider.ParseDirectoryChanged())
-                            parsingPaths.currentWorkingDirectory = result.Item2;
-                        //if (result.Item1 != MessageProvider.Success() && result.Item1 != MessageProvider.ParseSuccess())
-                        //if(!result.Item1.IsSuccess(true))
-                        if(result.Item1.Level != MessageCollections.Levels.Debug && result.Item1.Level != MessageCollections.Levels.Information)
-                            return (MessageProvider.ParseError(result.Item1, $"{path} at line {line}"), result.Item2);
-                    }
+                    string[] parts = Miscellaneous.CommandLineToArgs(cmds);
+                    Command cmd = CommandCollections.GetCommand(parts[0]);
+                    //string[] cmdargs = new string[parts.Length - 1];
+                    //for (int i = 0; i < cmdargs.Length; i++)
+                    //{
+                    //    cmdargs[i] = parts[i + 1];
+                    //}
+                    string[] cmdargs = parts[1..];
+                    //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
+                    (MessageHandler message, string? path) result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.RUN), parsingPaths);
+                    if (result.message == MessageProvider.ParseDirectoryChanged())
+                        parsingPaths.currentWorkingDirectory = result.path ?? parsingPaths.currentWorkingDirectory;
+                    //if (result.Item1 != MessageProvider.Success() && result.Item1 != MessageProvider.ParseSuccess())
+                    //if(!result.Item1.IsSuccess(true))
+                    if (result.message.Level != MessageCollections.Levels.Debug && result.message.Level != MessageCollections.Levels.Information)
+                        return (MessageProvider.ParseError(result.message, $"{path} at line {line}"), result.path);
                 }
 
                 //if ((flags & Flags.ONLY_COMPILE) != 0)
@@ -146,7 +143,7 @@ namespace BackingUpConsole
             else
             {
                 path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
-                localPaths.currentWorkingDirectory = Path.GetDirectoryName(path);
+                localPaths.currentWorkingDirectory = Path.GetDirectoryName(path) ?? localPaths.currentWorkingDirectory;
             }
             line = 0;
 
@@ -171,18 +168,19 @@ namespace BackingUpConsole
 
                     string[] parts = Miscellaneous.CommandLineToArgs(cmds);
                     Command cmd = CommandCollections.GetCommand(parts[0]);
-                    string[] cmdargs = new string[parts.Length - 1];
-                    for (int i = 0; i < cmdargs.Length; i++)
-                    {
-                        cmdargs[i] = parts[i + 1];
-                    }
-                    (MessageHandler, string?) result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.COMPILE), usingPaths);
-                    if (result.Item1 == MessageProvider.DirectoryChanged(String.Empty))
-                        usingPaths.currentWorkingDirectory = result.Item2;
+                    //string[] cmdargs = new string[parts.Length - 1];
+                    //for (int i = 0; i < cmdargs.Length; i++)
+                    //{
+                    //    cmdargs[i] = parts[i + 1];
+                    //}
+                    string[] cmdargs = parts[1..];
+                    (MessageHandler message, string? path) result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.COMPILE), usingPaths);
+                    if (result.message == MessageProvider.DirectoryChanged(String.Empty))
+                        usingPaths.currentWorkingDirectory = result.path ?? usingPaths.currentWorkingDirectory;
                     //if (result.Item1 != MessageProvider.Success())
                     //if(!result.Item1.IsSuccess(false))
-                    if (result.Item1.Level != MessageCollections.Levels.Debug && result.Item1.Level != MessageCollections.Levels.Information)
-                        return (MessageProvider.RuntimeError(result.Item1, $"{path} at line {line}"), result.Item2);
+                    if (result.message.Level != MessageCollections.Levels.Debug && result.message.Level != MessageCollections.Levels.Information)
+                        return (MessageProvider.RuntimeError(result.message, $"{path} at line {line}"), result.path);
                 }
             }
 
