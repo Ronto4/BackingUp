@@ -52,7 +52,7 @@ namespace BackingUpConsole.Utilities.Messages
             messageString += $"Description: {description}";
             return new MessageHandler(MessageCollections.Codes.InvalidMethodExecution, messageString, MessageCollections.Levels.Fatal);
         }
-        public static MessageHandler ExecutionDebug(Commands.Command cmd, UInt16 flags, string[] args)
+        public static MessageHandler ExecutionDebug(Commands.Command cmd, UInt16 flags, string[] args, Paths paths)
         {
             string messageString = $"Executing command '{cmd.cmd}'{Environment.NewLine}";
             messageString += $" Flags (Base 2): {Convert.ToString(flags, 2)}{Environment.NewLine}";
@@ -61,7 +61,21 @@ namespace BackingUpConsole.Utilities.Messages
             {
                 messageString += $"{Environment.NewLine}  {args[i]}";
             }
+            messageString += $"{Environment.NewLine} Paths: {paths}";
             return new MessageHandler(MessageCollections.Codes.ExecutionDebug, messageString, MessageCollections.Levels.Debug);
         }
+        public static MessageHandler DirectoryNotFound(string path) => new MessageHandler(MessageCollections.Codes.DirectoryNotFound,
+                                                                                     $"Cannot find directory '{path}'",
+                                                                                     MessageCollections.Levels.Error);
+        public static MessageHandler DirectoryChanged(string path) => new MessageHandler(MessageCollections.Codes.ChangedDirectory,
+                                                                                         $"Working directory updated to '{path}'",
+                                                                                         MessageCollections.Levels.Information);
+        public static MessageHandler ParseDirectoryChanged() => new MessageHandler(MessageCollections.Codes.ParseChangedDirectory,
+                                                                                              $"Working directory can be updated",
+                                                                                              MessageCollections.Levels.Debug);
+        public static MessageHandler ExecutionSuccess() => new MessageHandler(MessageCollections.Codes.ExecutionSuccess,
+                                                                         "Execution successful",
+                                                                         MessageCollections.Levels.Information,
+                                                                         System.ConsoleColor.Green);
     }
 }

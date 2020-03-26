@@ -1,4 +1,6 @@
-﻿#define DEBUG_MSG
+﻿//#define DEBUG_MSG
+
+#nullable enable
 
 using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
@@ -16,26 +18,36 @@ namespace BackingUpConsole
 #else
             MessagePrinter messagePrinter = new MessagePrinter(MessageCollections.Levels.Information, System.ConsoleColor.Gray);
 #endif
+            //string currentWorkingDirectory = Environment.CurrentDirectory;
+            Paths paths = new Paths();
+            paths.currentWorkingDirectory = Environment.CurrentDirectory;
             if (args.Length > 0)
             {
-                MessageHandler result = CLIInterpreter(args, messagePrinter);
-                messagePrinter.Print(result);
+                (MessageHandler, string?) result = CLIInterpreter(args, messagePrinter, paths);
+                if (result.Item1 == MessageProvider.DirectoryChanged(String.Empty))
+                    paths.currentWorkingDirectory = result.Item2;
+
+                messagePrinter.Print(result.Item1);
                 //if (result == MessageProvider.QuitProgram())
                 //    return;
             }
             bool exit = false;
             while (!exit)
             {
+                Console.Write($"{paths.currentWorkingDirectory}>");
                 string input = Console.ReadLine();
                 string[] arg = Miscellaneous.CommandLineToArgs(input);
-                MessageHandler result = CLIInterpreter(arg, messagePrinter);
-                messagePrinter.Print(result);
+                (MessageHandler, string?) result = CLIInterpreter(arg, messagePrinter, paths);
+                if (result.Item1 == MessageProvider.DirectoryChanged(String.Empty))
+                    paths.currentWorkingDirectory = result.Item2;
+
+                messagePrinter.Print(result.Item1);
                 //if (result == MessageProvider.QuitProgram())
                 //    exit = true;
             }
         }
 
-        private static MessageHandler CLIInterpreter(string[] args, MessagePrinter messagePrinter)
+        private static (MessageHandler, string?) CLIInterpreter(string[] args, MessagePrinter messagePrinter, Paths paths)
         {
             Command cmd = CommandCollections.GetCommand(args[0]);
             string[] arg = new string[args.Length - 1];
@@ -43,7 +55,7 @@ namespace BackingUpConsole
             {
                 arg[i] = args[i + 1];
             }
-            return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE | Flags.COMPILE | Flags.RUN));
+            return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE | Flags.COMPILE | Flags.RUN), paths);
             //return MessageProvider.QuitProgram();
         }
 

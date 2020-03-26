@@ -16,7 +16,11 @@ namespace BackingUpConsole.Utilities.Messages
             ParseSuccess,
             RuntimeError,
             InvalidMethodExecution,
-            ExecutionDebug
+            ExecutionDebug,
+            DirectoryNotFound,
+            ChangedDirectory,
+            ParseChangedDirectory,
+            ExecutionSuccess
         }
         public enum Levels
         {
