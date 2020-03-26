@@ -123,13 +123,13 @@ namespace BackingUpConsole
                     //}
                     string[] cmdargs = parts[1..];
                     //Command cmd = CommandCollections.GetCommand(sr.ReadLine());
-                    (MessageHandler message, string? path) result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.RUN), parsingPaths);
-                    if (result.message == MessageProvider.ParseDirectoryChanged())
-                        parsingPaths.currentWorkingDirectory = result.path ?? parsingPaths.currentWorkingDirectory;
+                    (MessageHandler message, string? newPath) = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.RUN), parsingPaths);
+                    if (message == MessageProvider.ParseDirectoryChanged())
+                        parsingPaths.currentWorkingDirectory = newPath ?? parsingPaths.currentWorkingDirectory;
                     //if (result.Item1 != MessageProvider.Success() && result.Item1 != MessageProvider.ParseSuccess())
                     //if(!result.Item1.IsSuccess(true))
-                    if (result.message.Level != MessageCollections.Levels.Debug && result.message.Level != MessageCollections.Levels.Information)
-                        return (MessageProvider.ParseError(result.message, $"{path} at line {line}"), result.path);
+                    if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
+                        return (MessageProvider.ParseError(message, $"{path} at line {line}"), newPath);
                 }
 
                 //if ((flags & Flags.ONLY_COMPILE) != 0)
@@ -174,13 +174,13 @@ namespace BackingUpConsole
                     //    cmdargs[i] = parts[i + 1];
                     //}
                     string[] cmdargs = parts[1..];
-                    (MessageHandler message, string? path) result = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.COMPILE), usingPaths);
-                    if (result.message == MessageProvider.DirectoryChanged(String.Empty))
-                        usingPaths.currentWorkingDirectory = result.path ?? usingPaths.currentWorkingDirectory;
+                    (MessageHandler message, string? newPath) = Interprete(cmd, cmdargs, messagePrinter, (UInt16)(flags & ~Flags.COMPILE), usingPaths);
+                    if (message == MessageProvider.DirectoryChanged(String.Empty))
+                        usingPaths.currentWorkingDirectory = newPath ?? usingPaths.currentWorkingDirectory;
                     //if (result.Item1 != MessageProvider.Success())
                     //if(!result.Item1.IsSuccess(false))
-                    if (result.message.Level != MessageCollections.Levels.Debug && result.message.Level != MessageCollections.Levels.Information)
-                        return (MessageProvider.RuntimeError(result.message, $"{path} at line {line}"), result.path);
+                    if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
+                        return (MessageProvider.RuntimeError(message, $"{path} at line {line}"), newPath);
                 }
             }
 

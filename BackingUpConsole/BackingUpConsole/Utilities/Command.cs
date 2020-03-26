@@ -24,7 +24,7 @@ namespace BackingUpConsole.Utilities.Commands
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return HashCode.Combine(cmd);
         }
 
         public override string ToString()
