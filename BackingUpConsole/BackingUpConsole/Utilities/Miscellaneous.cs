@@ -5,8 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace BackingUpConsole.Utilities
 {
-    class Miscellaneous
+    static class Miscellaneous
     {
+#pragma warning disable
         //Source: https://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp
         [DllImport("shell32.dll", SetLastError = true)]
         static extern IntPtr CommandLineToArgvW(
@@ -34,12 +35,14 @@ namespace BackingUpConsole.Utilities
                 Marshal.FreeHGlobal(argv);
             }
         }
-
+#pragma warning enable
 
         public static void ExitProgram(int exitCode, string source)
         {
             Console.WriteLine($"Program wil be terminated. Reason: {source}");
             Environment.Exit(exitCode);
         }
+
+        public static bool CheckLength(this string[] arr, int min, int max) => (arr.Length <= max || max == -1) && (arr.Length >= min || min == -1);
     }
 }
