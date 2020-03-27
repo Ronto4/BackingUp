@@ -6,6 +6,8 @@ namespace BackingUpConsole.Utilities.Commands
     {
         //Attributes
         public readonly string cmd;
+
+        public bool IsComment => cmd.StartsWith(";");
         //Constructors
         public Command(string cmd)
         {

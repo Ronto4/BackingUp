@@ -10,7 +10,7 @@ namespace BackingUpConsole
     {
         public static (MessageHandler message, string? path) Interprete(Command command, string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths)
         {
-            if (command.cmd.StartsWith(';'))
+            if (command.IsComment)
                 return (MessageProvider.Success(), null);
 
             //Console.Write(command.cmd);
