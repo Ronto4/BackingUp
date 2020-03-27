@@ -34,9 +34,9 @@ namespace BackingUpConsole
                 return (MessageProvider.UnknownCommand(command.cmd), null);
         }
 
-        private static bool CheckArgsLength(string[] args, int min, int max) => (args.Length <= max || max == -1) && (args.Length >= min || min == -1);
+        //private static bool CheckArgsLength(string[] args, int min, int max) => (args.Length <= max || max == -1) && (args.Length >= min || min == -1);
 
-        private static (MessageHandler message, string? path) Cd(string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths)
+        private static (MessageHandler message, string? path) Cd(string[] args, MessagePrinter _/*messagePrinter*/, UInt16 flags, in Paths paths)
         {
             string targetPath;
             string currentPath = paths.currentWorkingDirectory;
@@ -44,7 +44,8 @@ namespace BackingUpConsole
             //currentPath += currentPath.EndsWith('\\') ? String.Empty : "\\";
             if ((flags & Flags.COMPILE) != 0)
             {
-                if (!CheckArgsLength(args, 1, 1))
+                //if (!CheckArgsLength(args, 1, 1))
+                if (!args.CheckLength(1, 1))
                     return (MessageProvider.IncorrectArgumentCount(), null);
 
                 targetPath = args[0];
@@ -67,10 +68,10 @@ namespace BackingUpConsole
             return (MessageProvider.DirectoryChanged(newPath), newPath);
         }
 
-        private static (MessageHandler message, string? path) Exit(string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths)
+        private static (MessageHandler message, string? path) Exit(string[] args, MessagePrinter _/*messagePrinter*/, UInt16 flags, in Paths _1/*paths*/)
         {
             if((flags & Flags.COMPILE) != 0){
-                if (!CheckArgsLength(args, 0, 0))
+                if (!args.CheckLength(0, 0))
                     return (MessageProvider.IncorrectArgumentCount(), null);
             }
 
@@ -89,7 +90,7 @@ namespace BackingUpConsole
             Paths localPaths = paths;
             if (compiled = (flags & Flags.COMPILE) != 0)
             {
-                if (!CheckArgsLength(args, 1, 1))
+                if (!args.CheckLength(1, 1))
                     return (MessageProvider.IncorrectArgumentCount(), null);
 
                 path = PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, args[0]));

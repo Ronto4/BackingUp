@@ -62,7 +62,7 @@ namespace BackingUpConsole
             //return MessageProvider.QuitProgram();
         }
 
-        public static (MessageHandler message, Paths paths) Compute(string input, MessagePrinter messagePrinter, Paths paths, UInt16 flags, bool compile = false)
+        public static (MessageHandler message, Paths paths) Compute(string input, MessagePrinter messagePrinter, Paths paths, UInt16 flags, bool _/*compile*/ = false)
         {
             string[] arg = Miscellaneous.CommandLineToArgs(input);
             Command cmd = CommandCollections.GetCommand(arg[0]);
