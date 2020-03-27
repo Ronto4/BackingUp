@@ -7,7 +7,7 @@ using System;
 
 namespace BackingUpConsole
 {
-    class MainHandler
+    internal static class MainHandler
     {
         static void Main(string[] args)
         {

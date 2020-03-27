@@ -1,6 +1,6 @@
 ﻿namespace BackingUpConsole.Utilities.Commands
 {
-    public class CommandCollections
+    public static class CommandCollections
     {
         public static Command RunFile => new Command("run");
         public static Command Exit => new Command("exit");

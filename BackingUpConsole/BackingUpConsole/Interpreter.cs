@@ -6,7 +6,7 @@ using System.IO;
 
 namespace BackingUpConsole
 {
-    class Interpreter
+    internal static class Interpreter
     {
         public static (MessageHandler message, string? path) Interprete(Command command, string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths)
         {

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace BackingUpConsole.Utilities
 {
-    static class Miscellaneous
+    internal static class Miscellaneous
     {
 #pragma warning disable
         //Source: https://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp

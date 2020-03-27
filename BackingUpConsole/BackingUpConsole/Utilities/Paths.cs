@@ -12,7 +12,7 @@ namespace BackingUpConsole.Utilities
             return currentWorkingDirectory;
         }
     }
-    public class PathHandler
+    public static class PathHandler
     {
         public static string Combine(params string[] paths)
         {
