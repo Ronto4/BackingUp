@@ -9,6 +9,8 @@ namespace BackingUpConsole.Utilities
         public static UInt16 CHAIN_COMPILE => 0b0000_0000_0000_0100;
 
         public static UInt16 DEFAULT_FLAGS => (UInt16)(0x0 | RUN | COMPILE | CHAIN_COMPILE);
+
+        public static bool IsSet(this UInt16 flags, UInt16 checkFlag) => (flags & checkFlag) != 0;
        
     }
 }

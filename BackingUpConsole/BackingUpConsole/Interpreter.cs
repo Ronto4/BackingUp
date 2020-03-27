@@ -42,7 +42,7 @@ namespace BackingUpConsole
             string currentPath = paths.currentWorkingDirectory;
             string newPath;
             //currentPath += currentPath.EndsWith('\\') ? String.Empty : "\\";
-            if ((flags & Flags.COMPILE) != 0)
+            if(flags.IsSet(Flags.COMPILE))
             {
                 //if (!CheckArgsLength(args, 1, 1))
                 if (!args.CheckLength(1, 1))
@@ -61,7 +61,7 @@ namespace BackingUpConsole
                 //targetPath = targetPath.StartsWith('\\') ? targetPath.Substring(1) : targetPath;
             }
             newPath = PathHandler.Flatten(newPath);
-            if ((flags & Flags.RUN) == 0)
+            if (!flags.IsSet(Flags.RUN))
                 return (MessageProvider.ParseDirectoryChanged(), newPath);
 
             //string newPath = currentPath + targetPath;
@@ -70,12 +70,14 @@ namespace BackingUpConsole
 
         private static (MessageHandler message, string? path) Exit(string[] args, MessagePrinter _/*messagePrinter*/, UInt16 flags, in Paths _1/*paths*/)
         {
-            if((flags & Flags.COMPILE) != 0){
+            //if((flags & Flags.COMPILE) != 0){
+            if (flags.IsSet(Flags.COMPILE))
+            {
                 if (!args.CheckLength(0, 0))
                     return (MessageProvider.IncorrectArgumentCount(), null);
             }
 
-            if ((flags & Flags.RUN) == 0)
+            if(!flags.IsSet(Flags.RUN))
                 return (MessageProvider.Success(), null);
 
             Miscellaneous.ExitProgram(0, "User input or script");
@@ -88,7 +90,7 @@ namespace BackingUpConsole
             int line;
             bool compiled;
             Paths localPaths = paths;
-            if (compiled = (flags & Flags.COMPILE) != 0)
+            if (compiled = flags.IsSet(Flags.COMPILE))
             {
                 if (!args.CheckLength(1, 1))
                     return (MessageProvider.IncorrectArgumentCount(), null);
@@ -98,7 +100,7 @@ namespace BackingUpConsole
                 if (!File.Exists(path))
                     return (MessageProvider.FileNotFound(path), null);
 
-                if (((flags & Flags.RUN) == 0) && ((flags & Flags.CHAIN_COMPILE) == 0))
+                if(!flags.IsSet(Flags.RUN) && !flags.IsSet(Flags.CHAIN_COMPILE))
                     return (MessageProvider.ParseSuccess(), null);
 
                 line = 0;
@@ -151,7 +153,7 @@ namespace BackingUpConsole
             }
             line = 0;
 
-            if ((flags & Flags.RUN) == 0)
+            if(!flags.IsSet(Flags.RUN))
                 return (compiled
                         ? MessageProvider.ParseSuccess()
                         : MessageProvider.Success()
