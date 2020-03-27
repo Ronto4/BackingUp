@@ -1,6 +1,7 @@
 ﻿using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 
 namespace BackingUpConsole.Utilities.Commands
@@ -10,6 +11,7 @@ namespace BackingUpConsole.Utilities.Commands
         public static Command RunFile => new Command("run");
         public static Command Exit => new Command("exit");
         public static Command Cd => new Command("cd");
+        public static Command Dir => new Command("dir");
 
         public static Command GetCommand(string cmd) => new Command(cmd);
 
@@ -17,7 +19,8 @@ namespace BackingUpConsole.Utilities.Commands
         {
             {"exit", new CommandProperties(0,0,Parse_Exit, Run_Exit) },
             {"cd", new CommandProperties(1,1,Parse_Cd, Run_Cd) },
-            {"run", new CommandProperties(1,1,Parse_RunFile, Run_RunFile) }
+            {"run", new CommandProperties(1,1,Parse_RunFile, Run_RunFile) },
+            {"dir", new CommandProperties(0, 1, Parse_Dir, Run_Dir) }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -101,6 +104,36 @@ namespace BackingUpConsole.Utilities.Commands
             }
 
             return (MessageProvider.ExecutionSuccess(), null);
+        }
+
+        private static (MessageHandler message, string? path) Parse_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            string path = args.Length > 0 ? PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, args[0])) : paths.currentWorkingDirectory;
+
+            return Directory.Exists(path) ? (MessageProvider.ParseSuccess(), null) : (MessageProvider.DirectoryNotFound(path), (string?)null);
+        }
+        private static (MessageHandler message, string? path) Run_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            string path = args.Length > 0 ? PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, args[0])) : paths.currentWorkingDirectory;
+            DirectoryInfo root = new DirectoryInfo(path);
+            FileInfo[] files = root.GetFiles();
+            DirectoryInfo[] subdirs = root.GetDirectories();
+            string text = String.Empty;
+            text += $"Content of directory {root.FullName}:{Environment.NewLine}";
+            text += $"    Last modified    | Size (in B)   |       | Name{Environment.NewLine}";
+            //text += $" 2020-03-25 13:45:12 | 9 999 999 999 | <DIR> | FileName";
+            //var fileNames = files.Select(x => x.Name);
+            //var subdirNames = subdirs.Select(x => x.Name);
+            //FileSystemInfo[] content = new FileSystemInfo[files.Length + subdirs.Length] {files[..], }
+            //content = files[..];
+            var content = ((FileSystemInfo[])files).Concat(subdirs);
+            content = from c in content orderby c.Name ascending select c;
+            foreach(var entry in content)
+            {
+                text += $" {entry.LastWriteTime.ToString()} | {(entry is FileInfo f ? string.Format("{0,13:#}", f.Length)/*string.Format("0,5:#####", f.Length)*/ : "             ")} | {(entry is DirectoryInfo ? "<DIR>" : "     ")} | {entry.Name}{Environment.NewLine}";
+            }
+            return (MessageProvider.Message(text), null);
+            //string[] n = from file in files select file.Name;
         }
     }
 }
