@@ -13,29 +13,31 @@ namespace BackingUpConsole
             if (command.IsComment)
                 return (MessageProvider.Success(), null);
 
-            //Console.Write(command.cmd);
-            //for (int i = 0; i < args.Length; i++)
-            //{
-            //    Console.Write($"\"{args[i]}\"");
-            //}
-            //Console.WriteLine($": {Convert.ToString(flags, 2)}");
             messagePrinter.Print(MessageProvider.ExecutionDebug(command, flags, args, paths));
 
-            if (command == CommandCollections.RunFile)
-                return RunFile(args, messagePrinter, flags, paths);
-
-            else if (command == CommandCollections.Exit)
-                return Exit(args, messagePrinter, flags, paths);
-
-            else if (command == CommandCollections.Cd)
-                return Cd(args, messagePrinter, flags, paths);
-
-            else
+            if (command.IsInvalid)
                 return (MessageProvider.UnknownCommand(command.cmd), null);
+
+            return Evaluate(args, messagePrinter, flags, paths, command.properties);
         }
 
-        //private static bool CheckArgsLength(string[] args, int min, int max) => (args.Length <= max || max == -1) && (args.Length >= min || min == -1);
+        private static (MessageHandler message, string? path) Evaluate(string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths, in CommandProperties properties)
+        {
+            (MessageHandler message, string? path)? pResult = null;
+            if (flags.IsSet(Flags.COMPILE))
+            {
+                if (!args.CheckLength(properties.minArgs, properties.maxArgs))
+                    return (MessageProvider.IncorrectArgumentCount(), null);
 
+                pResult = properties.Parse(args, flags, paths, messagePrinter);
+                var result = pResult.Value;
+                if (!result.message.IsSuccess(true))
+                    return result;
+            }
+            return flags.IsSet(Flags.RUN) ? properties.Run(args, flags, paths, messagePrinter) : (pResult ?? (MessageProvider.Success(), (string?)null));
+        }
+        #region old
+#if false
         private static (MessageHandler message, string? path) Cd(string[] args, MessagePrinter _/*messagePrinter*/, UInt16 flags, in Paths paths)
         {
             string targetPath;
@@ -195,5 +197,8 @@ namespace BackingUpConsole
 
             return (MessageProvider.ExecutionSuccess(), null);
         }
+#endif
+        #endregion
+
     }
 }

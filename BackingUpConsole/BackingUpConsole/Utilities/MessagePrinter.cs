@@ -16,6 +16,7 @@ namespace BackingUpConsole.Utilities.Messages
         }
         public MessagePrinter(MessageCollections.Levels level) : this(level, null) { }
 
+        //Methods
         public void ChangeLevel(MessageCollections.Levels newLevel) => Level = newLevel;
         public void ChangeDefaultColor(ConsoleColor newDefaultColor) => DefaultColor = newDefaultColor;
 
@@ -24,12 +25,7 @@ namespace BackingUpConsole.Utilities.Messages
             if (Level < message.Level)
                 return;
 
-            //Console.ForegroundColor =
-            //    message.Color != null
-            //        ? (ConsoleColor)message.Color
-            //        : MessageCollections.Colors[message.Level];
             Console.ForegroundColor = message.Color ?? MessageCollections.Colors[message.Level];
-            //Console.ForegroundColor = MessageCollections.Colors[message.Level];
             Console.WriteLine(message.Message);
             Console.ForegroundColor = DefaultColor;
         }

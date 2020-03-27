@@ -19,12 +19,8 @@ namespace BackingUpConsole.Utilities.Messages
             Level = level;
             Color = color;
         }
-        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level) : this(code, message, level, null)
-        {
-            //Code = code;
-            //Message = message;
-            //Level = level;
-        }
+        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level) : this(code, message, level, null) { }
+
         //overriding operators
         public static bool operator ==(MessageHandler left, MessageHandler right) => (left.Code == right.Code);
         public static bool operator !=(MessageHandler left, MessageHandler right) => !(left == right);
@@ -32,14 +28,9 @@ namespace BackingUpConsole.Utilities.Messages
         //Methods
         public bool IsSuccess(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess() || this == MessageProvider.ParseDirectoryChanged()) && parsing);
 
-        public override bool Equals(object? message)
-        {
-            if (message is MessageHandler m)
-            {
-                return this == m;
-            }
-            throw new ArgumentException($"'{nameof(message)}' is not an '{typeof(MessageHandler)}' object.");
-        }
+        public override bool Equals(object? message) => (message is MessageHandler m)
+                                                            ? (this == m)
+                                                            : throw new ArgumentException($"'{nameof(message)}' is not an '{typeof(MessageHandler)}' object.");
 
         public override int GetHashCode()
         {

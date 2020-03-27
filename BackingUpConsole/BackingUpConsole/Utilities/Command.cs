@@ -7,11 +7,16 @@ namespace BackingUpConsole.Utilities.Commands
         //Attributes
         public readonly string cmd;
 
+        public readonly CommandProperties properties;
+
         public bool IsComment => cmd.StartsWith(";");
+        public bool IsInvalid => properties.Parse == null;
+
         //Constructors
         public Command(string cmd)
         {
             this.cmd = cmd;
+            CommandCollections.Properties.TryGetValue(cmd, out properties);
         }
 
         //overrides
