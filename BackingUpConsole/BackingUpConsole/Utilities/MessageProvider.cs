@@ -77,5 +77,7 @@ namespace BackingUpConsole.Utilities.Messages
                                                                          "Execution successful",
                                                                          MessageCollections.Levels.Information,
                                                                          ConsoleColor.Green);
+        public static MessageHandler Message(string message, MessageCollections.Levels level = MessageCollections.Levels.Information, ConsoleColor? color = null)
+            => new MessageHandler(MessageCollections.Codes.Message, message, level, color);
     }
 }
