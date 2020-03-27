@@ -1,7 +1,5 @@
 ﻿using System;
 
-#nullable enable
-
 namespace BackingUpConsole.Utilities.Messages
 {
     public class MessagePrinter
@@ -11,12 +9,14 @@ namespace BackingUpConsole.Utilities.Messages
         private ConsoleColor DefaultColor;
 
         //Constructors
-        public MessagePrinter(MessageCollections.Levels level, ConsoleColor defaultColor)
+        public MessagePrinter(MessageCollections.Levels level, ConsoleColor? defaultColor)
         {
             Level = level;
-            DefaultColor = defaultColor;
+            DefaultColor = defaultColor ?? ConsoleColor.Gray;
         }
+        public MessagePrinter(MessageCollections.Levels level) : this(level, null) { }
 
+        //Methods
         public void ChangeLevel(MessageCollections.Levels newLevel) => Level = newLevel;
         public void ChangeDefaultColor(ConsoleColor newDefaultColor) => DefaultColor = newDefaultColor;
 
@@ -25,11 +25,7 @@ namespace BackingUpConsole.Utilities.Messages
             if (Level < message.Level)
                 return;
 
-            Console.ForegroundColor =
-                message.Color != null
-                    ? (ConsoleColor)message.Color
-                    : MessageCollections.Colors[message.Level];
-            //Console.ForegroundColor = MessageCollections.Colors[message.Level];
+            Console.ForegroundColor = message.Color ?? MessageCollections.Colors[message.Level];
             Console.WriteLine(message.Message);
             Console.ForegroundColor = DefaultColor;
         }

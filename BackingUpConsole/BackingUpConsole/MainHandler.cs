@@ -1,7 +1,5 @@
 ﻿#define DEBUG_MSG
 
-#nullable enable
-
 using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities.Messages;
@@ -9,7 +7,7 @@ using System;
 
 namespace BackingUpConsole
 {
-    class MainHandler
+    internal static class MainHandler
     {
         static void Main(string[] args)
         {
@@ -19,15 +17,17 @@ namespace BackingUpConsole
             MessagePrinter messagePrinter = new MessagePrinter(MessageCollections.Levels.Information, System.ConsoleColor.Gray);
 #endif
             //string currentWorkingDirectory = Environment.CurrentDirectory;
-            Paths paths = new Paths();
-            paths.currentWorkingDirectory = Environment.CurrentDirectory;
+            Paths paths = new Paths
+            {
+                currentWorkingDirectory = Environment.CurrentDirectory
+            };
             if (args.Length > 0)
             {
-                (MessageHandler, string?) result = CLIInterpreter(args, messagePrinter, paths);
-                if (result.Item1 == MessageProvider.DirectoryChanged(String.Empty))
-                    paths.currentWorkingDirectory = result.Item2;
+                (MessageHandler message, string? path) = CLIInterpreter(args, messagePrinter, paths);
+                if (message == MessageProvider.DirectoryChanged(String.Empty))
+                    paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
 
-                messagePrinter.Print(result.Item1);
+                messagePrinter.Print(message);
                 //if (result == MessageProvider.QuitProgram())
                 //    return;
             }
@@ -36,12 +36,14 @@ namespace BackingUpConsole
             {
                 Console.Write($"{paths.currentWorkingDirectory}>");
                 string input = Console.ReadLine();
-                string[] arg = Miscellaneous.CommandLineToArgs(input);
-                (MessageHandler, string?) result = CLIInterpreter(arg, messagePrinter, paths);
-                if (result.Item1 == MessageProvider.DirectoryChanged(String.Empty))
-                    paths.currentWorkingDirectory = result.Item2;
+                //string[] arg = Miscellaneous.CommandLineToArgs(input);
+                //(MessageHandler message, string? path) = CLIInterpreter(arg, messagePrinter, paths);
+                //if (message == MessageProvider.DirectoryChanged(String.Empty))
+                //    paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
+                MessageHandler message;
+                (message, paths) = Compute(input, messagePrinter, paths, Flags.DEFAULT_FLAGS);
 
-                messagePrinter.Print(result.Item1);
+                messagePrinter.Print(message);
                 //if (result == MessageProvider.QuitProgram())
                 //    exit = true;
             }
@@ -50,16 +52,27 @@ namespace BackingUpConsole
         private static (MessageHandler, string?) CLIInterpreter(string[] args, MessagePrinter messagePrinter, Paths paths)
         {
             Command cmd = CommandCollections.GetCommand(args[0]);
-            string[] arg = new string[args.Length - 1];
-            for (int i = 0; i < arg.Length; i++)
-            {
-                arg[i] = args[i + 1];
-            }
+            //string[] arg = new string[args.Length - 1];
+            //for (int i = 0; i < arg.Length; i++)
+            //{
+            //    arg[i] = args[i + 1];
+            //}
+            string[] arg = args[1..];
             return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE | Flags.COMPILE | Flags.RUN), paths);
             //return MessageProvider.QuitProgram();
         }
 
+        public static (MessageHandler message, Paths paths) Compute(string input, MessagePrinter messagePrinter, Paths paths, UInt16 flags, bool _/*compile*/ = false)
+        {
+            string[] arg = Miscellaneous.CommandLineToArgs(input);
+            Command cmd = CommandCollections.GetCommand(arg[0]);
+            string[] args = arg[1..];
+            (MessageHandler message, string? path) = Interpreter.Interprete(cmd, args, messagePrinter, flags, paths);
+            if (message == MessageProvider.DirectoryChanged())
+                paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
 
+            return (message, paths);
+        }
 
     }
 }

@@ -12,7 +12,8 @@ namespace BackingUpConsole.Utilities
             return currentWorkingDirectory;
         }
     }
-    public class PathHandler
+
+    public static class PathHandler
     {
         public static string Combine(params string[] paths)
         {
@@ -28,7 +29,6 @@ namespace BackingUpConsole.Utilities
             {
                 path += paths[i];
             }
-            //Console.WriteLine("Combined string: " + path);
             return path;
         }
         public static string Flatten(string path) => Path.GetFullPath(path);

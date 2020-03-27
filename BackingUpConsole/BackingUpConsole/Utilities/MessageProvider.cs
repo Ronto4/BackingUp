@@ -1,11 +1,10 @@
-﻿#nullable enable
-
+﻿using BackingUpConsole.Utilities.Commands;
 using System;
 using System.Runtime.CompilerServices;
 
 namespace BackingUpConsole.Utilities.Messages
 {
-    public class MessageProvider
+    public static class MessageProvider
     {
         //public static MessageHandler QuitProgram() => new MessageHandler(MessageCollections.Codes.QuitProgram,
         //                                                                 $"Quit Program",
@@ -28,7 +27,7 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler ParseSuccess() => new MessageHandler(MessageCollections.Codes.ParseSuccess,
                                                                           "Parsing successful",
                                                                           MessageCollections.Levels.Information,
-                                                                          System.ConsoleColor.Green);
+                                                                          ConsoleColor.Green);
         public static MessageHandler RuntimeError(MessageHandler message, string position) => new MessageHandler(MessageCollections.Codes.RuntimeError,
                                                                                                                  $"Error while executing code at {position}:{Environment.NewLine}{message.Message}",
                                                                                                                  message.Level < MessageCollections.Levels.Error ? message.Level : MessageCollections.Levels.Error);
@@ -52,7 +51,7 @@ namespace BackingUpConsole.Utilities.Messages
             messageString += $"Description: {description}";
             return new MessageHandler(MessageCollections.Codes.InvalidMethodExecution, messageString, MessageCollections.Levels.Fatal);
         }
-        public static MessageHandler ExecutionDebug(Commands.Command cmd, UInt16 flags, string[] args, Paths paths)
+        public static MessageHandler ExecutionDebug(Command cmd, UInt16 flags, string[] args, Paths paths)
         {
             string messageString = $"Executing command '{cmd.cmd}'{Environment.NewLine}";
             messageString += $" Flags (Base 2): {Convert.ToString(flags, 2)}{Environment.NewLine}";
@@ -70,12 +69,13 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler DirectoryChanged(string path) => new MessageHandler(MessageCollections.Codes.ChangedDirectory,
                                                                                          $"Working directory updated to '{path}'",
                                                                                          MessageCollections.Levels.Information);
+        public static MessageHandler DirectoryChanged() => DirectoryChanged(String.Empty);
         public static MessageHandler ParseDirectoryChanged() => new MessageHandler(MessageCollections.Codes.ParseChangedDirectory,
                                                                                               $"Working directory can be updated",
                                                                                               MessageCollections.Levels.Debug);
         public static MessageHandler ExecutionSuccess() => new MessageHandler(MessageCollections.Codes.ExecutionSuccess,
                                                                          "Execution successful",
                                                                          MessageCollections.Levels.Information,
-                                                                         System.ConsoleColor.Green);
+                                                                         ConsoleColor.Green);
     }
 }

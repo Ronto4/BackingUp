@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BackingUpConsole.Utilities.Messages
 {
-    public class MessageCollections
+    public static class MessageCollections
     {
         public enum Codes
         {
