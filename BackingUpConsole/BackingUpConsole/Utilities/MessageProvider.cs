@@ -69,6 +69,7 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler DirectoryChanged(string path) => new MessageHandler(MessageCollections.Codes.ChangedDirectory,
                                                                                          $"Working directory updated to '{path}'",
                                                                                          MessageCollections.Levels.Information);
+        public static MessageHandler DirectoryChanged() => DirectoryChanged(String.Empty);
         public static MessageHandler ParseDirectoryChanged() => new MessageHandler(MessageCollections.Codes.ParseChangedDirectory,
                                                                                               $"Working directory can be updated",
                                                                                               MessageCollections.Levels.Debug);

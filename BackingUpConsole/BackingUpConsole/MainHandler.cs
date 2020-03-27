@@ -1,7 +1,5 @@
 ﻿#define DEBUG_MSG
 
-#nullable enable
-
 using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities.Messages;
@@ -38,10 +36,12 @@ namespace BackingUpConsole
             {
                 Console.Write($"{paths.currentWorkingDirectory}>");
                 string input = Console.ReadLine();
-                string[] arg = Miscellaneous.CommandLineToArgs(input);
-                (MessageHandler message, string? path) = CLIInterpreter(arg, messagePrinter, paths);
-                if (message == MessageProvider.DirectoryChanged(String.Empty))
-                    paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
+                //string[] arg = Miscellaneous.CommandLineToArgs(input);
+                //(MessageHandler message, string? path) = CLIInterpreter(arg, messagePrinter, paths);
+                //if (message == MessageProvider.DirectoryChanged(String.Empty))
+                //    paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
+                MessageHandler message;
+                (message, paths) = Compute(input, messagePrinter, paths, Flags.DEFAULT_FLAGS);
 
                 messagePrinter.Print(message);
                 //if (result == MessageProvider.QuitProgram())
@@ -62,7 +62,17 @@ namespace BackingUpConsole
             //return MessageProvider.QuitProgram();
         }
 
+        public static (MessageHandler message, Paths paths) Compute(string input, MessagePrinter messagePrinter, Paths paths, UInt16 flags, bool compile = false)
+        {
+            string[] arg = Miscellaneous.CommandLineToArgs(input);
+            Command cmd = CommandCollections.GetCommand(arg[0]);
+            string[] args = arg[1..];
+            (MessageHandler message, string? path) = Interpreter.Interprete(cmd, args, messagePrinter, flags, paths);
+            if (message == MessageProvider.DirectoryChanged())
+                paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
 
+            return (message, paths);
+        }
 
     }
 }
