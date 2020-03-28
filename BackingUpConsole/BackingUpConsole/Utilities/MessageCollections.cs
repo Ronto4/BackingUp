@@ -21,7 +21,8 @@ namespace BackingUpConsole.Utilities.Messages
             ChangedDirectory,
             ParseChangedDirectory,
             ExecutionSuccess,
-            Message
+            Message,
+            CompatibilityMode
         }
         public enum Levels
         {

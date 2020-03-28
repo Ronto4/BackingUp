@@ -79,5 +79,8 @@ namespace BackingUpConsole.Utilities.Messages
                                                                          ConsoleColor.Green);
         public static MessageHandler Message(string message, MessageCollections.Levels level = MessageCollections.Levels.Information, ConsoleColor? color = null)
             => new MessageHandler(MessageCollections.Codes.Message, message, level, color);
+        public static MessageHandler CompatibilityMode() => new MessageHandler(MessageCollections.Codes.CompatibilityMode,
+                                                                               "You are entering the compatibility mode. This mode contains the old commands from BackUp_0_3. These are diiferent than the new ones. There is no support for these commands.",
+                                                                               MessageCollections.Levels.Warning);
     }
 }
