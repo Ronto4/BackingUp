@@ -13,6 +13,11 @@ namespace BackingUpConsole
             if (command.IsComment)
                 return (MessageProvider.Success(), null);
 
+            MessageHandler message;
+            (message, flags) = flags.SetFromArgs(ref args);
+            if (!message.IsSuccess(false, messagePrinter))
+                return (message, null);
+
             messagePrinter.Print(MessageProvider.ExecutionDebug(command, flags, args, paths));
 
             if (command.IsInvalid)
