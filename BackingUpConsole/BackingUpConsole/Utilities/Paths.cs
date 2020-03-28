@@ -29,8 +29,8 @@ namespace BackingUpConsole.Utilities
             {
                 path += paths[i];
             }
-            return path;
+            return Flatten(path);
         }
-        public static string Flatten(string path) => Path.GetFullPath(path);
+        private static string Flatten(string path) => path.LastIndexOf(':') != 1 ? Combine(path.Split(':')[1][^1].ToString() + ":", path.Split(':')[2]) : Path.GetFullPath(path);
     }
 }
