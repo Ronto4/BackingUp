@@ -121,19 +121,13 @@ namespace BackingUpConsole.Utilities.Commands
             string text = String.Empty;
             text += $"Content of directory {root.FullName}:{Environment.NewLine}";
             text += $"    Last modified    |  Size (in B)  | <DIR> | Name{Environment.NewLine}";
-            //text += $" 2020-03-25 13:45:12 | 9 999 999 999 | <DIR> | FileName";
-            //var fileNames = files.Select(x => x.Name);
-            //var subdirNames = subdirs.Select(x => x.Name);
-            //FileSystemInfo[] content = new FileSystemInfo[files.Length + subdirs.Length] {files[..], }
-            //content = files[..];
             var content = ((FileSystemInfo[])files).Concat(subdirs);
             content = from c in content orderby c.Name ascending select c;
             foreach(var entry in content)
             {
-                text += $" {entry.LastWriteTime.ToString()} | {(entry is FileInfo f ? string.Format("{0,13:#}", f.Length)/*string.Format("0,5:#####", f.Length)*/ : "             ")} | {(entry is DirectoryInfo ? "<DIR>" : "     ")} | {entry.Name}{Environment.NewLine}";
+                text += $" {entry.LastWriteTime.ToString()} | {(entry is FileInfo f ? string.Format("{0,13:#,###,###,###}", f.Length) : "             ")} | {(entry is DirectoryInfo ? "<DIR>" : "     ")} | {entry.Name}{Environment.NewLine}";
             }
             return (MessageProvider.Message(text), null);
-            //string[] n = from file in files select file.Name;
         }
     }
 }
