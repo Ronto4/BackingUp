@@ -108,13 +108,13 @@ namespace BackingUpConsole.Utilities.Commands
 
         private static (MessageHandler message, string? path) Parse_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = args.Length > 0 ? PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, args[0])) : paths.currentWorkingDirectory;
+            string path = args.Length > 0 ? PathHandler.Combine(paths.currentWorkingDirectory, args[0]) : paths.currentWorkingDirectory;
 
             return Directory.Exists(path) ? (MessageProvider.ParseSuccess(), null) : (MessageProvider.DirectoryNotFound(path), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = args.Length > 0 ? PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, args[0])) : paths.currentWorkingDirectory;
+            string path = args.Length > 0 ? PathHandler.Combine(paths.currentWorkingDirectory, args[0]) : paths.currentWorkingDirectory;
             DirectoryInfo root = new DirectoryInfo(path);
             FileInfo[] files = root.GetFiles();
             DirectoryInfo[] subdirs = root.GetDirectories();
