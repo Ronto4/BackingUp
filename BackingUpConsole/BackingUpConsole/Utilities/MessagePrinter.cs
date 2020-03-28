@@ -17,7 +17,14 @@ namespace BackingUpConsole.Utilities.Messages
         public MessagePrinter(MessageCollections.Levels level) : this(level, null) { }
 
         //Methods
-        public void ChangeLevel(MessageCollections.Levels newLevel) => Level = newLevel;
+        public MessageHandler ChangeLevel(MessageCollections.Levels newLevel, bool parsing = false)
+        {
+            if (newLevel < MessageCollections.Levels.Warning)
+                return MessageProvider.Message($"The chosen minimum level to report messages cannot be set to '{Enum.GetName(typeof(MessageCollections.Levels), newLevel)}'. The minimum required level is 'Warning'.", MessageCollections.Levels.Error);
+
+            if (!parsing) Level = newLevel;
+            return MessageProvider.Success();
+        }
         public void ChangeDefaultColor(ConsoleColor newDefaultColor) => DefaultColor = newDefaultColor;
 
         public void Print(MessageHandler message)
