@@ -82,5 +82,14 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler CompatibilityMode() => new MessageHandler(MessageCollections.Codes.CompatibilityMode,
                                                                                "You are entering the compatibility mode. This mode contains the old commands from BackUp_0_3. These are different than the new ones. There is no support for these commands.",
                                                                                MessageCollections.Levels.Warning);
+        public static MessageHandler UnknownFlagIdentifier(string id, string value) => new MessageHandler(MessageCollections.Codes.UnknownFlagIdentifier,
+                                                                                                          $"The given flag identifier '{id}' (set to '{value}') does not exist.",
+                                                                                                          MessageCollections.Levels.Error);
+        public static MessageHandler InvalidFlagNotation(string notation) => new MessageHandler(MessageCollections.Codes.InvalidFlagNotation,
+                                                                                                $"The given flag notation '{notation}' is not valid",
+                                                                                                MessageCollections.Levels.Error);
+        public static MessageHandler InvalidFlagValue(string id, string value) => new MessageHandler(MessageCollections.Codes.InvalidFlagValue,
+                                                                                                          $"The given flag identifier '{id}' cannot be set to '{value}'.",
+                                                                                                          MessageCollections.Levels.Error);
     }
 }

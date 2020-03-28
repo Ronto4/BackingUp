@@ -22,7 +22,10 @@ namespace BackingUpConsole.Utilities.Messages
             ParseChangedDirectory,
             ExecutionSuccess,
             Message,
-            CompatibilityMode
+            CompatibilityMode,
+            UnknownFlagIdentifier,
+            InvalidFlagNotation,
+            InvalidFlagValue
         }
         public enum Levels
         {
