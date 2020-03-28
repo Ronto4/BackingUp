@@ -31,7 +31,7 @@ namespace BackingUpConsole
 
                 pResult = properties.Parse(args, flags, paths, messagePrinter);
                 var result = pResult.Value;
-                if (!result.message.IsSuccess(true))
+                if (!result.message.IsSuccess(true, messagePrinter))
                     return result;
             }
             return flags.IsSet(Flags.RUN) ? properties.Run(args, flags, paths, messagePrinter) : (pResult ?? (MessageProvider.Success(), (string?)null));

@@ -9,7 +9,7 @@ namespace BackingUpConsole.Utilities.Messages
         //Attributes
         public MessageCollections.Codes Code { get; }
         public string Message { get; }
-        public MessageCollections.Levels Level { get; }
+        public MessageCollections.Levels Level { get; private set; }
         public ConsoleColor? Color { get; }
         //Constructor
         public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level, ConsoleColor? color)
@@ -26,7 +26,7 @@ namespace BackingUpConsole.Utilities.Messages
         public static bool operator !=(MessageHandler left, MessageHandler right) => !(left == right);
 
         //Methods
-        public bool IsSuccess(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess() || this == MessageProvider.ParseDirectoryChanged()) && parsing);
+        private bool Success(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess() || this == MessageProvider.ParseDirectoryChanged()) && parsing);
 
         public override bool Equals(object? message) => (message is MessageHandler m)
                                                             ? (this == m)
@@ -38,5 +38,21 @@ namespace BackingUpConsole.Utilities.Messages
         }
 
         public override string? ToString() => Message;
+
+        public bool IsSuccess(bool parsing, MessagePrinter messagePrinter)
+        {
+            if (Success(parsing))
+                return true;
+
+            if (Level == MessageCollections.Levels.Warning)
+            {
+                messagePrinter.Print(this);
+                bool c = messagePrinter.AskContinue(this);
+                Level = c ? MessageCollections.Levels.Information : MessageCollections.Levels.Error;
+                return c;
+            }
+            //return Level == MessageCollections.Levels.Warning ? messagePrinter.AskContinue(this) : false;
+            return false;
+        }
     }
 }
