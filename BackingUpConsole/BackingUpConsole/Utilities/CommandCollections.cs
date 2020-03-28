@@ -120,7 +120,7 @@ namespace BackingUpConsole.Utilities.Commands
             DirectoryInfo[] subdirs = root.GetDirectories();
             string text = String.Empty;
             text += $"Content of directory {root.FullName}:{Environment.NewLine}";
-            text += $"    Last modified    | Size (in B)   |       | Name{Environment.NewLine}";
+            text += $"    Last modified    |  Size (in B)  | <DIR> | Name{Environment.NewLine}";
             //text += $" 2020-03-25 13:45:12 | 9 999 999 999 | <DIR> | FileName";
             //var fileNames = files.Select(x => x.Name);
             //var subdirNames = subdirs.Select(x => x.Name);
