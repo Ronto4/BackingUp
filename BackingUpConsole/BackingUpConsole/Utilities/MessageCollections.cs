@@ -20,7 +20,8 @@ namespace BackingUpConsole.Utilities.Messages
             DirectoryNotFound,
             ChangedDirectory,
             ParseChangedDirectory,
-            ExecutionSuccess
+            ExecutionSuccess,
+            Message
         }
         public enum Levels
         {
