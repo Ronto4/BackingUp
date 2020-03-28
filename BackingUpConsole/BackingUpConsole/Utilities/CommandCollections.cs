@@ -1,4 +1,5 @@
-﻿using BackingUpConsole.Utilities.Messages;
+﻿using COMPATIBILITY = BackUp_0_3;
+using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace BackingUpConsole.Utilities.Commands
         public static Command Exit => new Command("exit");
         public static Command Cd => new Command("cd");
         public static Command Dir => new Command("dir");
+        public static Command Tilde => new Command("~");
 
         public static Command GetCommand(string cmd) => new Command(cmd);
 
@@ -20,7 +22,8 @@ namespace BackingUpConsole.Utilities.Commands
             {"exit", new CommandProperties(0,0,Parse_Exit, Run_Exit) },
             {"cd", new CommandProperties(1,1,Parse_Cd, Run_Cd) },
             {"run", new CommandProperties(1,1,Parse_RunFile, Run_RunFile) },
-            {"dir", new CommandProperties(0, 1, Parse_Dir, Run_Dir) }
+            {"dir", new CommandProperties(0, 1, Parse_Dir, Run_Dir) },
+            {"~", new CommandProperties(-1, -1, Parse_Tilde, Run_Tilde) }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -128,6 +131,16 @@ namespace BackingUpConsole.Utilities.Commands
                 text += $" {entry.LastWriteTime.ToString()} | {(entry is FileInfo f ? string.Format("{0,13:#,###,###,###}", f.Length) : "             ")} | {(entry is DirectoryInfo ? "<DIR>" : "     ")} | {entry.Name}{Environment.NewLine}";
             }
             return (MessageProvider.Message(text), null);
+        }
+
+        private static (MessageHandler message, string? path) Parse_Tilde(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            return (MessageProvider.CompatibilityMode(), null);
+        }
+        private static (MessageHandler message, string? path) Run_Tilde(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            COMPATIBILITY.Program.Main(args);
+            return (MessageProvider.Success(), null);
         }
     }
 }
