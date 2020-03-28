@@ -89,6 +89,8 @@ namespace BackingUpConsole.Utilities.Commands
             if (flags.IsSet(Flags.COMPILE))
                 messagePrinter.Print(MessageProvider.ParseSuccess());
 
+            MessagePrinter localPrinter = (MessagePrinter)messagePrinter.Clone();
+
 
             using (StreamReader sr = new StreamReader(path))
             {
@@ -100,7 +102,7 @@ namespace BackingUpConsole.Utilities.Commands
                         return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected."), null);
 
                     MessageHandler message;
-                    (message, usingPaths) = MainHandler.Compute(cmds, messagePrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
+                    (message, usingPaths) = MainHandler.Compute(cmds, localPrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
 
                     if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
                         return (MessageProvider.RuntimeError(message, $"{path} at line {line}"), usingPaths.currentWorkingDirectory);

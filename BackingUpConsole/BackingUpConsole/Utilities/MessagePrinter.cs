@@ -2,19 +2,19 @@
 
 namespace BackingUpConsole.Utilities.Messages
 {
-    public class MessagePrinter
+    public class MessagePrinter : ICloneable
     {
         //Attributes
         private MessageCollections.Levels Level;
         private ConsoleColor DefaultColor;
 
         //Constructors
-        public MessagePrinter(MessageCollections.Levels level, ConsoleColor? defaultColor)
+        public MessagePrinter(MessageCollections.Levels level, ConsoleColor? defaultColor = null)
         {
             Level = level;
             DefaultColor = defaultColor ?? ConsoleColor.Gray;
         }
-        public MessagePrinter(MessageCollections.Levels level) : this(level, null) { }
+        public MessagePrinter(MessagePrinter printer) : this(printer.Level, printer.DefaultColor) { }
 
         //Methods
         public MessageHandler ChangeLevel(MessageCollections.Levels newLevel, bool parsing = false)
@@ -50,5 +50,7 @@ namespace BackingUpConsole.Utilities.Messages
                     return y;
             } while (true);
         }
+
+        public object Clone() => new MessagePrinter(this);
     }
 }
