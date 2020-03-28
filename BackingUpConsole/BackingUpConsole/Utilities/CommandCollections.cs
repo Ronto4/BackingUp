@@ -39,13 +39,13 @@ namespace BackingUpConsole.Utilities.Commands
         private static (MessageHandler message, string? path) Run_Cd(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string targetPath = args[0];
-            string newPath = PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, targetPath));
+            string newPath = PathHandler.Combine(paths.currentWorkingDirectory, targetPath);
             return (MessageProvider.DirectoryChanged(newPath), newPath);
         }
 
         private static (MessageHandler message, string? path) Parse_RunFile(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = PathHandler.Flatten(PathHandler.Combine(paths.currentWorkingDirectory, args[0]));
+            string path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
 
             if (!File.Exists(path))
                 return (MessageProvider.FileNotFound(path), null);
