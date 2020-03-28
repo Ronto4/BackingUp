@@ -62,13 +62,13 @@ namespace BackingUpConsole
             //return MessageProvider.QuitProgram();
         }
 
-        public static (MessageHandler message, Paths paths) Compute(string input, MessagePrinter messagePrinter, Paths paths, UInt16 flags, bool _/*compile*/ = false)
+        public static (MessageHandler message, Paths paths) Compute(string input, MessagePrinter messagePrinter, Paths paths, UInt16 flags, bool compile = false)
         {
             string[] arg = Miscellaneous.CommandLineToArgs(input);
             Command cmd = CommandCollections.GetCommand(arg[0]);
             string[] args = arg[1..];
             (MessageHandler message, string? path) = Interpreter.Interprete(cmd, args, messagePrinter, flags, paths);
-            if (message == MessageProvider.DirectoryChanged())
+            if (compile ? message == MessageProvider.ParseDirectoryChanged() : message == MessageProvider.DirectoryChanged())
                 paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
 
             return (message, paths);

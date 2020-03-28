@@ -40,7 +40,7 @@ namespace BackingUpConsole.Utilities.Commands
         {
             string targetPath = args[0];
             string newPath = PathHandler.Combine(paths.currentWorkingDirectory, targetPath);
-            return Directory.Exists(newPath) ? (MessageProvider.ParseSuccess(), null) : (MessageProvider.DirectoryNotFound(newPath), (string?)null);
+            return Directory.Exists(newPath) ? (MessageProvider.ParseDirectoryChanged(), newPath) : (MessageProvider.DirectoryNotFound(newPath), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Cd(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
