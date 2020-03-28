@@ -29,5 +29,19 @@ namespace BackingUpConsole.Utilities.Messages
             Console.WriteLine(message.Message);
             Console.ForegroundColor = DefaultColor;
         }
+
+        public bool AskContinue(MessageHandler message)
+        {
+            do
+            {
+                Console.ForegroundColor = message.Color ?? MessageCollections.Colors[message.Level];
+                Console.Write("Would you nevertheless like to continue? [y|n] ");
+                string input = Console.ReadLine();
+                Console.ForegroundColor = DefaultColor;
+                bool y;
+                if ((y = (input == "y")) || (input == "n"))
+                    return y;
+            } while (true);
+        }
     }
 }
