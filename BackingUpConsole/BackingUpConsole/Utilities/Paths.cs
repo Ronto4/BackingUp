@@ -15,7 +15,7 @@ namespace BackingUpConsole.Utilities
 
     public static class PathHandler
     {
-        public static string Combine(params string[] paths)
+        public static string Combine(bool flatten, params string[] paths)
         {
             for (int i = 0; i < paths.Length; i++)
             {
@@ -29,8 +29,9 @@ namespace BackingUpConsole.Utilities
             {
                 path += paths[i];
             }
-            return Flatten(path);
+            return flatten ? Flatten(path) : path;
         }
+        public static string Combine(params string[] paths) => Combine(true, paths);
         private static string Flatten(string path) => path.LastIndexOf(':') != 1 ? Combine(path.Split(':')[1][^1].ToString() + ":", path.Split(':')[2]) : Path.GetFullPath(path);
     }
 }

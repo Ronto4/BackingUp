@@ -1,6 +1,7 @@
 ﻿using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace BackingUpConsole.Utilities
@@ -22,11 +23,14 @@ namespace BackingUpConsole.Utilities
 
         public static bool IsSet(this UInt16 flags, UInt16 checkFlag) => (flags & checkFlag) != 0;
        
-        public static (MessageHandler message, UInt16 flags) SetFromArgs(this UInt16 flags, ref string[] args)
+        public static (MessageHandler message, UInt16 flags) SetFromArgs(this UInt16 flags, ref string[] args, Paths paths)
         {
-            var relevantArgs = from arg in args where arg.StartsWith("--") select arg.Substring(2);
+            var relevantArgs = from arg in args where arg.StartsWith("--") && !Path.IsPathFullyQualified(PathHandler.Combine(false, paths.currentWorkingDirectory, arg.Substring(2))) select arg.Substring(2);
             foreach(var arg in relevantArgs)
             {
+                //if (Path.IsPathFullyQualified(PathHandler.Combine(paths.currentWorkingDirectory, arg)))
+                //    continue;
+
                 string[] parts = arg.Split(':');
                 if (parts.Length != 2)
                     return (MessageProvider.InvalidFlagNotation(arg), flags);
@@ -44,7 +48,7 @@ namespace BackingUpConsole.Utilities
 
                 flags = (UInt16)(flagSet == 0 ? flags & ~flag : flags | flag);
             }
-            args = (from arg in args where !arg.StartsWith("--") select arg).ToArray();
+            args = (from arg in args where !arg.StartsWith("--") || Path.IsPathFullyQualified(PathHandler.Combine(paths.currentWorkingDirectory, arg.Substring(2))) select arg).ToArray();
             return (MessageProvider.Success(), flags);
 
         }
