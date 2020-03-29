@@ -25,7 +25,9 @@ namespace BackingUpConsole.Utilities.Messages
             CompatibilityMode,
             UnknownFlagIdentifier,
             InvalidFlagNotation,
-            InvalidFlagValue
+            InvalidFlagValue,
+            UnknownReportLevel,
+            ReportLevelChanged
         }
         public enum Levels
         {

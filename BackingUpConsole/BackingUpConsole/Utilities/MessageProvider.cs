@@ -86,10 +86,16 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                           $"The given flag identifier '{id}' (set to '{value}') does not exist.",
                                                                                                           MessageCollections.Levels.Error);
         public static MessageHandler InvalidFlagNotation(string notation) => new MessageHandler(MessageCollections.Codes.InvalidFlagNotation,
-                                                                                                $"The given flag notation '{notation}' is not valid",
+                                                                                                $"The given flag notation '{notation}' is not valid.",
                                                                                                 MessageCollections.Levels.Error);
         public static MessageHandler InvalidFlagValue(string id, string value) => new MessageHandler(MessageCollections.Codes.InvalidFlagValue,
                                                                                                           $"The given flag identifier '{id}' cannot be set to '{value}'.",
                                                                                                           MessageCollections.Levels.Error);
+        public static MessageHandler UnknownReportLevel(string level) => new MessageHandler(MessageCollections.Codes.UnknownReportLevel,
+                                                                                            $"The given report level '{level}' does not exist.",
+                                                                                            MessageCollections.Levels.Error);
+        public static MessageHandler ReportLevelChanged(MessageCollections.Levels level) => new MessageHandler(MessageCollections.Codes.ReportLevelChanged,
+                                                                                                               $"The report level has been updated to '{Enum.GetName(typeof(MessageCollections.Levels), level)}'.",
+                                                                                                               MessageCollections.Levels.Information);
     }
 }

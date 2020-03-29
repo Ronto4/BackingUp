@@ -2,22 +2,29 @@
 
 namespace BackingUpConsole.Utilities.Messages
 {
-    public class MessagePrinter
+    public class MessagePrinter : ICloneable
     {
         //Attributes
         private MessageCollections.Levels Level;
         private ConsoleColor DefaultColor;
 
         //Constructors
-        public MessagePrinter(MessageCollections.Levels level, ConsoleColor? defaultColor)
+        public MessagePrinter(MessageCollections.Levels level, ConsoleColor? defaultColor = null)
         {
             Level = level;
             DefaultColor = defaultColor ?? ConsoleColor.Gray;
         }
-        public MessagePrinter(MessageCollections.Levels level) : this(level, null) { }
+        public MessagePrinter(MessagePrinter printer) : this(printer.Level, printer.DefaultColor) { }
 
         //Methods
-        public void ChangeLevel(MessageCollections.Levels newLevel) => Level = newLevel;
+        public MessageHandler ChangeLevel(MessageCollections.Levels newLevel, bool parsing = false)
+        {
+            if (newLevel < MessageCollections.Levels.Warning)
+                return MessageProvider.Message($"The chosen minimum level to report messages cannot be set to '{Enum.GetName(typeof(MessageCollections.Levels), newLevel)}'. The minimum required level is 'Warning'.", MessageCollections.Levels.Error);
+
+            if (!parsing) Level = newLevel;
+            return MessageProvider.Success();
+        }
         public void ChangeDefaultColor(ConsoleColor newDefaultColor) => DefaultColor = newDefaultColor;
 
         public void Print(MessageHandler message)
@@ -43,5 +50,7 @@ namespace BackingUpConsole.Utilities.Messages
                     return y;
             } while (true);
         }
+
+        public object Clone() => new MessagePrinter(this);
     }
 }

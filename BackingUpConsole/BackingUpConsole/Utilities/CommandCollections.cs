@@ -23,7 +23,8 @@ namespace BackingUpConsole.Utilities.Commands
             {"cd", new CommandProperties(1,1,Parse_Cd, Run_Cd) },
             {"run", new CommandProperties(1,1,Parse_RunFile, Run_RunFile) },
             {"dir", new CommandProperties(0, 1, Parse_Dir, Run_Dir) },
-            {"~", new CommandProperties(-1, -1, Parse_Tilde, Run_Tilde) }
+            {"~", new CommandProperties(-1, -1, Parse_Tilde, Run_Tilde) },
+            {"reportlevel", new CommandProperties(1,1,Parse_ReportLevel, Run_ReportLevel) }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -88,6 +89,8 @@ namespace BackingUpConsole.Utilities.Commands
             if (flags.IsSet(Flags.COMPILE))
                 messagePrinter.Print(MessageProvider.ParseSuccess());
 
+            MessagePrinter localPrinter = (MessagePrinter)messagePrinter.Clone();
+
 
             using (StreamReader sr = new StreamReader(path))
             {
@@ -99,7 +102,7 @@ namespace BackingUpConsole.Utilities.Commands
                         return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected."), null);
 
                     MessageHandler message;
-                    (message, usingPaths) = MainHandler.Compute(cmds, messagePrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
+                    (message, usingPaths) = MainHandler.Compute(cmds, localPrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
 
                     if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
                         return (MessageProvider.RuntimeError(message, $"{path} at line {line}"), usingPaths.currentWorkingDirectory);
@@ -141,6 +144,29 @@ namespace BackingUpConsole.Utilities.Commands
         {
             COMPATIBILITY.Program.Main(args);
             return (MessageProvider.Success(), null);
+        }
+
+        private static (MessageHandler message, string? path) Parse_ReportLevel(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            bool success = Enum.TryParse(typeof(MessageCollections.Levels), args[0], true, out object? l);
+            if (!success)
+                return (MessageProvider.UnknownReportLevel(args[0]), null);
+
+            MessageCollections.Levels level = (MessageCollections.Levels)l!;
+            MessageHandler message = messagePrinter.ChangeLevel(level, true);
+            if (!message.IsSuccess(true, messagePrinter))
+                return (message, null);
+
+            return (MessageProvider.Success(), null);
+        }
+        private static (MessageHandler message, string? path) Run_ReportLevel(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            MessageCollections.Levels level = (MessageCollections.Levels)Enum.Parse(typeof(MessageCollections.Levels), args[0], true);
+            MessageHandler message = messagePrinter.ChangeLevel(level);
+            if (!message.IsSuccess(false, messagePrinter))
+                return (message, null);
+
+            return (MessageProvider.ReportLevelChanged(level), null);
         }
     }
 }
