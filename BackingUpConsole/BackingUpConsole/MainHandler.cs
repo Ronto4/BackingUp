@@ -58,7 +58,7 @@ namespace BackingUpConsole
             //    arg[i] = args[i + 1];
             //}
             string[] arg = args[1..];
-            return Interpreter.Interprete(cmd, arg, messagePrinter, (UInt16)(0x0 | Flags.CHAIN_COMPILE | Flags.COMPILE | Flags.RUN), paths);
+            return Interpreter.Interprete(cmd, arg, messagePrinter, Flags.DEFAULT_FLAGS, paths);
             //return MessageProvider.QuitProgram();
         }
 
