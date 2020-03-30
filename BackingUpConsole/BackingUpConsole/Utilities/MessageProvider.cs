@@ -103,5 +103,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler UnknownArgument(string arg) => new MessageHandler(MessageCollections.Codes.UnknownArgument,
                                                                                        $"Unknown argument: '{arg}'",
                                                                                        MessageCollections.Levels.Error);
+        public static MessageHandler InvalidArgumentNotation(string not) => new MessageHandler(MessageCollections.Codes.InvalidArgumentNotation,
+                                                                                               $"The given argument notation '{not}' is not valid.",
+                                                                                               MessageCollections.Levels.Error);
     }
 }

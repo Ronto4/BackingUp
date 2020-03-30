@@ -35,6 +35,12 @@ namespace BackingUpConsole.Utilities
             if (computedArgs.Count() != args.Length)
                 return (MessageProvider.MixedArguments(), args);
 
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (!args[i].Contains(":"))
+                    return (MessageProvider.InvalidArgumentNotation(args[i]), args);
+            }
+
             var splitArgs = from arg in computedArgs select (arg.Split(':')[0], arg.Split(':')[1..], Array.IndexOf(command.ArgOrder, arg.Split(':')[0]));
             splitArgs = splitArgs.OrderBy((elem) => elem.Item3);
 
