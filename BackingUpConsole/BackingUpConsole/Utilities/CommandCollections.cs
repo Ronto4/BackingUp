@@ -27,6 +27,16 @@ namespace BackingUpConsole.Utilities.Commands
             {"reportlevel", new CommandProperties(1,1,Parse_ReportLevel, Run_ReportLevel) }
         };
 
+        internal static Dictionary<string, string[]> ArgumentOrder = new Dictionary<string, string[]>()
+        {
+            {"exit", new string[] { } },
+            {"cd", new string[] { "Path" } },
+            {"run", new string[] { "Path" } },
+            {"dir", new string[] { "Path" } },
+            {"~", new string[] { } },
+            {"reportlevel", new string[] { "Level" } },
+        };
+
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             return (MessageProvider.ParseSuccess(), null);
