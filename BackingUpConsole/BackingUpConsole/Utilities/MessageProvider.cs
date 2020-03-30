@@ -97,5 +97,14 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler ReportLevelChanged(MessageCollections.Levels level) => new MessageHandler(MessageCollections.Codes.ReportLevelChanged,
                                                                                                                $"The report level has been updated to '{Enum.GetName(typeof(MessageCollections.Levels), level)}'.",
                                                                                                                MessageCollections.Levels.Information);
+        public static MessageHandler MixedArguments() => new MessageHandler(MessageCollections.Codes.MixedArguments,
+                                                                            "You cannot mix fixed arguments (starting with '+') and unfixed arguments.",
+                                                                            MessageCollections.Levels.Error);
+        public static MessageHandler UnknownArgument(string arg) => new MessageHandler(MessageCollections.Codes.UnknownArgument,
+                                                                                       $"Unknown argument: '{arg}'",
+                                                                                       MessageCollections.Levels.Error);
+        public static MessageHandler InvalidArgumentNotation(string not) => new MessageHandler(MessageCollections.Codes.InvalidArgumentNotation,
+                                                                                               $"The given argument notation '{not}' is not valid.",
+                                                                                               MessageCollections.Levels.Error);
     }
 }

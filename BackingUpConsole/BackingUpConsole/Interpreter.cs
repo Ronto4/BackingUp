@@ -14,9 +14,12 @@ namespace BackingUpConsole
                 return (MessageProvider.Success(), null);
 
             MessageHandler message;
-            (message, flags) = flags.SetFromArgs(ref args);
+            //(message, flags) = flags.SetFromArgs(ref args);
+            (message, args, flags) = ArgumentHandler.ParseArguments(args, flags, messagePrinter, command);
             if (!message.IsSuccess(false, messagePrinter))
                 return (message, null);
+
+
 
             messagePrinter.Print(MessageProvider.ExecutionDebug(command, flags, args, paths));
 

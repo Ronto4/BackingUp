@@ -27,7 +27,10 @@ namespace BackingUpConsole.Utilities.Messages
             InvalidFlagNotation,
             InvalidFlagValue,
             UnknownReportLevel,
-            ReportLevelChanged
+            ReportLevelChanged,
+            MixedArguments,
+            UnknownArgument,
+            InvalidArgumentNotation
         }
         public enum Levels
         {
