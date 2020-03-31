@@ -25,7 +25,7 @@ namespace BackingUpConsole.Utilities
 
         private static (MessageHandler message, string[] args) SortArgs(this string[] args, MessagePrinter messagePrinter, Command command)
         {
-            if (command.ArgOrder.Length == 0)
+            if (command.ArgOrder is null || command.ArgOrder.Length == 0)
                 return (MessageProvider.Success(), args);
 
             var computedArgs = from arg in args where arg.StartsWith("+") select arg.Substring(1);

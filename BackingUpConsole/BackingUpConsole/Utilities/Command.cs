@@ -9,7 +9,7 @@ namespace BackingUpConsole.Utilities.Commands
 
         public readonly CommandProperties properties;
 
-        public readonly string[] ArgOrder;
+        public readonly string[]? ArgOrder;
 
         public bool IsComment => cmd.StartsWith(";");
         public bool IsInvalid => properties.Parse == null;
@@ -19,7 +19,7 @@ namespace BackingUpConsole.Utilities.Commands
         {
             this.cmd = cmd;
             CommandCollections.Properties.TryGetValue(cmd, out properties);
-            CommandCollections.ArgumentOrder.TryGetValue(cmd, out ArgOrder!);
+            CommandCollections.ArgumentOrder.TryGetValue(cmd, out ArgOrder);
         }
 
         //overrides
