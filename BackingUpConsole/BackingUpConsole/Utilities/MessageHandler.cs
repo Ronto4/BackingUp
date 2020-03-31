@@ -11,22 +11,23 @@ namespace BackingUpConsole.Utilities.Messages
         public string Message { get; }
         public MessageCollections.Levels Level { get; private set; }
         public ConsoleColor? Color { get; }
+        public bool Silent { get; }
         //Constructor
-        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level, ConsoleColor? color)
+        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level, ConsoleColor? color = null, bool silent = false)
         {
             Code = code;
             Message = message;
             Level = level;
             Color = color;
+            Silent = silent;
         }
-        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level) : this(code, message, level, null) { }
 
         //overriding operators
         public static bool operator ==(MessageHandler left, MessageHandler right) => (left.Code == right.Code);
         public static bool operator !=(MessageHandler left, MessageHandler right) => !(left == right);
 
         //Methods
-        private bool Success(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess(String.Empty) || this == MessageProvider.ParseDirectoryChanged()) && parsing);
+        private bool Success(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess() || this == MessageProvider.ParseDirectoryChanged()) && parsing);
 
         public override bool Equals(object? message) => (message is MessageHandler m)
                                                             ? (this == m)

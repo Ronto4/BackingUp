@@ -39,25 +39,25 @@ namespace BackingUpConsole.Utilities.Commands
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return (MessageProvider.Success(), null);
+            return (MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
         private static (MessageHandler message, string? path) Run_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             Miscellaneous.ExitProgram(0, "User input or script");
-            return (MessageProvider.InvalidMethodExecution(flags, args, "'Miscellaneous.ExitProgram(0, \"User input or script\");' was called, but the program did not stop."), null);
+            return (MessageProvider.InvalidMethodExecution(flags, args, "'Miscellaneous.ExitProgram(0, \"User input or script\");' was called, but the program did not stop.", silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
 
         private static (MessageHandler message, string? path) Parse_Cd(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string targetPath = args[0];
             string newPath = PathHandler.Combine(paths.currentWorkingDirectory, targetPath);
-            return Directory.Exists(newPath) ? (MessageProvider.ParseDirectoryChanged(), newPath) : (MessageProvider.DirectoryNotFound(newPath), (string?)null);
+            return Directory.Exists(newPath) ? (MessageProvider.ParseDirectoryChanged(silent: !flags.IsSet(Flags.VERBOSE)), newPath) : (MessageProvider.DirectoryNotFound(newPath, silent: !flags.IsSet(Flags.VERBOSE)), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Cd(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string targetPath = args[0];
             string newPath = PathHandler.Combine(paths.currentWorkingDirectory, targetPath);
-            return (MessageProvider.DirectoryChanged(newPath), newPath);
+            return (MessageProvider.DirectoryChanged(newPath, silent: !flags.IsSet(Flags.VERBOSE)), newPath);
         }
 
         private static (MessageHandler message, string? path) Parse_RunFile(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -65,10 +65,10 @@ namespace BackingUpConsole.Utilities.Commands
             string path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
 
             if (!File.Exists(path))
-                return (MessageProvider.FileNotFound(path), null);
+                return (MessageProvider.FileNotFound(path, silent: !flags.IsSet(Flags.VERBOSE)), null);
 
             if (!flags.IsSet(Flags.RUN) && !flags.IsSet(Flags.CHAIN_COMPILE))
-                return (MessageProvider.ParseSuccess(path), null);
+                return (MessageProvider.ParseSuccess(path, silent: !flags.IsSet(Flags.VERBOSE)), null);
 
             Paths parsingPaths = paths;
             int line = 0;
@@ -79,14 +79,14 @@ namespace BackingUpConsole.Utilities.Commands
                 line++;
                 string? cmds = sr.ReadLine();
                 if (cmds == null)
-                    return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected."), null);
+                    return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected.", silent: !flags.IsSet(Flags.VERBOSE)), null);
 
                 MessageHandler message;
                 (message, parsingPaths) = MainHandler.Compute(cmds, messagePrinter, parsingPaths, (UInt16)(flags & ~Flags.RUN), true);
                 if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
-                    return (MessageProvider.ParseError(message, $"{path} at line {line}"), parsingPaths.currentWorkingDirectory);
+                    return (MessageProvider.ParseError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), parsingPaths.currentWorkingDirectory);
             }
-            MessageHandler success = MessageProvider.ParseSuccess(path);
+            MessageHandler success = MessageProvider.ParseSuccess(path, silent: !flags.IsSet(Flags.VERBOSE));
             if (flags.IsSet(Flags.VERBOSE))
                 messagePrinter.Print(success);
             return (success, null);
@@ -112,27 +112,27 @@ namespace BackingUpConsole.Utilities.Commands
                     line++;
                     string? cmds = sr.ReadLine();
                     if (cmds == null)
-                        return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected."), null);
+                        return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected.", silent: !flags.IsSet(Flags.VERBOSE)), null);
 
                     MessageHandler message;
                     (message, usingPaths) = MainHandler.Compute(cmds, localPrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
 
                     if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
-                        return (MessageProvider.RuntimeError(message, $"{path} at line {line}"), usingPaths.currentWorkingDirectory);
+                        return (MessageProvider.RuntimeError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), usingPaths.currentWorkingDirectory);
 
                     if (flags.IsSet(Flags.VERBOSE))
                         messagePrinter.Print(message);
                 }
             }
 
-            return (MessageProvider.ExecutionSuccess(path), null);
+            return (MessageProvider.ExecutionSuccess(path, silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
 
         private static (MessageHandler message, string? path) Parse_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string path = args.Length > 0 ? PathHandler.Combine(paths.currentWorkingDirectory, args[0]) : paths.currentWorkingDirectory;
 
-            return Directory.Exists(path) ? (MessageProvider.Success(), null) : (MessageProvider.DirectoryNotFound(path), (string?)null);
+            return Directory.Exists(path) ? (MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE)), null) : (MessageProvider.DirectoryNotFound(path, silent: !flags.IsSet(Flags.VERBOSE)), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
@@ -149,31 +149,31 @@ namespace BackingUpConsole.Utilities.Commands
             {
                 text += $" {entry.LastWriteTime.ToString()} | {(entry is FileInfo f ? string.Format("{0,13:#,###,###,###}", f.Length) : "             ")} | {(entry is DirectoryInfo ? "<DIR>" : "     ")} | {entry.Name}{Environment.NewLine}";
             }
-            return (MessageProvider.Message(text), null);
+            return (MessageProvider.Message(text, silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
 
         private static (MessageHandler message, string? path) Parse_Tilde(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return (MessageProvider.CompatibilityMode(), null);
+            return (MessageProvider.CompatibilityMode(silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
         private static (MessageHandler message, string? path) Run_Tilde(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             COMPATIBILITY.Program.Main(args);
-            return (MessageProvider.Success(), null);
+            return (MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
 
         private static (MessageHandler message, string? path) Parse_ReportLevel(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             bool success = Enum.TryParse(typeof(MessageCollections.Levels), args[0], true, out object? l);
             if (!success)
-                return (MessageProvider.UnknownReportLevel(args[0]), null);
+                return (MessageProvider.UnknownReportLevel(args[0], silent: !flags.IsSet(Flags.VERBOSE)), null);
 
             MessageCollections.Levels level = (MessageCollections.Levels)l!;
             MessageHandler message = messagePrinter.ChangeLevel(level, true);
             if (!message.IsSuccess(true, messagePrinter))
                 return (message, null);
 
-            return (MessageProvider.Success(), null);
+            return (MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
         private static (MessageHandler message, string? path) Run_ReportLevel(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
@@ -182,7 +182,7 @@ namespace BackingUpConsole.Utilities.Commands
             if (!message.IsSuccess(false, messagePrinter))
                 return (message, null);
 
-            return (MessageProvider.ReportLevelChanged(level), null);
+            return (MessageProvider.ReportLevelChanged(level, silent: !flags.IsSet(Flags.VERBOSE)), null);
         }
     }
 }
