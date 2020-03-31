@@ -11,15 +11,16 @@ namespace BackingUpConsole.Utilities.Messages
         public string Message { get; }
         public MessageCollections.Levels Level { get; private set; }
         public ConsoleColor? Color { get; }
+        public bool Silent { get; }
         //Constructor
-        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level, ConsoleColor? color)
+        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level, ConsoleColor? color = null, bool silent = false)
         {
             Code = code;
             Message = message;
             Level = level;
             Color = color;
+            Silent = silent;
         }
-        public MessageHandler(MessageCollections.Codes code, string message, MessageCollections.Levels level) : this(code, message, level, null) { }
 
         //overriding operators
         public static bool operator ==(MessageHandler left, MessageHandler right) => (left.Code == right.Code);

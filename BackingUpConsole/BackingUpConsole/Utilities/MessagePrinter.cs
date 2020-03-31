@@ -29,7 +29,7 @@ namespace BackingUpConsole.Utilities.Messages
 
         public void Print(MessageHandler message)
         {
-            if (Level < message.Level)
+            if (Level < message.Level || (Level < MessageCollections.Levels.Debug && message.Silent && message.Level >= MessageCollections.Levels.Information))
                 return;
 
             Console.ForegroundColor = message.Color ?? MessageCollections.Colors[message.Level];
