@@ -12,7 +12,7 @@ namespace BackingUpConsole.Utilities
         public static UInt16 CHAIN_COMPILE => 0b0000_0000_0000_0100;
         public static UInt16 VERBOSE => 0b0000_0000_0000_1000;
 
-        public static UInt16 DEFAULT_FLAGS => (UInt16)(0x0 | RUN | COMPILE | CHAIN_COMPILE);
+        public static UInt16 DEFAULT_FLAGS => (UInt16)(0x0 | RUN | COMPILE | CHAIN_COMPILE | VERBOSE);
 
         private static readonly Dictionary<string, UInt16> flagIdentifier = new Dictionary<string, ushort>()
         {
