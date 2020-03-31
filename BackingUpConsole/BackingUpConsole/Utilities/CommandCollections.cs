@@ -116,6 +116,9 @@ namespace BackingUpConsole.Utilities.Commands
 
                     if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
                         return (MessageProvider.RuntimeError(message, $"{path} at line {line}"), usingPaths.currentWorkingDirectory);
+
+                    if (flags.IsSet(Flags.VERBOSE))
+                        messagePrinter.Print(message);
                 }
             }
 

@@ -10,6 +10,7 @@ namespace BackingUpConsole.Utilities
         public static UInt16 RUN => 0b0000_0000_0000_0001;
         public static UInt16 COMPILE => 0b0000_0000_0000_0010;
         public static UInt16 CHAIN_COMPILE => 0b0000_0000_0000_0100;
+        public static UInt16 VERBOSE => 0b0000_0000_0000_1000;
 
         public static UInt16 DEFAULT_FLAGS => (UInt16)(0x0 | RUN | COMPILE | CHAIN_COMPILE);
 
@@ -17,7 +18,8 @@ namespace BackingUpConsole.Utilities
         {
             {"run", RUN },
             {"compile", COMPILE },
-            {"chain-compile", CHAIN_COMPILE }
+            {"chain-compile", CHAIN_COMPILE },
+            {"verbose", VERBOSE }
         };
 
         public static bool IsSet(this UInt16 flags, UInt16 checkFlag) => (flags & checkFlag) != 0;
