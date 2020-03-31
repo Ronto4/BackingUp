@@ -26,7 +26,7 @@ namespace BackingUpConsole.Utilities.Messages
         public static bool operator !=(MessageHandler left, MessageHandler right) => !(left == right);
 
         //Methods
-        private bool Success(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess() || this == MessageProvider.ParseDirectoryChanged()) && parsing);
+        private bool Success(bool parsing) => this == MessageProvider.Success() || ((this == MessageProvider.ParseSuccess(String.Empty) || this == MessageProvider.ParseDirectoryChanged()) && parsing);
 
         public override bool Equals(object? message) => (message is MessageHandler m)
                                                             ? (this == m)

@@ -39,7 +39,7 @@ namespace BackingUpConsole.Utilities.Commands
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return (MessageProvider.ParseSuccess(), null);
+            return (MessageProvider.Success(), null);
         }
         private static (MessageHandler message, string? path) Run_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
@@ -68,7 +68,7 @@ namespace BackingUpConsole.Utilities.Commands
                 return (MessageProvider.FileNotFound(path), null);
 
             if (!flags.IsSet(Flags.RUN) && !flags.IsSet(Flags.CHAIN_COMPILE))
-                return (MessageProvider.ParseSuccess(), null);
+                return (MessageProvider.ParseSuccess(path), null);
 
             Paths parsingPaths = paths;
             int line = 0;
@@ -86,7 +86,10 @@ namespace BackingUpConsole.Utilities.Commands
                 if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
                     return (MessageProvider.ParseError(message, $"{path} at line {line}"), parsingPaths.currentWorkingDirectory);
             }
-            return (MessageProvider.ParseSuccess(), null);
+            MessageHandler success = MessageProvider.ParseSuccess(path);
+            if (flags.IsSet(Flags.VERBOSE))
+                messagePrinter.Print(success);
+            return (success, null);
         }
         private static (MessageHandler message, string? path) Run_RunFile(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
@@ -96,8 +99,8 @@ namespace BackingUpConsole.Utilities.Commands
 
             int line = 0;
 
-            if (flags.IsSet(Flags.COMPILE))
-                messagePrinter.Print(MessageProvider.ParseSuccess());
+            //if (flags.IsSet(Flags.COMPILE))
+            //    messagePrinter.Print(MessageProvider.ParseSuccess());
 
             MessagePrinter localPrinter = (MessagePrinter)messagePrinter.Clone();
 
@@ -122,14 +125,14 @@ namespace BackingUpConsole.Utilities.Commands
                 }
             }
 
-            return (MessageProvider.ExecutionSuccess(), null);
+            return (MessageProvider.ExecutionSuccess(path), null);
         }
 
         private static (MessageHandler message, string? path) Parse_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string path = args.Length > 0 ? PathHandler.Combine(paths.currentWorkingDirectory, args[0]) : paths.currentWorkingDirectory;
 
-            return Directory.Exists(path) ? (MessageProvider.ParseSuccess(), null) : (MessageProvider.DirectoryNotFound(path), (string?)null);
+            return Directory.Exists(path) ? (MessageProvider.Success(), null) : (MessageProvider.DirectoryNotFound(path), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {

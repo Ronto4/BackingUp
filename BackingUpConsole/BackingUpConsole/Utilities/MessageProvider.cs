@@ -24,9 +24,9 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler ParseError(MessageHandler message, string position) => new MessageHandler(MessageCollections.Codes.ParseError,
                                                                                                                $"Parse error at {position}:\n{message.Message}",
                                                                                                                message.Level < MessageCollections.Levels.Error ? message.Level : MessageCollections.Levels.Error);
-        public static MessageHandler ParseSuccess() => new MessageHandler(MessageCollections.Codes.ParseSuccess,
-                                                                          "Parsing successful",
-                                                                          MessageCollections.Levels.Information,
+        public static MessageHandler ParseSuccess(string script) => new MessageHandler(MessageCollections.Codes.ParseSuccess,
+                                                                          $"Parsing of script '{script}' successful",
+                                                                          MessageCollections.Levels.Debug,
                                                                           ConsoleColor.Green);
         public static MessageHandler RuntimeError(MessageHandler message, string position) => new MessageHandler(MessageCollections.Codes.RuntimeError,
                                                                                                                  $"Error while executing code at {position}:{Environment.NewLine}{message.Message}",
@@ -73,8 +73,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler ParseDirectoryChanged() => new MessageHandler(MessageCollections.Codes.ParseChangedDirectory,
                                                                                               $"Working directory can be updated",
                                                                                               MessageCollections.Levels.Debug);
-        public static MessageHandler ExecutionSuccess() => new MessageHandler(MessageCollections.Codes.ExecutionSuccess,
-                                                                         "Execution successful",
+        public static MessageHandler ExecutionSuccess(string script) => new MessageHandler(MessageCollections.Codes.ExecutionSuccess,
+                                                                         $"Execution of script '{script}' successful",
                                                                          MessageCollections.Levels.Information,
                                                                          ConsoleColor.Green);
         public static MessageHandler Message(string message, MessageCollections.Levels level = MessageCollections.Levels.Information, ConsoleColor? color = null)
