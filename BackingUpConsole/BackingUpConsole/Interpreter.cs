@@ -3,12 +3,13 @@ using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities.Messages;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace BackingUpConsole
 {
     internal static class Interpreter
     {
-        public static (MessageHandler message, string? path) Interprete(Command command, string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths)
+        public async static Task<(MessageHandler message, string? path)> Interprete(Command command, string[] args, MessagePrinter messagePrinter, UInt16 flags, Paths paths)
         {
             if (command.IsComment)
                 return (MessageProvider.Success(), null);
@@ -26,10 +27,10 @@ namespace BackingUpConsole
             if (command.IsInvalid)
                 return (MessageProvider.UnknownCommand(command.cmd), null);
 
-            return Evaluate(args, messagePrinter, flags, paths, command.properties);
+            return await Evaluate(args, messagePrinter, flags, paths, command.properties);
         }
 
-        private static (MessageHandler message, string? path) Evaluate(string[] args, MessagePrinter messagePrinter, UInt16 flags, in Paths paths, in CommandProperties properties)
+        private async static Task<(MessageHandler message, string? path)> Evaluate(string[] args, MessagePrinter messagePrinter, UInt16 flags, Paths paths, CommandProperties properties)
         {
             (MessageHandler message, string? path)? pResult = null;
             if (flags.IsSet(Flags.COMPILE))
@@ -37,12 +38,12 @@ namespace BackingUpConsole
                 if (!args.CheckLength(properties.minArgs, properties.maxArgs))
                     return (MessageProvider.IncorrectArgumentCount(), null);
 
-                pResult = properties.Parse(args, flags, paths, messagePrinter);
+                pResult = properties.ParseIsAsync ? await properties.Parse_Async!(args, flags, paths, messagePrinter) : properties.Parse!(args, flags, paths, messagePrinter);
                 var result = pResult.Value;
                 if (!result.message.IsSuccess(true, messagePrinter))
                     return result;
             }
-            return flags.IsSet(Flags.RUN) ? properties.Run(args, flags, paths, messagePrinter) : (pResult ?? (MessageProvider.Success(), (string?)null));
+            return flags.IsSet(Flags.RUN) ? (properties.RunIsAsync ? await properties.Run_Async!(args, flags, paths, messagePrinter) : properties.Run!(args, flags, paths, messagePrinter)) : (pResult ?? (MessageProvider.Success(), (string?)null));
         }
         #region old
 #if false
