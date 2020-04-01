@@ -14,6 +14,10 @@ namespace BackingUpConsole.CoreFunctions.Commands
         {
             if (!File.Exists(args[1]))
                 return MessageProvider.FileNotFound(args[1], flags.IsSet(Flags.VERBOSE));
+
+            (MessageHandler message, _) = Utilities.ScanList();
+            if (!message.IsSuccess(true, messagePrinter))
+                return message;
         }
 
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)

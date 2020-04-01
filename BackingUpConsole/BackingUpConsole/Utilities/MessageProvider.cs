@@ -112,5 +112,11 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler InvalidExtension(string path, string ext, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidExtension,
                                                                                                                           $"The given file '{path}' does not match the desired extension '{ext}'.",
                                                                                                                           MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler InvalidFileFormat(string path, int lineNumber, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileFormat,
+                                                                                                               $"The given file '{path}' does not match the desired format in line {lineNumber}.",
+                                                                                                               MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler InvalidFileFormat(string path, string lineContent, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileFormat,
+                                                                                                               $"The given file '{path}' does not match the desired format in line containing '{lineContent}'.",
+                                                                                                               MessageCollections.Levels.Error, silent: silent);
     }
 }
