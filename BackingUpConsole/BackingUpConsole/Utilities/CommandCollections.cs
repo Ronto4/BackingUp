@@ -38,7 +38,7 @@ namespace BackingUpConsole.Utilities.Commands
             {"dir", new string[] { "Path" } },
             {"~", new string[] { } },
             {"reportlevel", new string[] { "Level" } },
-            {"backup", new string[] {"Mode" } }
+            {"backup", new string[] {"Mode", "Path", "Name" } }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -54,19 +54,19 @@ namespace BackingUpConsole.Utilities.Commands
         private static (MessageHandler message, string? path) Parse_Cd(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string targetPath = args[0];
-            string newPath = PathHandler.Combine(paths.currentWorkingDirectory, targetPath);
+            string newPath = PathHandler.Combine(paths.CurrentWorkingDirectory, targetPath);
             return Directory.Exists(newPath) ? (MessageProvider.ParseDirectoryChanged(silent: !flags.IsSet(Flags.VERBOSE)), newPath) : (MessageProvider.DirectoryNotFound(newPath, silent: !flags.IsSet(Flags.VERBOSE)), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Cd(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string targetPath = args[0];
-            string newPath = PathHandler.Combine(paths.currentWorkingDirectory, targetPath);
+            string newPath = PathHandler.Combine(paths.CurrentWorkingDirectory, targetPath);
             return (MessageProvider.DirectoryChanged(newPath, silent: !flags.IsSet(Flags.VERBOSE)), newPath);
         }
 
         private async static Task<(MessageHandler message, string? path)> Parse_RunFile_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
+            string path = PathHandler.Combine(paths.CurrentWorkingDirectory, args[0]);
 
             if (!File.Exists(path))
                 return (MessageProvider.FileNotFound(path, silent: !flags.IsSet(Flags.VERBOSE)), null);
@@ -74,9 +74,9 @@ namespace BackingUpConsole.Utilities.Commands
             if (!flags.IsSet(Flags.RUN) && !flags.IsSet(Flags.CHAIN_COMPILE))
                 return (MessageProvider.ParseSuccess(path, silent: !flags.IsSet(Flags.VERBOSE)), null);
 
-            Paths parsingPaths = paths;
+            Paths parsingPaths = (Paths)paths.Clone();
             int line = 0;
-            parsingPaths.currentWorkingDirectory = Path.GetDirectoryName(path) ?? parsingPaths.currentWorkingDirectory;
+            parsingPaths.CurrentWorkingDirectory = Path.GetDirectoryName(path) ?? parsingPaths.CurrentWorkingDirectory;
             using StreamReader sr = new StreamReader(path);
             while (!sr.EndOfStream)
             {
@@ -88,7 +88,7 @@ namespace BackingUpConsole.Utilities.Commands
                 MessageHandler message;
                 (message, parsingPaths) = await MainHandler.Compute(cmds, messagePrinter, parsingPaths, (UInt16)(flags & ~Flags.RUN), true);
                 if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
-                    return (MessageProvider.ParseError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), parsingPaths.currentWorkingDirectory);
+                    return (MessageProvider.ParseError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), parsingPaths.CurrentWorkingDirectory);
             }
             MessageHandler success = MessageProvider.ParseSuccess(path, silent: !flags.IsSet(Flags.VERBOSE));
             if (flags.IsSet(Flags.VERBOSE))
@@ -97,9 +97,9 @@ namespace BackingUpConsole.Utilities.Commands
         }
         private async static Task<(MessageHandler message, string? path)> Run_RunFile_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
-            Paths usingPaths = paths;
-            usingPaths.currentWorkingDirectory = Path.GetDirectoryName(path) ?? usingPaths.currentWorkingDirectory;
+            string path = PathHandler.Combine(paths.CurrentWorkingDirectory, args[0]);
+            Paths usingPaths = (Paths)paths.Clone();
+            usingPaths.CurrentWorkingDirectory = Path.GetDirectoryName(path) ?? usingPaths.CurrentWorkingDirectory;
 
             int line = 0;
 
@@ -122,7 +122,7 @@ namespace BackingUpConsole.Utilities.Commands
                     (message, usingPaths) = await MainHandler.Compute(cmds, localPrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
 
                     if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
-                        return (MessageProvider.RuntimeError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), usingPaths.currentWorkingDirectory);
+                        return (MessageProvider.RuntimeError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), usingPaths.CurrentWorkingDirectory);
 
                     if (flags.IsSet(Flags.VERBOSE))
                         messagePrinter.Print(message);
@@ -134,13 +134,13 @@ namespace BackingUpConsole.Utilities.Commands
 
         private static (MessageHandler message, string? path) Parse_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = args.Length > 0 ? PathHandler.Combine(paths.currentWorkingDirectory, args[0]) : paths.currentWorkingDirectory;
+            string path = args.Length > 0 ? PathHandler.Combine(paths.CurrentWorkingDirectory, args[0]) : paths.CurrentWorkingDirectory;
 
             return Directory.Exists(path) ? (MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE)), null) : (MessageProvider.DirectoryNotFound(path, silent: !flags.IsSet(Flags.VERBOSE)), (string?)null);
         }
         private static (MessageHandler message, string? path) Run_Dir(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string path = args.Length > 0 ? PathHandler.Combine(paths.currentWorkingDirectory, args[0]) : paths.currentWorkingDirectory;
+            string path = args.Length > 0 ? PathHandler.Combine(paths.CurrentWorkingDirectory, args[0]) : paths.CurrentWorkingDirectory;
             DirectoryInfo root = new DirectoryInfo(path);
             FileInfo[] files = root.GetFiles();
             DirectoryInfo[] subdirs = root.GetDirectories();

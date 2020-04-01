@@ -3,13 +3,21 @@ using System.IO;
 
 namespace BackingUpConsole.Utilities
 {
-    public struct Paths
+    public class Paths : ICloneable
     {
-        public string currentWorkingDirectory;
+        public string CurrentWorkingDirectory { get; set; }
+
+        public Paths(string currWorkDir) => CurrentWorkingDirectory = currWorkDir;
+        public Paths(Paths p) => CurrentWorkingDirectory = p.CurrentWorkingDirectory;
 
         public override string ToString()
         {
-            return currentWorkingDirectory;
+            return CurrentWorkingDirectory;
+        }
+
+        public object Clone()
+        {
+            return new Paths(this);
         }
     }
 
