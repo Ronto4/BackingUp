@@ -35,7 +35,7 @@ namespace BackingUpConsole.Utilities.Commands
             {"dir", new string[] { "Path" } },
             {"~", new string[] { } },
             {"reportlevel", new string[] { "Level" } },
-            {"backup", new string[]{ } }
+            {"backup", new string[] {"Mode" } }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)

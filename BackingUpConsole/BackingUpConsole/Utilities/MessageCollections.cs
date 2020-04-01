@@ -30,7 +30,8 @@ namespace BackingUpConsole.Utilities.Messages
             ReportLevelChanged,
             MixedArguments,
             UnknownArgument,
-            InvalidArgumentNotation
+            InvalidArgumentNotation,
+            BackingUpUnknownMode
         }
         public enum Levels
         {

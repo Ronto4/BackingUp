@@ -106,5 +106,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler InvalidArgumentNotation(string not, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidArgumentNotation,
                                                                                                $"The given argument notation '{not}' is not valid.",
                                                                                                MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler BackingUpUnknownMode(string mode, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackingUpUnknownMode,
+                                                                                                                  $"The given mode '{mode}' does not exist.",
+                                                                                                                  MessageCollections.Levels.Error, silent: silent);
     }
 }
