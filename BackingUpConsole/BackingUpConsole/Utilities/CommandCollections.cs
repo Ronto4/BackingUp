@@ -1,9 +1,11 @@
 ﻿using COMPATIBILITY = BackUp_0_3;
+using BackingUpConsole.CoreFunctions;
 using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace BackingUpConsole.Utilities.Commands
 {
@@ -21,10 +23,11 @@ namespace BackingUpConsole.Utilities.Commands
         {
             {"exit", new CommandProperties(0,0,Parse_Exit, Run_Exit) },
             {"cd", new CommandProperties(1,1,Parse_Cd, Run_Cd) },
-            {"run", new CommandProperties(1,1,Parse_RunFile, Run_RunFile) },
+            {"run", new CommandProperties(1,1,Parse_RunFile_Async, Run_RunFile_Async) },
             {"dir", new CommandProperties(0, 1, Parse_Dir, Run_Dir) },
             {"~", new CommandProperties(-1, -1, Parse_Tilde, Run_Tilde) },
-            {"reportlevel", new CommandProperties(1,1,Parse_ReportLevel, Run_ReportLevel) }
+            {"reportlevel", new CommandProperties(1,1,Parse_ReportLevel, Run_ReportLevel) },
+            {"backup", new CommandProperties(1, 1, Parse_BackUp, Run_BackUp_Async) }
         };
 
         internal static Dictionary<string, string[]> ArgumentOrder = new Dictionary<string, string[]>()
@@ -35,7 +38,7 @@ namespace BackingUpConsole.Utilities.Commands
             {"dir", new string[] { "Path" } },
             {"~", new string[] { } },
             {"reportlevel", new string[] { "Level" } },
-            {"backup", new string[]{ } }
+            {"backup", new string[] {"Mode" } }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -61,7 +64,7 @@ namespace BackingUpConsole.Utilities.Commands
             return (MessageProvider.DirectoryChanged(newPath, silent: !flags.IsSet(Flags.VERBOSE)), newPath);
         }
 
-        private static (MessageHandler message, string? path) Parse_RunFile(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        private async static Task<(MessageHandler message, string? path)> Parse_RunFile_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
 
@@ -83,7 +86,7 @@ namespace BackingUpConsole.Utilities.Commands
                     return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected.", silent: !flags.IsSet(Flags.VERBOSE)), null);
 
                 MessageHandler message;
-                (message, parsingPaths) = MainHandler.Compute(cmds, messagePrinter, parsingPaths, (UInt16)(flags & ~Flags.RUN), true);
+                (message, parsingPaths) = await MainHandler.Compute(cmds, messagePrinter, parsingPaths, (UInt16)(flags & ~Flags.RUN), true);
                 if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
                     return (MessageProvider.ParseError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), parsingPaths.currentWorkingDirectory);
             }
@@ -92,7 +95,7 @@ namespace BackingUpConsole.Utilities.Commands
                 messagePrinter.Print(success);
             return (success, null);
         }
-        private static (MessageHandler message, string? path) Run_RunFile(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        private async static Task<(MessageHandler message, string? path)> Run_RunFile_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string path = PathHandler.Combine(paths.currentWorkingDirectory, args[0]);
             Paths usingPaths = paths;
@@ -116,7 +119,7 @@ namespace BackingUpConsole.Utilities.Commands
                         return (MessageProvider.InvalidMethodExecution(flags, args, "ReadLine returned null, when EOF was not detected.", silent: !flags.IsSet(Flags.VERBOSE)), null);
 
                     MessageHandler message;
-                    (message, usingPaths) = MainHandler.Compute(cmds, localPrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
+                    (message, usingPaths) = await MainHandler.Compute(cmds, localPrinter, usingPaths, (UInt16)(flags & ~Flags.COMPILE));
 
                     if (message.Level != MessageCollections.Levels.Debug && message.Level != MessageCollections.Levels.Information)
                         return (MessageProvider.RuntimeError(message, $"{path} at line {line}", silent: !flags.IsSet(Flags.VERBOSE)), usingPaths.currentWorkingDirectory);
@@ -184,6 +187,16 @@ namespace BackingUpConsole.Utilities.Commands
                 return (message, null);
 
             return (MessageProvider.ReportLevelChanged(level, silent: !flags.IsSet(Flags.VERBOSE)), null);
+        }
+
+        private static (MessageHandler message, string? path) Parse_BackUp(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            return (CommandHandler.Parse(args, flags, paths, messagePrinter), null);
+        }
+
+        private async static Task<(MessageHandler message, string? path)> Run_BackUp_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        {
+            return (await CoreFunctions.CommandHandler.Run(args, flags, paths, messagePrinter), null);
         }
     }
 }
