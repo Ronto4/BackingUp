@@ -14,7 +14,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
         {
             return MessageProvider.Success(flags.IsSet(Flags.VERBOSE));
         }
-        public async static Task<MessageHandler> Run(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        public async static Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             string listDir = PathHandler.Combine(Environment.CurrentDirectory, "data");
             string listPath = PathHandler.Combine(listDir, "backups.bul");

@@ -12,11 +12,13 @@ namespace BackingUpConsole.CoreFunctions
     {
         private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, MessageHandler>> Parse_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, MessageHandler>>()
         {
-            {"list", Commands.List.Parse }
+            {"list", Commands.List.Parse },
+            {"add", Commands.Add.Parse }
         };
         private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, Task<MessageHandler>>> Run_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, Task<MessageHandler>>>()
         {
-            {"list", Commands.List.Run }
+            {"list", Commands.List.RunAsync },
+            {"add", Commands.Add.RunAsync }
         };
 
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
