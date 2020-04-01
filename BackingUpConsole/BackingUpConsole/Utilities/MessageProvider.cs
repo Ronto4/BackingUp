@@ -109,5 +109,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackingUpUnknownMode(string mode, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackingUpUnknownMode,
                                                                                                                   $"The given mode '{mode}' does not exist.",
                                                                                                                   MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler InvalidExtension(string path, string ext, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidExtension,
+                                                                                                                          $"The given file '{path}' does not match the desired extension '{ext}'.",
+                                                                                                                          MessageCollections.Levels.Error, silent: silent);
     }
 }

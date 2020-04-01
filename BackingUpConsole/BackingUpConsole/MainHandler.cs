@@ -10,7 +10,7 @@ namespace BackingUpConsole
 {
     internal static class MainHandler
     {
-        static async void Main(string[] args)
+        static async Task Main(string[] args)
         {
 #if DEBUG_MSG
             MessagePrinter messagePrinter = new MessagePrinter(MessageCollections.Levels.Debug, System.ConsoleColor.Gray);

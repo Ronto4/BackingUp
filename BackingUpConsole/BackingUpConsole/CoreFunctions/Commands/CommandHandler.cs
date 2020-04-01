@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions
 {
@@ -13,12 +14,12 @@ namespace BackingUpConsole.CoreFunctions
         {
             {"list", Commands.List.Parse }
         };
-        private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, MessageHandler>> Run_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, MessageHandler>>()
+        private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, Task<MessageHandler>>> Run_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, Task<MessageHandler>>>()
         {
             {"list", Commands.List.Run }
         };
 
-        public static MessageHandler Parse(string[] args, UInt16 flags, in Paths paths, MessagePrinter messagePrinter)
+        public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             //if (!Array.Exists(modes, (arg) => arg == args[0]))
             //    return MessageProvider.BackingUpUnknownMode(args[0], flags.IsSet(Flags.VERBOSE));
@@ -30,9 +31,9 @@ namespace BackingUpConsole.CoreFunctions
 
         }
 
-        public static MessageHandler Run(string[] args, UInt16 flags, in Paths paths, MessagePrinter messagePrinter)
+        public async static Task<MessageHandler> Run(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return Run_Funcs[args[0]](args, flags, paths, messagePrinter);
+            return await Run_Funcs[args[0]](args, flags, paths, messagePrinter);
         }
 
         

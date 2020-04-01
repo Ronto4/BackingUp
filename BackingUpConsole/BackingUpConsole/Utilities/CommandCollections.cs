@@ -196,7 +196,7 @@ namespace BackingUpConsole.Utilities.Commands
 
         private async static Task<(MessageHandler message, string? path)> Run_BackUp_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            var message = await CoreFunctions.CommandHandler.Run(args, flags, paths, messagePrinter);
+            return (await CoreFunctions.CommandHandler.Run(args, flags, paths, messagePrinter), null);
         }
     }
 }
