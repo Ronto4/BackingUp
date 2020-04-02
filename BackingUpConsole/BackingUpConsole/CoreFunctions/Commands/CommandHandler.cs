@@ -27,7 +27,7 @@ namespace BackingUpConsole.CoreFunctions
             //    return MessageProvider.BackingUpUnknownMode(args[0], flags.IsSet(Flags.VERBOSE));
             bool exists = Parse_Funcs.TryGetValue(args[0], out var parse_func);
             if(!exists)
-                return MessageProvider.BackingUpUnknownMode(args[0], flags.IsSet(Flags.VERBOSE)); ;
+                return MessageProvider.BackingUpUnknownMode(args[0], !flags.IsSet(Flags.VERBOSE)); ;
 
             return parse_func!(args, flags, paths, messagePrinter);
 

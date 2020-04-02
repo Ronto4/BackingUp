@@ -118,5 +118,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler InvalidFileFormat(string path, string lineContent, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileFormat,
                                                                                                                $"The given file '{path}' does not match the desired format in line containing '{lineContent}'.",
                                                                                                                MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler DoubledName(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.DoubledName,
+                                                                                                         $"The given name '{name}' already exists.",
+                                                                                                         MessageCollections.Levels.Error, silent: silent);
     }
 }

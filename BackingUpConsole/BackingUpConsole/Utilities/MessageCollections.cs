@@ -33,7 +33,8 @@ namespace BackingUpConsole.Utilities.Messages
             InvalidArgumentNotation,
             BackingUpUnknownMode,
             InvalidExtension,
-            InvalidFileFormat
+            InvalidFileFormat,
+            DoubledName
         }
         public enum Levels
         {
