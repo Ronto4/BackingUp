@@ -124,5 +124,11 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackupEntryAdded(string name, string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
                                                                                                                            $"Entry '{name}', pointing to file '{path}', successfully added to the list.",
                                                                                                                            MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler BackupNotFound(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupNotFound,
+                                                                                                            $"The given backup '{name}' does not exist.",
+                                                                                                            MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler BackupEntryRemoved(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
+                                                                                                                   $"Entry '{name}' successfully removed from the list.",
+                                                                                                                   MessageCollections.Levels.Information, silent: silent);
     }
 }

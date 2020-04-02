@@ -8,18 +8,19 @@ using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions.Commands
 {
-    class Add
+    internal static class Add
     {
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             if (!args.CheckLength(3, 3))
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
-            if (!File.Exists(args[1]))
-                return MessageProvider.FileNotFound(args[1], !flags.IsSet(Flags.VERBOSE));
+            string path = PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]);
+            if (!File.Exists(path))
+                return MessageProvider.FileNotFound(path, !flags.IsSet(Flags.VERBOSE));
 
-            if (new FileInfo(args[1]).Extension != ".bu")
-                return MessageProvider.InvalidExtension(args[1], "bu", silent: flags.IsSet(Flags.VERBOSE));
+            if (new FileInfo(path).Extension != ".bu")
+                return MessageProvider.InvalidExtension(path, "bu", silent: flags.IsSet(Flags.VERBOSE));
 
             (MessageHandler message, _) = Utilities.ScanList();
             if (!message.IsSuccess(true, messagePrinter))

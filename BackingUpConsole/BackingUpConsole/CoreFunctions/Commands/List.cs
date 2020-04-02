@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions.Commands
 {
-    class List
+    internal static class List
     {
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
