@@ -75,7 +75,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 message += $"{entry.Key} | {entry.Value} {Environment.NewLine}";
             }
 
-            return MessageProvider.Message(message, silent: flags.IsSet(Flags.VERBOSE));
+            return MessageProvider.Message(message, silent: !flags.IsSet(Flags.VERBOSE));
         }
     }
 }

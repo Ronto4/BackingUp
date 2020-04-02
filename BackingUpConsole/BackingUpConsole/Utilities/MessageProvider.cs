@@ -121,5 +121,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler DoubledName(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.DoubledName,
                                                                                                          $"The given name '{name}' already exists.",
                                                                                                          MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler BackupEntryAdded(string name, string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
+                                                                                                                           $"Entry '{name}', pointing to file '{path}', successfully added to the list.",
+                                                                                                                           MessageCollections.Levels.Information, silent: silent);
     }
 }

@@ -43,7 +43,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!message.IsSuccess(false, messagePrinter))
                 return message;
 
-            return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+            return MessageProvider.BackupEntryAdded(args[2], args[1], silent: !flags.IsSet(Flags.VERBOSE));
         }
     }
 }

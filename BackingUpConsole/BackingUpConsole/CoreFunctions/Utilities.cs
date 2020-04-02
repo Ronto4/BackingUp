@@ -138,26 +138,25 @@ namespace BackingUpConsole.CoreFunctions
             {
                 string listDir = PathHandler.Combine(Environment.CurrentDirectory, "data");
                 string listPath = PathHandler.Combine(listDir, "backups.bul");
+                if (!Directory.Exists(listDir))
+                    Directory.CreateDirectory(listDir);
+
                 if (!File.Exists(listPath))
-                {
-                    if (!Directory.Exists(listDir))
-                        Directory.CreateDirectory(listDir);
-
                     File.Create(listPath).Close();
-                    string basis = $"[BackUps]";
-                    using StreamWriter sw = new StreamWriter(listPath);
-                    //Parallel.ForEach<char>(basis.ToCharArray(), (c) => sw.WriteAsync(c));
-                    await sw.WriteAsync(basis);
 
-                    foreach (var line in content)
-                    {
-                        await sw.WriteAsync($"{Environment.NewLine}{line.Key}?{line.Value}");
-                    }
+                string basis = $"[BackUps]";
+                using StreamWriter sw = new StreamWriter(listPath);
+                //Parallel.ForEach<char>(basis.ToCharArray(), (c) => sw.WriteAsync(c));
+                await sw.WriteAsync(basis);
 
-                    sw.Close();
+                foreach (var line in content)
+                {
+                    await sw.WriteAsync($"{Environment.NewLine}{line.Key}?{line.Value}");
                 }
+
+                sw.Close();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return MessageProvider.Message(ex.Message, MessageCollections.Levels.Error);
             }
