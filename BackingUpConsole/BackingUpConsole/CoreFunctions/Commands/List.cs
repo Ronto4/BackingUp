@@ -12,6 +12,9 @@ namespace BackingUpConsole.CoreFunctions.Commands
     {
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
+            if (!args.CheckLength(1, 1))
+                return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
+
             (MessageHandler message, _) = Utilities.ScanList();
             if (message.IsSuccess(true, messagePrinter))
                 return MessageProvider.Success(!flags.IsSet(Flags.VERBOSE));
