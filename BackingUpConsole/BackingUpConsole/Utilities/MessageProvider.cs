@@ -112,5 +112,23 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler InvalidExtension(string path, string ext, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidExtension,
                                                                                                                           $"The given file '{path}' does not match the desired extension '{ext}'.",
                                                                                                                           MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler InvalidFileFormat(string path, int lineNumber, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileFormat,
+                                                                                                               $"The given file '{path}' does not match the desired format in line {lineNumber}.",
+                                                                                                               MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler InvalidFileFormat(string path, string lineContent, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileFormat,
+                                                                                                               $"The given file '{path}' does not match the desired format in line containing '{lineContent}'.",
+                                                                                                               MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler DoubledName(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.DoubledName,
+                                                                                                         $"The given name '{name}' already exists.",
+                                                                                                         MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler BackupEntryAdded(string name, string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
+                                                                                                                           $"Entry '{name}', pointing to file '{path}', successfully added to the list.",
+                                                                                                                           MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler BackupNotFound(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupNotFound,
+                                                                                                            $"The given backup '{name}' does not exist.",
+                                                                                                            MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler BackupEntryRemoved(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
+                                                                                                                   $"Entry '{name}' successfully removed from the list.",
+                                                                                                                   MessageCollections.Levels.Information, silent: silent);
     }
 }

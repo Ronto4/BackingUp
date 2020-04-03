@@ -12,11 +12,15 @@ namespace BackingUpConsole.CoreFunctions
     {
         private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, MessageHandler>> Parse_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, MessageHandler>>()
         {
-            {"list", Commands.List.Parse }
+            {"list", Commands.List.Parse },
+            {"add", Commands.Add.Parse },
+            {"remove", Commands.Remove.Parse }
         };
         private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, Task<MessageHandler>>> Run_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, Task<MessageHandler>>>()
         {
-            {"list", Commands.List.Run }
+            {"list", Commands.List.RunAsync },
+            {"add", Commands.Add.RunAsync },
+            {"remove", Commands.Remove.RunAsync }
         };
 
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
@@ -25,7 +29,7 @@ namespace BackingUpConsole.CoreFunctions
             //    return MessageProvider.BackingUpUnknownMode(args[0], flags.IsSet(Flags.VERBOSE));
             bool exists = Parse_Funcs.TryGetValue(args[0], out var parse_func);
             if(!exists)
-                return MessageProvider.BackingUpUnknownMode(args[0], flags.IsSet(Flags.VERBOSE)); ;
+                return MessageProvider.BackingUpUnknownMode(args[0], !flags.IsSet(Flags.VERBOSE)); ;
 
             return parse_func!(args, flags, paths, messagePrinter);
 

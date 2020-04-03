@@ -18,15 +18,12 @@ namespace BackingUpConsole
             MessagePrinter messagePrinter = new MessagePrinter(MessageCollections.Levels.Information, System.ConsoleColor.Gray);
 #endif
             //string currentWorkingDirectory = Environment.CurrentDirectory;
-            Paths paths = new Paths
-            {
-                currentWorkingDirectory = Environment.CurrentDirectory
-            };
+            Paths paths = new Paths(Environment.CurrentDirectory);
             if (args.Length > 0)
             {
                 (MessageHandler message, string? path) = await CLIInterpreter(args, messagePrinter, paths);
                 if (message == MessageProvider.DirectoryChanged(String.Empty))
-                    paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
+                    paths.CurrentWorkingDirectory = path ?? paths.CurrentWorkingDirectory;
 
                 messagePrinter.Print(message);
                 //if (result == MessageProvider.QuitProgram())
@@ -35,7 +32,7 @@ namespace BackingUpConsole
             bool exit = false;
             while (!exit)
             {
-                Console.Write($"{paths.currentWorkingDirectory}>");
+                Console.Write($"{paths.CurrentWorkingDirectory}>");
                 string input = Console.ReadLine();
                 //string[] arg = Miscellaneous.CommandLineToArgs(input);
                 //(MessageHandler message, string? path) = CLIInterpreter(arg, messagePrinter, paths);
@@ -70,7 +67,7 @@ namespace BackingUpConsole
             string[] args = arg[1..];
             (MessageHandler message, string? path) = await Interpreter.Interprete(cmd, args, messagePrinter, flags, paths);
             if (compile ? message == MessageProvider.ParseDirectoryChanged() : message == MessageProvider.DirectoryChanged())
-                paths.currentWorkingDirectory = path ?? paths.currentWorkingDirectory;
+                paths.CurrentWorkingDirectory = path ?? paths.CurrentWorkingDirectory;
 
             return (message, paths);
         }
