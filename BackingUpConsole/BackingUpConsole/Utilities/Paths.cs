@@ -6,9 +6,15 @@ namespace BackingUpConsole.Utilities
     public class Paths : ICloneable
     {
         public string CurrentWorkingDirectory { get; set; }
+        public string SelectedBackupPath { get; set; }
 
-        public Paths(string currWorkDir) => CurrentWorkingDirectory = currWorkDir;
-        public Paths(Paths p) => CurrentWorkingDirectory = p.CurrentWorkingDirectory;
+        public Paths(string currWorkDir, string backupDir)
+        {
+            CurrentWorkingDirectory = currWorkDir;
+            SelectedBackupPath = backupDir;
+        }
+
+        public Paths(Paths p) : this(p.CurrentWorkingDirectory, p.SelectedBackupPath) { }
 
         public override string ToString()
         {
