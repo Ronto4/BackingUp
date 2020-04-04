@@ -9,7 +9,7 @@
    `backup select`: show the currently selected `.bu` file from the list  
    `backup select name`: choose `name` as the currently selected `.bu` file from the list
 - Note: This version is not usable, because there is no possibility to create `.bu` files or to use them. This is just a preview of the features for version 0.1.0.0, to be released when all `backup` functionality is introduced.
-- Note: This version id from the branch `master-backup`. It is possible that the `master` branch receives updates independently which will not be included in this branch.
+- Note: This version is from the branch `master-backup`. It is possible that the `master` branch receives updates independently which will not be included in this branch.
 
 ## Version 0.0.0.2; 2020-03-28:
 
