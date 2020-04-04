@@ -27,7 +27,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             if (args.CheckLength(1, 1))
-                return MessageProvider.Message($"Currently selected Back Up file: '{paths.SelectedBackupPath}'.", silent: !flags.IsSet(Flags.VERBOSE));
+                return MessageProvider.Message($"Currently selected Back Up file: '{paths.SelectedBackupPath ?? "<NULL>"}'.", silent: !flags.IsSet(Flags.VERBOSE));
 
             (_, Dictionary<string, string>? entries) = await Utilities.ScanListAsync();
             if (entries is null)
