@@ -130,5 +130,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackupEntryRemoved(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
                                                                                                                    $"Entry '{name}' successfully removed from the list.",
                                                                                                                    MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler BackupChanged(string name, string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupChanged,
+                                                                                                                        $"The current backup has successfully been updated to '{name}' in path '{path}'",
+                                                                                                                        MessageCollections.Levels.Information, silent: silent);
     }
 }
