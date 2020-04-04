@@ -6,9 +6,9 @@ namespace BackingUpConsole.Utilities
     public class Paths : ICloneable
     {
         public string CurrentWorkingDirectory { get; set; }
-        public string SelectedBackupPath { get; set; }
+        public string? SelectedBackupPath { get; set; }
 
-        public Paths(string currWorkDir, string backupDir)
+        public Paths(string currWorkDir, string? backupDir)
         {
             CurrentWorkingDirectory = currWorkDir;
             SelectedBackupPath = backupDir;
