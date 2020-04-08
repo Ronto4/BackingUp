@@ -7,17 +7,28 @@ using System.Text;
 
 namespace BackingUpConsole.CoreFunctions
 {
-    class BackUpFile
+    public class BackUpFile : ICloneable
     {
         private static readonly string FileIdentifier = $"[BackUp]";
         //Attributes
+        public string Path { get; }
         public BackUpSettings Settings { get; private set; }
         public DirectoryInfo SummaryDirectory { get; private set; }
         public DirectoryInfo LogDirectory { get; private set; }
         public DirectoryInfo SettingsPath { get; private set; }
         private int Version { get; }
         //Constructors
-        private BackUpFile(string path, out MessageHandler message)
+        private BackUpFile(string path, BackUpSettings settings, DirectoryInfo summaryDir, DirectoryInfo logDir, DirectoryInfo settingsDir, int version)
+        {
+            Path = path;
+            Settings = settings;
+            SettingsPath = settingsDir;
+            SummaryDirectory = summaryDir;
+            LogDirectory = logDir;
+            Version = version;
+        }
+        //static methods
+        public static (MessageHandler, BackUpFile?) GetFromFile(string path)
         {
             List<string?> results = new List<string?>();
             using (StreamReader sr = new StreamReader(path))
@@ -27,8 +38,8 @@ namespace BackingUpConsole.CoreFunctions
                     results.Add(sr.ReadLine());
                     if (results[^1] is null)
                     {
-                        message = MessageProvider.InvalidMethodExecution(null, null, $"StreamReader.ReadLine returned null string when EOF was not detected in file '{path}' on line {results.Count}.");
-                        return;
+                        var message = MessageProvider.InvalidMethodExecution(null, null, $"StreamReader.ReadLine returned null string when EOF was not detected in file '{path}' on line {results.Count}.");
+                        return (message, null);
                     }
                     if (results[^1]!.StartsWith(';'))
                         results.RemoveAt(results.Count - 1);
@@ -36,89 +47,98 @@ namespace BackingUpConsole.CoreFunctions
             }
             if (results[0] != FileIdentifier)
             {
-                message = MessageProvider.InvalidFileFormat(path, 1);
-                return;
+                var message = MessageProvider.InvalidFileFormat(path, 1);
+                return (message, null);
             }
             if (!results[1]!.StartsWith('*'))
             {
-                message = MessageProvider.InvalidFileFormat(path, 2);
-                return;
+                var message = MessageProvider.InvalidFileFormat(path, 2);
+                return (message, null);
             }
             string[] parameter = results[1]!.Substring(1).Split('|');
             if (parameter.Length != 1)
             {
-                message = MessageProvider.InvalidFileFormat(path, 2);
-                return;
+                var message = MessageProvider.InvalidFileFormat(path, 2);
+                return (message, null);
             }
+            int version = -1;
             for (int i = 0; i < parameter.Length; i++)
             {
                 string[] param = parameter[i].Split(':');
                 if (param.Length != 2)
                 {
-                    message = MessageProvider.InvalidFileFormat(path, 2);
-                    return;
+                    var message = MessageProvider.InvalidFileFormat(path, 2);
+                    return (message, null);
                 }
                 if (param[0] == "version")
-                    Version = Convert.ToInt32(param[1]);
+                    version = Convert.ToInt32(param[1]);
                 else
                 {
-                    message = MessageProvider.InvalidFileFormat(path, 2);
-                    return;
+                    var message = MessageProvider.InvalidFileFormat(path, 2);
+                    return (message, null);
                 }
             }
+            if (version == -1)
+            {
+                var message = MessageProvider.InvalidFileFormat(path, 2);
+                return (message, null);
+            }
+            if (results.Count > 2)
+            {
+                var message = MessageProvider.InvalidFileFormat(path, 2);
+                return (message, null);
+            }
+            DirectoryInfo? settingsPath, summaryDir, logDir;
+            settingsPath = summaryDir = logDir = null;
+            BackUpSettings? settings = null;
             for (int i = 2; i < results.Count; i++)
             {
                 string[] value = results[i]!.Split('?');
                 if (value.Length != 2)
                 {
-                    message = MessageProvider.InvalidFileFormat(path, 2);
-                    return;
+                    var message = MessageProvider.InvalidFileFormat(path, 2);
+                    return (message, null);
                 }
                 switch (value[0])
                 {
                     case "settings":
                         {
-                            SettingsPath = new DirectoryInfo(value[1]);
+                            settingsPath = new DirectoryInfo(value[1]);
                             break;
                         }
                     case "selectedsettings":
                         {
-                            Settings = new BackUpSettings(value[1]);
+                            settings = new BackUpSettings(value[1]);
                             break;
                         }
                     case "summaries":
                         {
-                            SummaryDirectory = new DirectoryInfo(value[1]);
+                            summaryDir = new DirectoryInfo(value[1]);
                             break;
                         }
                     case "logs":
                         {
-                            LogDirectory = new DirectoryInfo(path);
+                            logDir= new DirectoryInfo(path);
                             break;
                         }
                     default:
                         {
-                            message = MessageProvider.InvalidFileFormat(path, i + 1);
-                            return;
+                            var message = MessageProvider.InvalidFileFormat(path, i + 1);
+                            return (message, null);
                         }
                 }
             }
-            if (Settings is null || SettingsPath is null || SummaryDirectory is null || LogDirectory is null)
+            if (settings is null || settingsPath is null || summaryDir is null || logDir is null)
             {
-                message = MessageProvider.InvalidFileFormat(path, 0);
-                return;
-            }
-            message = MessageProvider.Success();
-            return;
-        }
-        //Static methods
-        public static (MessageHandler, BackUpFile?) GetFromFile(string path, UInt16 flags, MessagePrinter messagePrinter)
-        {
-            BackUpFile backUp = new BackUpFile(path, out MessageHandler message);
-            if (!message.IsSuccess(false, messagePrinter))
+                var message = MessageProvider.InvalidFileFormat(path, 0);
                 return (message, null);
-
-            return (MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE)), backUp);
+            }
+            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, version));
+        }
+        //Override methods
+        public object Clone()
+        {
+            return new BackUpFile(this.Path, this.Settings, this.SummaryDirectory, this.LogDirectory, this.SettingsPath, this.Version);
         }
     }
 }

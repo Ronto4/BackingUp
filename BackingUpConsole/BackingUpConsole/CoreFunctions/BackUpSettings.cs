@@ -4,7 +4,8 @@ using System.Text;
 
 namespace BackingUpConsole.CoreFunctions
 {
-    class BackUpSettings
+    //Note: This class is just a placeholder for now, will be implemented later.
+    public class BackUpSettings
     {
         //Attributes
         public string Path { get; }

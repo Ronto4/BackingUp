@@ -27,7 +27,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             if (args.CheckLength(1, 1))
-                return MessageProvider.Message($"Currently selected Back Up file: '{paths.SelectedBackupPath ?? "<NULL>"}'.", silent: !flags.IsSet(Flags.VERBOSE));
+                return MessageProvider.Message($"Currently selected Back Up file: '{(paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path)}'.", silent: !flags.IsSet(Flags.VERBOSE));
 
             (_, Dictionary<string, string>? entries) = await Utilities.ScanListAsync();
             if (entries is null)
@@ -37,8 +37,12 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!success)
                 return MessageProvider.BackupNotFound(args[1], silent: !flags.IsSet(Flags.VERBOSE));
 
-            paths.SelectedBackupPath = path;
-            return MessageProvider.BackupChanged(args[1], paths.SelectedBackupPath ?? "<NULL>", silent: !flags.IsSet(Flags.VERBOSE));
+            (MessageHandler message, BackUpFile? backup) = BackUpFile.GetFromFile(path!);
+            if (!message.IsSuccess(false, messagePrinter))
+                return message;
+
+            paths.SelectedBackup = backup;
+            return MessageProvider.BackupChanged(args[1], paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path, silent: !flags.IsSet(Flags.VERBOSE));
         }
     }
 }
