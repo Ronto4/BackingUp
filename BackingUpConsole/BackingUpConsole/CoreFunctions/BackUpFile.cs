@@ -45,6 +45,9 @@ namespace BackingUpConsole.CoreFunctions
                         results.RemoveAt(results.Count - 1);
                 }
             }
+            if (results.Count != 6)
+                return (MessageProvider.InvalidFileFormat(path, 0), null);
+
             if (results[0] != FileIdentifier)
             {
                 var message = MessageProvider.InvalidFileFormat(path, 1);
@@ -83,11 +86,6 @@ namespace BackingUpConsole.CoreFunctions
                 var message = MessageProvider.InvalidFileFormat(path, 2);
                 return (message, null);
             }
-            if (results.Count > 2)
-            {
-                var message = MessageProvider.InvalidFileFormat(path, 2);
-                return (message, null);
-            }
             DirectoryInfo? settingsPath, summaryDir, logDir;
             settingsPath = summaryDir = logDir = null;
             BackUpSettings? settings = null;
@@ -96,7 +94,7 @@ namespace BackingUpConsole.CoreFunctions
                 string[] value = results[i]!.Split('?');
                 if (value.Length != 2)
                 {
-                    var message = MessageProvider.InvalidFileFormat(path, 2);
+                    var message = MessageProvider.InvalidFileFormat(path, i + 1);
                     return (message, null);
                 }
                 switch (value[0])
