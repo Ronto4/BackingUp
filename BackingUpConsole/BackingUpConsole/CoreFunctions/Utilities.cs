@@ -48,16 +48,6 @@ namespace BackingUpConsole.CoreFunctions
             return (MessageProvider.Success(), splitRes); 
         }
 
-        private static string Print(string input)
-        {
-            string o = String.Empty;
-            for (int i = 0; i < input.Length; i++)
-            {
-                o += $"{(int)input[i]}, ";
-            }
-            return o;
-        }
-
         internal static async Task<(MessageHandler message, Dictionary<string, string>? entries)> ScanListAsync()
         {
             string path = PathHandler.Combine(Environment.CurrentDirectory, @"data\backups.bul");
