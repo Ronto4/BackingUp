@@ -27,7 +27,7 @@ namespace BackingUpConsole.Utilities.Commands
             {"dir", new CommandProperties(0, 1, Parse_Dir, Run_Dir) },
             {"~", new CommandProperties(-1, -1, Parse_Tilde, Run_Tilde) },
             {"reportlevel", new CommandProperties(1,1,Parse_ReportLevel, Run_ReportLevel) },
-            {"backup", new CommandProperties(1, 3, Parse_BackUp, Run_BackUp_Async) }
+            {"backup", new CommandProperties(1, 4, Parse_BackUp, Run_BackUp_Async) }
         };
 
         internal static Dictionary<string, string[]> ArgumentOrder = new Dictionary<string, string[]>()
@@ -38,7 +38,7 @@ namespace BackingUpConsole.Utilities.Commands
             {"dir", new string[] { "Path" } },
             {"~", new string[] { } },
             {"reportlevel", new string[] { "Level" } },
-            {"backup", new string[] {"Mode", "Path", "Name" } }
+            {"backup", new string[] {"Mode", "Path", "Name", "Usage" } }
         };
 
         private static (MessageHandler message, string? path) Parse_Exit(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)

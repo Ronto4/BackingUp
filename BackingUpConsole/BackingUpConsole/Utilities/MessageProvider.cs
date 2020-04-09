@@ -133,5 +133,11 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackupChanged(string name, string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupChanged,
                                                                                                                         $"The current backup has successfully been updated to '{name}' in path '{path}'",
                                                                                                                         MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler DirectoryNotEmpty(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.DirectoryNotEmpty,
+                                                                                                               $"The given directory '{path}' is not empty. Would you still like to use this directory as your back up directory? Please note that this could lead to unexpected errors due to files that exist when they should not.",
+                                                                                                               MessageCollections.Levels.Warning, silent: silent);
+        public static MessageHandler BackingUpUnknownUsage(string usage, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackingUpUnknownUsage,
+                                                                                                          $"The given usage '{usage}' does not exist.",
+                                                                                                          MessageCollections.Levels.Error, silent: silent);
     }
 }
