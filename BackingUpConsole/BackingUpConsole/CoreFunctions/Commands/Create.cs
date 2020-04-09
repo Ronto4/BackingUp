@@ -34,10 +34,11 @@ namespace BackingUpConsole.CoreFunctions.Commands
 
                 if (entries!.ContainsKey(args[2]))
                     return MessageProvider.DoubledName(args[2], !flags.IsSet(Flags.VERBOSE));
+
+                if (args.Length == 4)
+                    if (args[3] != "select")
+                        return MessageProvider.BackingUpUnknownUsage(args[3], !flags.IsSet(Flags.VERBOSE));
             }
-            if (args.Length == 4)
-                if (args[3] != "select")
-                    return MessageProvider.BackingUpUnknownUsage(args[3], !flags.IsSet(Flags.VERBOSE));
 
             return MessageProvider.Success();
         }
@@ -48,12 +49,28 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 dir.Create();
 
             string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
-            //Console.WriteLine($"---{Environment.NewLine}{origContent}{Environment.NewLine}---");
             origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
 
             using (FileStream fs = File.Create(PathHandler.Combine(dir.FullName, @"container.bu")))
             {
                 await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
+            }
+            if (args.Length > 2)
+            {
+                MessageHandler addResult;
+                (addResult, _) = await Interpreter.Interprete(BackingUpConsole.Utilities.Commands.CommandCollections.Backup, new string[] { "add", PathHandler.Combine(dir.FullName, @"container.bu"), args[2] }, messagePrinter, flags, paths);
+                if (!addResult.IsSuccess(false, messagePrinter))
+                    return addResult;
+
+                if (args.Length == 4)
+                {
+                    (MessageHandler selectResult, BackUpFile? bu) = BackUpFile.GetFromFile(PathHandler.Combine(dir.FullName, @"container.bu"));
+                    if (!selectResult.IsSuccess(false, messagePrinter))
+                        return selectResult;
+
+                    paths.SelectedBackup = bu!;
+                }
+
             }
             return MessageProvider.Success();
         }

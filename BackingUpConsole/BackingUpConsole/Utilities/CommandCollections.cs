@@ -16,6 +16,8 @@ namespace BackingUpConsole.Utilities.Commands
         public static Command Cd => new Command("cd");
         public static Command Dir => new Command("dir");
         public static Command Tilde => new Command("~");
+        public static Command Reportlevel => new Command("reportlevel");
+        public static Command Backup => new Command("backup");
 
         public static Command GetCommand(string cmd) => new Command(cmd);
 
