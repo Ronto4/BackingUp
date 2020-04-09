@@ -3,6 +3,7 @@ using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,6 +43,18 @@ namespace BackingUpConsole.CoreFunctions.Commands
         }
         public static async Task<MessageHandler> Run(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
+            DirectoryInfo dir = new DirectoryInfo(args[1]);
+            if (!dir.Exists)
+                dir.Create();
+
+            string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
+            //Console.WriteLine($"---{Environment.NewLine}{origContent}{Environment.NewLine}---");
+            origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
+
+            using (FileStream fs = File.Create(PathHandler.Combine(dir.FullName, @"container.bu")))
+            {
+                await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
+            }
             return MessageProvider.Success();
         }
     }
