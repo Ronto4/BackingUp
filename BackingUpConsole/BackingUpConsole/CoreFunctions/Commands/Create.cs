@@ -51,27 +51,39 @@ namespace BackingUpConsole.CoreFunctions.Commands
             string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
             origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
 
-            using (FileStream fs = File.Create(PathHandler.Combine(dir.FullName, @"container.bu")))
+            string path = PathHandler.Combine(dir.FullName, @"container.bu");
+
+            using (FileStream fs = File.Create(path))
             {
                 await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
             }
             if (args.Length > 2)
             {
-                MessageHandler addResult = await Commands.Add.RunAsync(new string[] { "add", PathHandler.Combine(dir.FullName, @"container.bu"), args[2] }, flags, paths, messagePrinter);
+                MessageHandler addResult = await Commands.Add.RunAsync(new string[] { "add", path, args[2] }, flags, paths, messagePrinter);
                 if (addResult.Code != MessageCollections.Codes.BackupEntryAdded)
                     return addResult;
 
+                if (flags.IsSet(Flags.VERBOSE))
+                    messagePrinter.Print(addResult);
+
                 if (args.Length == 4)
                 {
-                    (MessageHandler selectResult, BackUpFile? bu) = BackUpFile.GetFromFile(PathHandler.Combine(dir.FullName, @"container.bu"));
-                    if (!selectResult.IsSuccess(false, messagePrinter))
+                    //(MessageHandler selectResult, BackUpFile? bu) = BackUpFile.GetFromFile(path);
+                    //if (!selectResult.IsSuccess(false, messagePrinter))
+                    //    return selectResult;
+
+                    //paths.SelectedBackup = bu!;
+
+                    MessageHandler selectResult = await Commands.Select.RunAsync(new string[] { "select", args[2] }, flags, paths, messagePrinter);
+                    if (selectResult.Code != MessageCollections.Codes.BackupChanged)
                         return selectResult;
 
-                    paths.SelectedBackup = bu!;
+                    if (flags.IsSet(Flags.VERBOSE))
+                        messagePrinter.Print(selectResult);
                 }
 
             }
-            return MessageProvider.Success();
+            return MessageProvider.BackupCreated(path, !flags.IsSet(Flags.VERBOSE));
         }
     }
 }

@@ -139,5 +139,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackingUpUnknownUsage(string usage, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackingUpUnknownUsage,
                                                                                                           $"The given usage '{usage}' does not exist.",
                                                                                                           MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler BackupCreated(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupCreated,
+                                                                                                           $"The back up at '{path}' was successfully created.",
+                                                                                                           MessageCollections.Levels.Information, silent: silent);
     }
 }
