@@ -57,9 +57,8 @@ namespace BackingUpConsole.CoreFunctions.Commands
             }
             if (args.Length > 2)
             {
-                MessageHandler addResult;
-                (addResult, _) = await Interpreter.Interprete(BackingUpConsole.Utilities.Commands.CommandCollections.Backup, new string[] { "add", PathHandler.Combine(dir.FullName, @"container.bu"), args[2] }, messagePrinter, flags, paths);
-                if (!addResult.IsSuccess(false, messagePrinter))
+                MessageHandler addResult = await Commands.Add.RunAsync(new string[] { "add", PathHandler.Combine(dir.FullName, @"container.bu"), args[2] }, flags, paths, messagePrinter);
+                if (addResult.Code != MessageCollections.Codes.BackupEntryAdded)
                     return addResult;
 
                 if (args.Length == 4)
