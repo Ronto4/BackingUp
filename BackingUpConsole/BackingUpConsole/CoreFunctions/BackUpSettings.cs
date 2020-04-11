@@ -14,5 +14,10 @@ namespace BackingUpConsole.CoreFunctions
         {
             Path = path;
         }
+        //Methods
+        public void Create()
+        {
+            System.IO.File.Create(Path);
+        }
     }
 }

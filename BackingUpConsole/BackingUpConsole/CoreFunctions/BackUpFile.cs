@@ -18,7 +18,7 @@ namespace BackingUpConsole.CoreFunctions
         public DirectoryInfo SettingsPath { get; private set; }
         private int Version { get; }
         //Constructors
-        private BackUpFile(string path, BackUpSettings settings, DirectoryInfo summaryDir, DirectoryInfo logDir, DirectoryInfo settingsDir, int version)
+        private BackUpFile(string path, BackUpSettings settings, DirectoryInfo summaryDir, DirectoryInfo logDir, DirectoryInfo settingsDir, int version, bool create)
         {
             Path = path;
             Settings = settings;
@@ -26,6 +26,8 @@ namespace BackingUpConsole.CoreFunctions
             SummaryDirectory = summaryDir;
             LogDirectory = logDir;
             Version = version;
+            if (create)
+                Create();
         }
         //static methods
         public static (MessageHandler, BackUpFile?) GetFromFile(string path)
@@ -116,7 +118,7 @@ namespace BackingUpConsole.CoreFunctions
                         }
                     case "logs":
                         {
-                            logDir= new DirectoryInfo(path);
+                            logDir= new DirectoryInfo(value[1]);
                             break;
                         }
                     default:
@@ -131,12 +133,20 @@ namespace BackingUpConsole.CoreFunctions
                 var message = MessageProvider.InvalidFileFormat(path, 0);
                 return (message, null);
             }
-            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, version));
+            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, version, true));
+        }
+        //Methods
+        public void Create()
+        {
+            SummaryDirectory.Create();
+            LogDirectory.Create();
+            SettingsPath.Create();
+            Settings.Create();
         }
         //Override methods
         public object Clone()
         {
-            return new BackUpFile(this.Path, this.Settings, this.SummaryDirectory, this.LogDirectory, this.SettingsPath, this.Version);
+            return new BackUpFile(this.Path, this.Settings, this.SummaryDirectory, this.LogDirectory, this.SettingsPath, this.Version, false);
         }
     }
 }
