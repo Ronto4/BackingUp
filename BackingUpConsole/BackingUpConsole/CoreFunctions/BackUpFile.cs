@@ -16,15 +16,17 @@ namespace BackingUpConsole.CoreFunctions
         public DirectoryInfo SummaryDirectory { get; private set; }
         public DirectoryInfo LogDirectory { get; private set; }
         public DirectoryInfo SettingsPath { get; private set; }
+        public DirectoryInfo BackUpPath { get; private set; }
         private int Version { get; }
         //Constructors
-        private BackUpFile(string path, BackUpSettings settings, DirectoryInfo summaryDir, DirectoryInfo logDir, DirectoryInfo settingsDir, int version, bool create)
+        private BackUpFile(string path, BackUpSettings settings, DirectoryInfo summaryDir, DirectoryInfo logDir, DirectoryInfo settingsDir, DirectoryInfo backupDir, int version, bool create)
         {
             Path = path;
             Settings = settings;
             SettingsPath = settingsDir;
             SummaryDirectory = summaryDir;
             LogDirectory = logDir;
+            BackUpPath = backupDir;
             Version = version;
             if (create)
                 Create();
@@ -47,7 +49,7 @@ namespace BackingUpConsole.CoreFunctions
                         results.RemoveAt(results.Count - 1);
                 }
             }
-            if (results.Count != 6)
+            if (results.Count != 7)
                 return (MessageProvider.InvalidFileFormat(path, 0), null);
 
             if (results[0] != FileIdentifier)
@@ -88,8 +90,8 @@ namespace BackingUpConsole.CoreFunctions
                 var message = MessageProvider.InvalidFileFormat(path, 2);
                 return (message, null);
             }
-            DirectoryInfo? settingsPath, summaryDir, logDir;
-            settingsPath = summaryDir = logDir = null;
+            DirectoryInfo? settingsPath, summaryDir, logDir, backupDir;
+            settingsPath = summaryDir = logDir = backupDir = null;
             BackUpSettings? settings = null;
             for (int i = 2; i < results.Count; i++)
             {
@@ -121,6 +123,11 @@ namespace BackingUpConsole.CoreFunctions
                             logDir= new DirectoryInfo(value[1]);
                             break;
                         }
+                    case "backups":
+                        {
+                            backupDir = new DirectoryInfo(value[1]);
+                            break;
+                        }
                     default:
                         {
                             var message = MessageProvider.InvalidFileFormat(path, i + 1);
@@ -128,12 +135,12 @@ namespace BackingUpConsole.CoreFunctions
                         }
                 }
             }
-            if (settings is null || settingsPath is null || summaryDir is null || logDir is null)
+            if (settings is null || settingsPath is null || summaryDir is null || logDir is null || backupDir is null)
             {
                 var message = MessageProvider.InvalidFileFormat(path, 0);
                 return (message, null);
             }
-            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, version, true));
+            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, true));
         }
         //Methods
         public void Create()
@@ -142,11 +149,12 @@ namespace BackingUpConsole.CoreFunctions
             LogDirectory.Create();
             SettingsPath.Create();
             Settings.Create();
+            BackUpPath.Create();
         }
         //Override methods
         public object Clone()
         {
-            return new BackUpFile(this.Path, this.Settings, this.SummaryDirectory, this.LogDirectory, this.SettingsPath, this.Version, false);
+            return new BackUpFile(this.Path, this.Settings, this.SummaryDirectory, this.LogDirectory, this.SettingsPath, this.BackUpPath, this.Version, false);
         }
     }
 }

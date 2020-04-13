@@ -8,10 +8,11 @@ namespace BackingUpConsole.Utilities
     {
         public static string DEFAULT_BACKUP_FILE => 
             $"[BackUp]{Environment.NewLine}" +
-            $"*version:1{Environment.NewLine}" +
+            $"*version:2{Environment.NewLine}" +
             $"settings?*\\settings{Environment.NewLine}" +
             $"selectedsettings?*\\settings\\default.buse{Environment.NewLine}" +
             $"summaries?*\\summaries{Environment.NewLine}" +
-            $"logs?*\\logs";
+            $"logs?*\\logs{Environment.NewLine}" + 
+            $"backups?*\\backup";
     }
 }
