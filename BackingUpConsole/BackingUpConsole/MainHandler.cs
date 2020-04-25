@@ -18,7 +18,7 @@ namespace BackingUpConsole
             MessagePrinter messagePrinter = new MessagePrinter(MessageCollections.Levels.Information, System.ConsoleColor.Gray);
 #endif
             //string currentWorkingDirectory = Environment.CurrentDirectory;
-            Paths paths = new Paths(Environment.CurrentDirectory, null);
+            Paths paths = new Paths(Environment.CurrentDirectory);
             if (args.Length > 0)
             {
                 (MessageHandler message, string? path) = await CLIInterpreter(args, messagePrinter, paths);

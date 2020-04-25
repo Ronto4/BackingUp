@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BackingUpConsole.CoreFunctions;
+using System;
 using System.IO;
 
 namespace BackingUpConsole.Utilities
@@ -6,15 +7,17 @@ namespace BackingUpConsole.Utilities
     public class Paths : ICloneable
     {
         public string CurrentWorkingDirectory { get; set; }
-        public string? SelectedBackupPath { get; set; }
+        public BackUpFile? SelectedBackup { get; set; }
 
-        public Paths(string currWorkDir, string? backupDir)
+        public Paths(string currWorkDir)
         {
             CurrentWorkingDirectory = currWorkDir;
-            SelectedBackupPath = backupDir;
+            SelectedBackup = null;
         }
 
-        public Paths(Paths p) : this(p.CurrentWorkingDirectory, p.SelectedBackupPath) { }
+        public Paths(Paths p) : this(p.CurrentWorkingDirectory) {
+            SelectedBackup = p.SelectedBackup is null ? null : (BackUpFile)p.SelectedBackup.Clone();
+        }
 
         public override string ToString()
         {

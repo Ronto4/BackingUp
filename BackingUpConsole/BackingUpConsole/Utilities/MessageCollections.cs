@@ -38,7 +38,10 @@ namespace BackingUpConsole.Utilities.Messages
             BackupEntryAdded,
             BackupNotFound,
             BackupEntryRemoved,
-            BackupChanged
+            BackupChanged,
+            DirectoryNotEmpty,
+            BackingUpUnknownUsage,
+            BackupCreated
         }
         public enum Levels
         {
