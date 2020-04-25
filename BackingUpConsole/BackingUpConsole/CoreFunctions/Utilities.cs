@@ -10,7 +10,7 @@ namespace BackingUpConsole.CoreFunctions
 {
     internal static class Utilities
     {
-        private static readonly string ListIndentifier = $"[BackUps]";
+        private static readonly string ListIndentifier = $"BackUpList";
         internal static (MessageHandler message, Dictionary<string, string>? entries) ScanList()
         {
             string path = PathHandler.Combine(Environment.CurrentDirectory, @"data\backups.bul");
@@ -26,12 +26,15 @@ namespace BackingUpConsole.CoreFunctions
                 }
             }
             //Console.WriteLine($"'{Print(results[0]!)}' | '{Print(ListIndentifier)}'");
-            if (results[0] != ListIndentifier)
+            if (results[0] != $"[{ListIndentifier}]")
                 return (MessageProvider.InvalidFileFormat(path, 1), null);
+
+            if (results[1] != "*version:1")
+                return (MessageProvider.InvalidFileFormat(path, 2), null);
 
             Dictionary<string, string> splitRes = new Dictionary<string, string>();
 
-            for (int i = 1; i < results.Count; i++)
+            for (int i = 2; i < results.Count; i++)
             {
                 if (results[i] is null || !IsMatch(results[i]!))
                     return (MessageProvider.InvalidFileFormat(path, i + 1), null);
@@ -62,14 +65,17 @@ namespace BackingUpConsole.CoreFunctions
                     results.Add(await sr.ReadLineAsync());
                 }
             }
-            if (results[0] != ListIndentifier)
+            if (results[0] != $"[{ListIndentifier}]")
                 return (MessageProvider.InvalidFileFormat(path, 1), null);
+
+            if (results[1] != "*version:1")
+                return (MessageProvider.InvalidFileFormat(path, 2), null);
 
             Dictionary<string, string> splitRes = new Dictionary<string, string>();
 
             bool errorOccured = false;
             string? errorLineContent = null;
-            Parallel.For(1, results.Count, body: (pos) =>
+            Parallel.For(2, results.Count, body: (pos) =>
            {
                if (results[pos] is null || !IsMatch(results[pos]!))
                {
@@ -135,7 +141,7 @@ namespace BackingUpConsole.CoreFunctions
                 if (!File.Exists(listPath))
                     File.Create(listPath).Close();
 
-                string basis = $"[BackUps]";
+                string basis = $"[{ListIndentifier}]\n*version:1";
                 using StreamWriter sw = new StreamWriter(listPath);
                 //Parallel.ForEach<char>(basis.ToCharArray(), (c) => sw.WriteAsync(c));
                 await sw.WriteAsync(basis);
