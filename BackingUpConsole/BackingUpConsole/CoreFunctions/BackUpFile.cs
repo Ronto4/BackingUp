@@ -9,7 +9,7 @@ namespace BackingUpConsole.CoreFunctions
 {
     public class BackUpFile : ICloneable
     {
-        private static readonly string FileIdentifier = $"[BackUp]";
+        private static readonly string FileIdentifier = $"[BackUpContainer]";
         //Attributes
         public string Path { get; }
         public BackUpSettings Settings { get; private set; }
