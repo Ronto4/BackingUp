@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions
 {
@@ -28,11 +29,10 @@ namespace BackingUpConsole.CoreFunctions
             LogDirectory = logDir;
             BackUpPath = backupDir;
             Version = version;
-            if (create)
-                Create();
+
         }
         //static methods
-        public static (MessageHandler, BackUpFile?) GetFromFile(string path, bool firstCreation = false)
+        public static async Task<(MessageHandler, BackUpFile?)> GetFromFile(string path, bool firstCreation = false)
         {
             List<string?> results = new List<string?>();
             using (StreamReader sr = new StreamReader(path))
@@ -140,15 +140,19 @@ namespace BackingUpConsole.CoreFunctions
                 var message = MessageProvider.InvalidFileFormat(path, 0);
                 return (message, null);
             }
-            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, firstCreation));
+            var r = (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, firstCreation));
+            if (firstCreation)
+                await r.Item2.Create();
+
+            return r;
         }
         //Methods
-        public void Create()
+        public async Task Create()
         {
             SummaryDirectory.Create();
             LogDirectory.Create();
             SettingsPath.Create();
-            Settings.Create();
+            await Settings.Create();
             BackUpPath.Create();
         }
         //Override methods

@@ -14,5 +14,10 @@ namespace BackingUpConsole.Utilities
             $"summaries?*\\summaries{Environment.NewLine}" +
             $"logs?*\\logs{Environment.NewLine}" + 
             $"backups?*\\backup";
+
+        public static string DEFAULT_BACKUP_SETTINGS_FILE =>
+            $"[BackUpSettings]{Environment.NewLine}" +
+            $"*version:1{Environment.NewLine}" +
+            $"paths?";
     }
 }

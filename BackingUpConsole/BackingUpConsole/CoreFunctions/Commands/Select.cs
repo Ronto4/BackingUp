@@ -37,7 +37,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!success)
                 return MessageProvider.BackupNotFound(args[1], silent: !flags.IsSet(Flags.VERBOSE));
 
-            (MessageHandler message, BackUpFile? backup) = BackUpFile.GetFromFile(path!);
+            (MessageHandler message, BackUpFile? backup) = await BackUpFile.GetFromFile(path!);
             if (!message.IsSuccess(false, messagePrinter))
                 return message;
 
