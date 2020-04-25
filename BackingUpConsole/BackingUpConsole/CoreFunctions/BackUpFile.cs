@@ -32,7 +32,7 @@ namespace BackingUpConsole.CoreFunctions
                 Create();
         }
         //static methods
-        public static (MessageHandler, BackUpFile?) GetFromFile(string path)
+        public static (MessageHandler, BackUpFile?) GetFromFile(string path, bool firstCreation = false)
         {
             List<string?> results = new List<string?>();
             using (StreamReader sr = new StreamReader(path))
@@ -140,7 +140,7 @@ namespace BackingUpConsole.CoreFunctions
                 var message = MessageProvider.InvalidFileFormat(path, 0);
                 return (message, null);
             }
-            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, true));
+            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, firstCreation));
         }
         //Methods
         public void Create()

@@ -57,6 +57,8 @@ namespace BackingUpConsole.CoreFunctions.Commands
             {
                 await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
             }
+            BackUpFile.GetFromFile(path, true);
+
             if (args.Length > 2)
             {
                 MessageHandler addResult = await Commands.Add.RunAsync(new string[] { "add", path, args[2] }, flags, paths, messagePrinter);
