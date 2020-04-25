@@ -78,6 +78,7 @@ namespace BackingUpConsole.CoreFunctions
                    return;
                }
                string[] split = results[pos]!.Split('?');
+               Console.WriteLine($"splits: split[0]={split[0]} ; split[1]={split[1]}");
                if (!splitRes.TryAdd(split[0], split[1]))
                {
                    errorOccured = true;
