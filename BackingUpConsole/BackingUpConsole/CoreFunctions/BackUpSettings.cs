@@ -28,11 +28,14 @@ namespace BackingUpConsole.CoreFunctions
             Path = path;
         }
         //Methods
-        public static async Task<BackUpSettings> GetFromFile(string path)
+        public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter)
         {
             var buse = new BackUpSettings(path);
-            await buse.GetSettings();
-            return buse;
+            var get = await buse.GetSettings();
+            if (!get.IsSuccess(false, messagePrinter))
+                return (null, get);
+
+            return (buse, MessageProvider.Success());
         }
         public override string ToString()
         {
@@ -64,8 +67,6 @@ namespace BackingUpConsole.CoreFunctions
             while (!sr.EndOfStream)
             {
                 string? line = await sr.ReadLineAsync();
-                //if (lline is null)
-                //return MessageProvider.InvalidMethodExecution(null, null, "ReadLine returned null, when EOF was not detected.");
 
                 yield return line;
             }
@@ -73,18 +74,6 @@ namespace BackingUpConsole.CoreFunctions
         }
         public async Task<MessageHandler> GetSettings()
         {
-            //Queue<string> settingsContent = new Queue<string>();
-            //using (StreamReader sr = new StreamReader(Path))
-            //{
-            //    while (!sr.EndOfStream)
-            //    {
-            //        string? lline = await sr.ReadLineAsync();
-            //        if (lline is null)
-            //            return MessageProvider.InvalidMethodExecution(null, null, "ReadLine returned null, when EOF was not detected.");
-
-            //        settingsContent.Enqueue(lline);
-            //    }
-            //}
             int state = 0;
             await foreach (string? line in ReadFromFile())
             {
@@ -150,38 +139,11 @@ namespace BackingUpConsole.CoreFunctions
                             break;
                         }
                 }
-
-                //settingsContent.Enqueue(line);
             }
-            //string line = settingsContent.Dequeue();
-            //if (line != FileIdentifier)
-            //    return MessageProvider.InvalidFileFormat(Path, 1);
-
-            //line = settingsContent.Dequeue();
-            //if (line != $"*version:1")
-            //    return MessageProvider.InvalidFileFormat(Path, 2);
-
-            //line = settingsContent.Dequeue();
-            //string[] s = line.Split('?');
-            //if (s.Length != 2 || s[0] != "path")
-            //    return MessageProvider.InvalidFileFormat(Path, 3);
-
-            //string[] paths = s[1].Split('|', StringSplitOptions.RemoveEmptyEntries);
-            //settings.BackUpPaths = paths;
-            //Console.WriteLine(this);
             return MessageProvider.Success();
         }
         public async Task<MessageHandler> SaveSettings()
         {
-            //using (FileStream fs = new FileStream(Path, FileMode.Create))
-            //{
-            //    await fs.WriteAsync(ConstantValues.DEFAULT_BACKUP_SETTINGS_FILE.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
-            //    for (int i = 0; i < settings.BackUpPaths.Length; i++)
-            //    {
-            //        await fs.WriteAsync((settings.BackUpPaths + "|").ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
-            //    }
-            //    fs.Close();
-            //}
             if (!File.Exists(Path))
             {
                 if (!Directory.Exists((new FileInfo(Path).Directory).FullName))

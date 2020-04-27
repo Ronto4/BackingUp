@@ -111,16 +111,20 @@ namespace BackingUpConsole.CoreFunctions
                     case "selectedsettings":
                         {
                             //settings = new BackUpSettings(value[1]);
+                            MessageHandler getFromFile;
                             if (firstCreation)
                             {
                                 var lsettings = new BackUpSettings(value[1]);
                                 await lsettings.Create(messagePrinter);
-                                settings = await BackUpSettings.GetFromFile(value[1]);
+                                (settings, getFromFile) = await BackUpSettings.GetFromFile(value[1], messagePrinter);
                             }
                             else
                             {
-                                settings = await BackUpSettings.GetFromFile(value[1]);
+                                (settings, getFromFile) = await BackUpSettings.GetFromFile(value[1], messagePrinter);
                             }
+                            if (!getFromFile.IsSuccess(false, messagePrinter))
+                                return (getFromFile, null);
+
                             break;
                         }
                     case "summaries":
