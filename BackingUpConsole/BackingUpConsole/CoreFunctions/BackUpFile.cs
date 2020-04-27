@@ -32,7 +32,7 @@ namespace BackingUpConsole.CoreFunctions
 
         }
         //static methods
-        public static async Task<(MessageHandler, BackUpFile?)> GetFromFile(string path, bool firstCreation = false)
+        public static async Task<(MessageHandler, BackUpFile?)> GetFromFile(string path, MessagePrinter messagePrinter, bool firstCreation = false)
         {
             List<string?> results = new List<string?>();
             using (StreamReader sr = new StreamReader(path))
@@ -110,7 +110,17 @@ namespace BackingUpConsole.CoreFunctions
                         }
                     case "selectedsettings":
                         {
-                            settings = new BackUpSettings(value[1]);
+                            //settings = new BackUpSettings(value[1]);
+                            if (firstCreation)
+                            {
+                                var lsettings = new BackUpSettings(value[1]);
+                                await lsettings.Create(messagePrinter);
+                                settings = await BackUpSettings.GetFromFile(value[1]);
+                            }
+                            else
+                            {
+                                settings = await BackUpSettings.GetFromFile(value[1]);
+                            }
                             break;
                         }
                     case "summaries":
@@ -142,17 +152,19 @@ namespace BackingUpConsole.CoreFunctions
             }
             var r = (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, firstCreation));
             if (firstCreation)
-                await r.Item2.Create();
+                await r.Item2.Create(messagePrinter);
 
             return r;
         }
         //Methods
-        public async Task Create()
+        public async Task Create(MessagePrinter messagePrinter)
         {
             SummaryDirectory.Create();
             LogDirectory.Create();
             SettingsPath.Create();
-            await Settings.Create();
+            if(!File.Exists(Settings.Path))
+                _ = await Settings.Create(messagePrinter);
+
             BackUpPath.Create();
         }
         //Override methods

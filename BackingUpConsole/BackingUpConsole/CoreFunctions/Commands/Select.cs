@@ -37,12 +37,14 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!success)
                 return MessageProvider.BackupNotFound(args[1], silent: !flags.IsSet(Flags.VERBOSE));
 
-            (MessageHandler message, BackUpFile? backup) = await BackUpFile.GetFromFile(path!);
+            (MessageHandler message, BackUpFile? backup) = await BackUpFile.GetFromFile(path!, messagePrinter);
             if (!message.IsSuccess(false, messagePrinter))
                 return message;
 
             paths.SelectedBackup = backup;
-            return MessageProvider.BackupChanged(args[1], paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path, silent: !flags.IsSet(Flags.VERBOSE));
+            var m = MessageProvider.BackupChanged(args[1], paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path, silent: !flags.IsSet(Flags.VERBOSE));
+            Console.WriteLine(backup!.Settings);
+            return m;
         }
     }
 }

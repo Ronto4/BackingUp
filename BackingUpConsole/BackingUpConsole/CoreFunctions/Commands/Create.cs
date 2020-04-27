@@ -57,7 +57,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             {
                 await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
             }
-            await BackUpFile.GetFromFile(path, true);
+            await BackUpFile.GetFromFile(path, messagePrinter, true);
 
             if (args.Length > 2)
             {

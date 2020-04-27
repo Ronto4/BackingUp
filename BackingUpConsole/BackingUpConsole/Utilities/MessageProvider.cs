@@ -142,5 +142,8 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackupCreated(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupCreated,
                                                                                                            $"The back up at '{path}' was successfully created.",
                                                                                                            MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler InvalidFileVersion(string path, int versionRequired, int versionGiven, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileVersion,
+                                                                                                                                                       $"The given file '{path}' is of version '{versionGiven}' but version '{versionRequired}' was required.",
+                                                                                                                                                       MessageCollections.Levels.Error, silent: silent);
     }
 }
