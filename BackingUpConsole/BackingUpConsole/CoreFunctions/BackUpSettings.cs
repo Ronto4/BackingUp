@@ -17,6 +17,12 @@ namespace BackingUpConsole.CoreFunctions
         {
             internal string[] BackUpPaths;
         }
+        //Enums
+        public enum EditType
+        {
+            RemoveEntry,
+            AddEntry
+        }
         //Attributes
         private static readonly string FileIdentifier = $"[BackUpSettings]";
         private static readonly int RequiredVersion = 1;
@@ -28,11 +34,44 @@ namespace BackingUpConsole.CoreFunctions
             Path = path;
         }
         //Methods
+        public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter)
+        {
+            var get = await GetSettings();
+            if (!get.IsSuccess(messagePrinter))
+                return get;
+
+            switch (editType)
+            {
+                case EditType.AddEntry:
+                    string[] paths = new string[settings.BackUpPaths.Length + 1];
+                    paths[0] = entry;
+                    for (int i = 0; i < settings.BackUpPaths.Length; i++)
+                    {
+                        paths[i + 1] = settings.BackUpPaths[i];
+                    }
+                    break;
+                case EditType.RemoveEntry:
+                    string[] newPaths = new string[settings.BackUpPaths.Length - 1];
+                    for (int i = 0, j = 0; i < settings.BackUpPaths.Length; i++)
+                    {
+                        if (settings.BackUpPaths[i] == entry)
+                            continue;
+
+                        newPaths[j] = settings.BackUpPaths[i];
+                    }
+                    break;
+            }
+            var set = await SaveSettings();
+            if (!set.IsSuccess(messagePrinter))
+                return set;
+
+            return MessageProvider.Success();
+        }
         public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter)
         {
             var buse = new BackUpSettings(path);
             var get = await buse.GetSettings();
-            if (!get.IsSuccess(false, messagePrinter))
+            if (!get.IsSuccess(messagePrinter))
                 return (null, get);
 
             return (buse, MessageProvider.Success());
@@ -52,11 +91,11 @@ namespace BackingUpConsole.CoreFunctions
         {
             settings = new Settings { BackUpPaths = new string[] { } };
             var save = await SaveSettings();
-            if (!save.IsSuccess(false, messagePrinter))
+            if (!save.IsSuccess(messagePrinter))
                 return save;
 
             var get = await GetSettings();
-            if (!get.IsSuccess(false, messagePrinter))
+            if (!get.IsSuccess(messagePrinter))
                 return get;
 
             return MessageProvider.Success();
