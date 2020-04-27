@@ -41,7 +41,7 @@ namespace BackingUpConsole.Utilities.Messages
 
         public override string? ToString() => Message;
 
-        public bool IsSuccess(bool parsing, MessagePrinter messagePrinter)
+        public bool IsSuccess(MessagePrinter messagePrinter, bool parsing = false)
         {
             if (!(SuccessChecked is null))
                 return (bool)SuccessChecked!;
@@ -63,7 +63,9 @@ namespace BackingUpConsole.Utilities.Messages
             //return Level == MessageCollections.Levels.Warning ? messagePrinter.AskContinue(this) : false;
             SuccessChecked = false;
             return false;
-
         }
+
+        [Obsolete("IsSuccess(bool parsing, MessagePrinter messagePrinter) is deprecated, please use IsSuccess(MessagePrinter messagePrinter, bool parsing = false) instead.")]
+        public bool IsSuccess(bool parsing, MessagePrinter messagePrinter) => IsSuccess(messagePrinter, parsing);
     }
 }
