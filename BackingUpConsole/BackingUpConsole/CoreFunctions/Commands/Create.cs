@@ -42,7 +42,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
 
             return MessageProvider.Success();
         }
-        public static async Task<MessageHandler> Run(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             DirectoryInfo dir = new DirectoryInfo(args[1]);
             if (!dir.Exists)

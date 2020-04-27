@@ -20,12 +20,13 @@ namespace BackingUpConsole.CoreFunctions
         //Enums
         public enum EditType
         {
-            RemoveEntry,
-            AddEntry
+            remove,
+            add
         }
         //Attributes
         private static readonly string FileIdentifier = $"[BackUpSettings]";
         private static readonly int RequiredVersion = 1;
+        private string[] Parameters = new string[] { "paths" };
         public string Path { get; }
         private Settings settings = new Settings { BackUpPaths = new string[0] };
         //Constructors
@@ -34,33 +35,43 @@ namespace BackingUpConsole.CoreFunctions
             Path = path;
         }
         //Methods
+        public bool ParameterExists(string name) => Parameters.Contains(name);
         public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter)
         {
             var get = await GetSettings();
             if (!get.IsSuccess(messagePrinter))
                 return get;
 
+            string[] newPaths = new string[0];
+
             switch (editType)
             {
-                case EditType.AddEntry:
-                    string[] paths = new string[settings.BackUpPaths.Length + 1];
-                    paths[0] = entry;
+                case EditType.add:
+                    newPaths = new string[settings.BackUpPaths.Length + 1];
+                    newPaths[0] = entry;
                     for (int i = 0; i < settings.BackUpPaths.Length; i++)
                     {
-                        paths[i + 1] = settings.BackUpPaths[i];
+                        newPaths[i + 1] = settings.BackUpPaths[i];
                     }
                     break;
-                case EditType.RemoveEntry:
-                    string[] newPaths = new string[settings.BackUpPaths.Length - 1];
+                case EditType.remove:
+                    newPaths = new string[settings.BackUpPaths.Length - 1];
                     for (int i = 0, j = 0; i < settings.BackUpPaths.Length; i++)
                     {
+                        //Console.WriteLine($"Iteration: i == {i}; j == {j}; newPaths.Length == {newPaths.Length}; settings.BackUpPaths.Length == {settings.BackUpPaths.Length}");
                         if (settings.BackUpPaths[i] == entry)
+                        {
+                            //Console.WriteLine($"Continue: '{settings.BackUpPaths[i]}' with entry == '{entry}'.");
                             continue;
+                        }
 
                         newPaths[j] = settings.BackUpPaths[i];
+                        j++;
                     }
                     break;
             }
+            newPaths = newPaths.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            settings.BackUpPaths = newPaths;
             var set = await SaveSettings();
             if (!set.IsSuccess(messagePrinter))
                 return set;

@@ -42,7 +42,11 @@ namespace BackingUpConsole.Utilities.Messages
             DirectoryNotEmpty,
             BackingUpUnknownUsage,
             BackupCreated,
-            InvalidFileVersion
+            InvalidFileVersion,
+            NoBackupSelected,
+            ParameterDoesNotExist,
+            UnknownSettingsUsage,
+            SettingsUpdated
         }
         public enum Levels
         {

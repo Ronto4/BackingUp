@@ -145,5 +145,17 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler InvalidFileVersion(string path, int versionRequired, int versionGiven, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileVersion,
                                                                                                                                                        $"The given file '{path}' is of version '{versionGiven}' but version '{versionRequired}' was required.",
                                                                                                                                                        MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler NoBackupSelected(bool silent = false) => new MessageHandler(MessageCollections.Codes.NoBackupSelected,
+                                                                                                 $"No backup was selected. The given command could not be executed",
+                                                                                                 MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler ParameterDoesNotExist(string param, bool silent = false) => new MessageHandler(MessageCollections.Codes.ParameterDoesNotExist,
+                                                                                                                    $"The given parameter '{param}' does not exist",
+                                                                                                                    MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler UnknownSettingsUsage(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.UnknownSettingsUsage,
+                                                                                                                  $"The given settings usage '{name}' does not exist.",
+                                                                                                                  MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler SettingsUpdated(bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsUpdated,
+                                                                                                $"The selected settings file has successfully been updated.",
+                                                                                                MessageCollections.Levels.Information, silent: silent);
     }
 }
