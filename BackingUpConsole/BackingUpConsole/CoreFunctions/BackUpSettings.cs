@@ -35,8 +35,29 @@ namespace BackingUpConsole.CoreFunctions
             Path = path;
         }
         //Methods
+        private async Task<MessageHandler> ClearDoubles(MessagePrinter messagePrinter)
+        {
+            int lenStart = -1;
+            int lenFinish = -2;
+            do
+            {
+                lenStart = settings.BackUpPaths.Length;
+                foreach (var path in settings.BackUpPaths)
+                {
+                    var remove = await EditSettings(path, EditType.remove, messagePrinter, false);
+                    if (!remove.IsSuccess(messagePrinter))
+                        return remove;
+
+                    var add = await EditSettings(path, EditType.add, messagePrinter, false);
+                    if (!add.IsSuccess(messagePrinter))
+                        return add;
+                }
+                lenFinish = settings.BackUpPaths.Length;
+            } while (lenFinish != lenStart);
+            return MessageProvider.Success();
+        }
         public bool ParameterExists(string name) => Parameters.Contains(name);
-        public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter)
+        public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter, bool clear = true)
         {
             var get = await GetSettings();
             if (!get.IsSuccess(messagePrinter))
@@ -75,6 +96,13 @@ namespace BackingUpConsole.CoreFunctions
             var set = await SaveSettings();
             if (!set.IsSuccess(messagePrinter))
                 return set;
+
+            if (clear)
+            {
+                var c = await ClearDoubles(messagePrinter);
+                if (!c.IsSuccess(messagePrinter))
+                    return c;
+            }
 
             return MessageProvider.Success();
         }
