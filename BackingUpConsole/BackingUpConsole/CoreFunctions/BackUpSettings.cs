@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions
 {
-    //Note: This class is just a placeholder for now, will be implemented later.
     public class BackUpSettings
     {
         //Types
