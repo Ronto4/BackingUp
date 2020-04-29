@@ -36,8 +36,8 @@ namespace BackingUpConsole.CoreFunctions
         //Methods
         private async Task<MessageHandler> ClearDoubles(MessagePrinter messagePrinter)
         {
-            int lenStart = -1;
-            int lenFinish = -2;
+            int lenStart;
+            int lenFinish;
             do
             {
                 lenStart = settings.BackUpPaths.Length;
@@ -56,7 +56,7 @@ namespace BackingUpConsole.CoreFunctions
             return MessageProvider.Success();
         }
         public bool ParameterExists(string name) => Parameters.Contains(name);
-        public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter, bool clear = true)
+        public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter, bool clear = true) //Will contain name of parameter when more than one parameter exists.
         {
             var get = await GetSettings();
             if (!get.IsSuccess(messagePrinter))
