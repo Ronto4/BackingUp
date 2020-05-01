@@ -22,7 +22,12 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (args.CheckLength(2, 2) && !result!.ContainsKey(args[1]))
                 return MessageProvider.BackupNotFound(args[1], silent: !flags.IsSet(Flags.VERBOSE));
 
-            return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+            //return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+            if (args.CheckLength(1, 1))
+                return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+
+            //Console.WriteLine($"---{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}---");
+            return MessageProvider.ParsingBackupChanged(result![args[1]], silent: !flags.IsSet(Flags.VERBOSE));
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
@@ -43,7 +48,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
 
             paths.SelectedBackup = backup;
             var m = MessageProvider.BackupChanged(args[1], paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path, silent: !flags.IsSet(Flags.VERBOSE));
-            Console.WriteLine(backup!.Settings);
+            //Console.WriteLine(backup!.Settings);
             return m;
         }
     }

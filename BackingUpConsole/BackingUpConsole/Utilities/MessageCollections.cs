@@ -39,6 +39,7 @@ namespace BackingUpConsole.Utilities.Messages
             BackupNotFound,
             BackupEntryRemoved,
             BackupChanged,
+            ParsingBackupChanged,
             DirectoryNotEmpty,
             BackingUpUnknownUsage,
             BackupCreated,

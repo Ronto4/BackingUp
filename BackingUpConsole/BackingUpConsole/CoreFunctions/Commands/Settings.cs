@@ -15,7 +15,10 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
             if (paths.SelectedBackup is null)
+            {
+                Console.WriteLine($"---{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}---");
                 return MessageProvider.NoBackupSelected(!flags.IsSet(Flags.VERBOSE));
+            }
 
             if (args.CheckLength(1, 1))
                 return MessageProvider.Success();

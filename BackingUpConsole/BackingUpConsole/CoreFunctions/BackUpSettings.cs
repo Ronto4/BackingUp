@@ -36,6 +36,10 @@ namespace BackingUpConsole.CoreFunctions
         //Methods
         private async Task<MessageHandler> ClearDoubles(MessagePrinter messagePrinter)
         {
+            var get = await GetSettings();
+            if (!get.IsSuccess(messagePrinter))
+                return get;
+
             int lenStart;
             int lenFinish;
             do
@@ -58,9 +62,15 @@ namespace BackingUpConsole.CoreFunctions
         public bool ParameterExists(string name) => Parameters.Contains(name);
         public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter, bool clear = true) //Will contain name of parameter when more than one parameter exists.
         {
+            //Console.WriteLine($"entry == {entry}{Environment.NewLine}editType == {editType}{Environment.NewLine}clear == {clear}");
             var get = await GetSettings();
             if (!get.IsSuccess(messagePrinter))
                 return get;
+
+            //foreach (var path in settings.BackUpPaths)
+            //{
+            //    Console.WriteLine($"path: {path}");
+            //}
 
             string[] newPaths = new string[0];
 
@@ -218,7 +228,7 @@ namespace BackingUpConsole.CoreFunctions
                             switch (setting[0])
                             {
                                 case "paths":
-                                    string[] paths = setting[1].Split('|');
+                                    string[] paths = setting[1].Split('|', StringSplitOptions.RemoveEmptyEntries);
                                     settings.BackUpPaths = paths;
                                     break;
                                 default:
