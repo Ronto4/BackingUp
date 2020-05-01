@@ -105,6 +105,17 @@ namespace BackingUpConsole.CoreFunctions
 
             return MessageProvider.Success();
         }
+        public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter, bool create)
+        {
+            if (create)
+            {
+                var tmp = new BackUpSettings(path);
+                var c = await tmp.Create(messagePrinter);
+                if (!c.IsSuccess(messagePrinter))
+                    return (null, c);
+            }
+            return await GetFromFile(path, messagePrinter);
+        }
         public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter)
         {
             var buse = new BackUpSettings(path);
