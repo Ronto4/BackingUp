@@ -25,7 +25,7 @@ namespace BackingUpConsole.CoreFunctions
         //Attributes
         private static readonly string FileIdentifier = $"[BackUpSettings]";
         private static readonly int RequiredVersion = 1;
-        private string[] Parameters = new string[] { "paths" };
+        private static readonly string[] Parameters = new string[] { "paths" };
         public string Path { get; }
         private Settings settings = new Settings { BackUpPaths = new string[0] };
         //Constructors
@@ -72,7 +72,7 @@ namespace BackingUpConsole.CoreFunctions
             //    Console.WriteLine($"path: {path}");
             //}
 
-            string[] newPaths = new string[0];
+            string[] newPaths;
 
             switch (editType)
             {
@@ -99,6 +99,8 @@ namespace BackingUpConsole.CoreFunctions
                         j++;
                     }
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.");
             }
             newPaths = newPaths.Where(x => !string.IsNullOrEmpty(x)).ToArray();
             settings.BackUpPaths = newPaths;
