@@ -67,41 +67,12 @@ namespace BackingUpConsole.CoreFunctions
             if (!get.IsSuccess(messagePrinter))
                 return get;
 
-            //foreach (var path in settings.BackUpPaths)
-            //{
-            //    Console.WriteLine($"path: {path}");
-            //}
-
-            string[] newPaths;
-
-            switch (editType)
+            string[] newPaths = editType switch
             {
-                case EditType.add:
-                    newPaths = new string[settings.BackUpPaths.Length + 1];
-                    newPaths[0] = entry;
-                    for (int i = 0; i < settings.BackUpPaths.Length; i++)
-                    {
-                        newPaths[i + 1] = settings.BackUpPaths[i];
-                    }
-                    break;
-                case EditType.remove:
-                    newPaths = new string[settings.BackUpPaths.Length - 1];
-                    for (int i = 0, j = 0; i < settings.BackUpPaths.Length; i++)
-                    {
-                        //Console.WriteLine($"Iteration: i == {i}; j == {j}; newPaths.Length == {newPaths.Length}; settings.BackUpPaths.Length == {settings.BackUpPaths.Length}");
-                        if (settings.BackUpPaths[i] == entry)
-                        {
-                            //Console.WriteLine($"Continue: '{settings.BackUpPaths[i]}' with entry == '{entry}'.");
-                            continue;
-                        }
-
-                        newPaths[j] = settings.BackUpPaths[i];
-                        j++;
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.");
-            }
+                EditType.add => settings.BackUpPaths.Append(entry).ToArray(),
+                EditType.remove => (from path in settings.BackUpPaths where path != entry select path).ToArray(),
+                _ => throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.")
+            };
             newPaths = newPaths.Where(x => !string.IsNullOrEmpty(x)).ToArray();
             settings.BackUpPaths = newPaths;
             var set = await SaveSettings();
