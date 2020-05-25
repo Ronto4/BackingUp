@@ -16,7 +16,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
             (MessageHandler success, Dictionary<string, string>? result) = Utilities.ScanList();
-            if (!success.IsSuccess(true, messagePrinter))
+            if (!success.IsSuccess(messagePrinter, true))
                 return success;
 
             if (args.CheckLength(2, 2) && !result!.ContainsKey(args[1]))
@@ -27,7 +27,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
 
             //Console.WriteLine($"---{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}---");
-            return MessageProvider.ParsingBackupChanged(result![args[1]], silent: !flags.IsSet(Flags.VERBOSE));
+            return flags.IsSet(Flags.IN_SCRIPT) ? MessageProvider.ParsingBackupChanged(result![args[1]], silent: !flags.IsSet(Flags.VERBOSE)) : MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
