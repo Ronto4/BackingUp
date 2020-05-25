@@ -68,6 +68,7 @@ namespace BackingUpConsole.Utilities.Commands
 
         private async static Task<(MessageHandler message, string? path)> Parse_RunFile_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
+            flags |= Flags.IN_SCRIPT;
             string path = PathHandler.Combine(paths.CurrentWorkingDirectory, args[0]);
 
             if (!File.Exists(path))
@@ -99,6 +100,7 @@ namespace BackingUpConsole.Utilities.Commands
         }
         private async static Task<(MessageHandler message, string? path)> Run_RunFile_Async(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
+            flags |= Flags.IN_SCRIPT;
             string path = PathHandler.Combine(paths.CurrentWorkingDirectory, args[0]);
             Paths usingPaths = (Paths)paths.Clone();
             usingPaths.CurrentWorkingDirectory = Path.GetDirectoryName(path) ?? usingPaths.CurrentWorkingDirectory;
