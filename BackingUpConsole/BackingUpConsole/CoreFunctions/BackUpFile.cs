@@ -117,7 +117,7 @@ namespace BackingUpConsole.CoreFunctions
                             //    var lsettings = new BackUpSettings(value[1]);
                             //    await lsettings.Create(messagePrinter);
                             //}
-                            (settings, getFromFile) = await BackUpSettings.GetFromFile(value[1], messagePrinter, firstCreation);
+                            (settings, getFromFile) = await BackUpSettings.GetFromFile(value[1], messagePrinter);
                             if (!getFromFile.IsSuccess(messagePrinter))
                                 return (getFromFile, null);
 
@@ -152,18 +152,18 @@ namespace BackingUpConsole.CoreFunctions
             }
             var r = (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, firstCreation));
             if (firstCreation)
-                await r.Item2.Create(messagePrinter);
+                /*await*/ r.Item2.Create(messagePrinter);
 
             return r;
         }
         //Methods
-        public async Task Create(MessagePrinter messagePrinter)
+        public /*async Task*/void Create(MessagePrinter messagePrinter)
         {
             SummaryDirectory.Create();
             LogDirectory.Create();
             SettingsPath.Create();
-            if(!File.Exists(Settings.Path))
-                _ = await Settings.Create(messagePrinter);
+            //if(!File.Exists(Settings.Path))
+            //    _ = await Settings.Create(messagePrinter);
 
             BackUpPath.Create();
         }

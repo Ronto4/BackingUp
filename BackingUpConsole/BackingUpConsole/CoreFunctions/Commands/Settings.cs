@@ -23,7 +23,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!paths.SelectedBackup.Settings.ParameterExists(args[1]))
                 return MessageProvider.ParameterDoesNotExist(args[1]);
 
-            if (!Enum.IsDefined(typeof(BackUpSettings.EditType), args[2]))
+            if (BackUpSettings.EditTypes.ContainsKey(args[2]) == false)
                 return MessageProvider.UnknownSettingsUsage(args[2], !flags.IsSet(Flags.VERBOSE));
 
             return MessageProvider.Success();
@@ -33,7 +33,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (args.CheckLength(1, 1))
                 return MessageProvider.Message($"Currently selected settings:{Environment.NewLine}{paths.SelectedBackup!.Settings}");
 
-            var run = await paths.SelectedBackup!.Settings.EditSettings(args[3], (BackUpSettings.EditType)Enum.Parse(typeof(BackUpSettings.EditType), args[2]), messagePrinter);
+            var run = await paths.SelectedBackup!.Settings.UpdateSettings(args[3], args[1], args[2], messagePrinter);
             if (!run.IsSuccess(messagePrinter))
                 return run;
 

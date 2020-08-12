@@ -47,7 +47,8 @@ namespace BackingUpConsole.Utilities.Messages
             NoBackupSelected,
             ParameterDoesNotExist,
             UnknownSettingsUsage,
-            SettingsUpdated
+            SettingsUpdated,
+            InvalidEditType
         }
         public enum Levels
         {

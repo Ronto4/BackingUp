@@ -1,10 +1,9 @@
-﻿using BackingUpConsole.Utilities;
-using BackingUpConsole.Utilities.Messages;
+﻿using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions
@@ -12,228 +11,131 @@ namespace BackingUpConsole.CoreFunctions
     public class BackUpSettings
     {
         //Types
-        private struct Settings
+        internal class SettingsContainerHelper
         {
-            internal string[] BackUpPaths;
+            public string FileType { get; set; } = string.Empty;
+            public int FileVersion { get; set; } = 0;
+            public string SettingsName { get; set; } = string.Empty;
+            public List<string> Paths { get; set; } = new List<string>();
+            public List<string> BlacklistedExtensions { get; set; } = new List<string>();
         }
-        //Enums
+        public class SettingsContainer
+        {
+            public string FileType { get => Fields[nameof(FileType)].Value; set => Fields[nameof(FileType)].Value = value; }
+            public int FileVersion { get => Fields[nameof(FileVersion)].Value; set => Fields[nameof(FileVersion)].Value = value; }
+            public string SettingsName { get => Fields[nameof(SettingsName)].Value; set => Fields[nameof(SettingsName)].Value = value; }
+            public List<string> Paths { get => ((IEnumerable<SettingsProperty>)Fields[nameof(Paths)].Value).Select<SettingsProperty, string>(prop => prop.Value).ToList();  set => Fields[nameof(Paths)].Value = value; }
+            public List<string> BlacklistedExtensions { get => ((IEnumerable<SettingsProperty>)Fields[nameof(BlacklistedExtensions)].Value).Select<SettingsProperty, string>(prop => prop.Value).ToList(); set => Fields[nameof(BlacklistedExtensions)].Value = value; }
+            internal Dictionary<string, SettingsProperty> Fields = new Dictionary<string, SettingsProperty>()
+            {
+                {nameof(Paths), new SettingsProperty(SettingsProperty.UsedType.Array, new string[0], SettingsProperty.UsedType.String) },
+                {nameof(BlacklistedExtensions), new SettingsProperty(SettingsProperty.UsedType.Array, new string[0], SettingsProperty.UsedType.String) },
+                {nameof(FileType), new SettingsProperty(SettingsProperty.UsedType.String, string.Empty) },
+                {nameof(SettingsName), new SettingsProperty(SettingsProperty.UsedType.String, string.Empty) },
+                {nameof(FileVersion), new SettingsProperty(SettingsProperty.UsedType.Integer, 0) }
+            };
+            internal static Dictionary<string, string> NameTranslate = new Dictionary<string, string>()
+            {
+                {"paths", nameof(Paths) },
+                {"excluded-extensions", nameof(BlacklistedExtensions) },
+                {"name", nameof(SettingsName) }
+            };
+            internal SettingsContainer(SettingsContainerHelper helper)
+            {
+                Paths = helper.Paths;
+                BlacklistedExtensions = helper.BlacklistedExtensions;
+                FileType = helper.FileType;
+                SettingsName = helper.SettingsName;
+                FileVersion = helper.FileVersion;
+            }
+            public SettingsContainer() { } 
+        }
         public enum EditType
         {
-            remove,
-            add
+            AddValueToField,
+            SetFieldToValue,
+            RemoveValueFromField
         }
         //Attributes
-        private static readonly string FileIdentifier = $"[BackUpSettings]";
-        private static readonly int RequiredVersion = 1;
-        private static readonly string[] Parameters = new string[] { "paths" };
-        public string Path { get; }
-        private Settings settings = new Settings { BackUpPaths = new string[0] };
-        //Constructors
-        public BackUpSettings(string path)
+        public static readonly Dictionary<string, EditType> EditTypes = new Dictionary<string, EditType>()
         {
+            {"add", EditType.AddValueToField },
+            {"set", EditType.SetFieldToValue },
+            {"remove", EditType.RemoveValueFromField } };
+        public SettingsContainer Settings { get; private set; }
+        public string Path { get; }
+        //Constructors
+        private BackUpSettings(string path)
+        {
+            Settings = new SettingsContainer();
             Path = path;
         }
         //Methods
-        private async Task<MessageHandler> ClearDoubles(MessagePrinter messagePrinter)
+        public bool ParameterExists(string name) => SettingsContainer.NameTranslate.ContainsKey(name);
+        public async Task<MessageHandler> UpdateSettings(string value, string fieldName, string editType, MessagePrinter messagePrinter)
         {
-            var get = await GetSettings();
-            if (!get.IsSuccess(messagePrinter))
-                return get;
-
-            int lenStart;
-            int lenFinish;
-            do
-            {
-                lenStart = settings.BackUpPaths.Length;
-                foreach (var path in settings.BackUpPaths)
-                {
-                    var remove = await EditSettings(path, EditType.remove, messagePrinter, false);
-                    if (!remove.IsSuccess(messagePrinter))
-                        return remove;
-
-                    var add = await EditSettings(path, EditType.add, messagePrinter, false);
-                    if (!add.IsSuccess(messagePrinter))
-                        return add;
-                }
-                lenFinish = settings.BackUpPaths.Length;
-            } while (lenFinish != lenStart);
-            return MessageProvider.Success();
+            bool success = SettingsContainer.NameTranslate.TryGetValue(fieldName, out string? fieldNameQualified);
+            if (success == false)
+                return MessageProvider.ParameterDoesNotExist(fieldName);
+            SettingsProperty field = Settings.Fields[fieldNameQualified!];
+            success = EditTypes.TryGetValue(editType, out EditType type);
+            if (success == false)
+                return MessageProvider.UnknownSettingsUsage(editType);
+            return await UpdateSettings(value, field, type, messagePrinter);
         }
-        public bool ParameterExists(string name) => Parameters.Contains(name);
-        public async Task<MessageHandler> EditSettings(string entry, EditType editType, MessagePrinter messagePrinter, bool clear = true) //Will contain name of parameter when more than one parameter exists.
+        private async Task<MessageHandler> UpdateSettings(string value, SettingsProperty field, EditType editType, MessagePrinter messagePrinter)
         {
-            //Console.WriteLine($"entry == {entry}{Environment.NewLine}editType == {editType}{Environment.NewLine}clear == {clear}");
-            var get = await GetSettings();
-            if (!get.IsSuccess(messagePrinter))
-                return get;
+            if (((editType == EditType.AddValueToField || editType == EditType.RemoveValueFromField) && field.Type != SettingsProperty.UsedType.Array) || (editType == EditType.SetFieldToValue && field.Type == SettingsProperty.UsedType.Array))
+                return MessageProvider.InvalidEditType(field.Type, editType);
 
-            string[] newPaths = editType switch
+            field.Value = editType switch
             {
-                EditType.add => settings.BackUpPaths.Append(entry).ToArray(),
-                EditType.remove => (from path in settings.BackUpPaths where path != entry select path).ToArray(),
+                EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
+                EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value where entry.Value != (field.TypeOfArray == SettingsProperty.UsedType.String ? (dynamic)value : (field.TypeOfArray == SettingsProperty.UsedType.Integer ? Convert.ToInt32(value) : Convert.ToDouble(value))) select entry).ToArray(),
+                EditType.SetFieldToValue => value,
                 _ => throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.")
             };
-            newPaths = newPaths.Where(x => !string.IsNullOrEmpty(x)).ToArray();
-            settings.BackUpPaths = newPaths;
-            var set = await SaveSettings();
-            if (!set.IsSuccess(messagePrinter))
-                return set;
-
-            if (clear)
-            {
-                var c = await ClearDoubles(messagePrinter);
-                if (!c.IsSuccess(messagePrinter))
-                    return c;
-            }
-
+            var save = await SaveSettings();
+            if (save.IsSuccess(messagePrinter) == false)
+                return save;
             return MessageProvider.Success();
         }
-        public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter, bool create)
+        private async Task<MessageHandler> SaveSettings()
         {
-            if (create)
+            var options = new JsonSerializerOptions
             {
-                var tmp = new BackUpSettings(path);
-                var c = await tmp.Create(messagePrinter);
-                if (!c.IsSuccess(messagePrinter))
-                    return (null, c);
+                WriteIndented = true,
+            };
+            using (FileStream fs = File.Create(Path))
+            {
+                await JsonSerializer.SerializeAsync(fs, Settings, options);
             }
-            return await GetFromFile(path, messagePrinter);
+            return MessageProvider.Success();
+        }
+        private async Task<MessageHandler> GetSettings()
+        {
+            if (File.Exists(Path) == false)
+            {
+                FileInfo file = new FileInfo(Path);
+                if (file.Directory.Exists == false)
+                    file.Directory.Create();
+                using FileStream fs = file.Create();
+                await fs.WriteAsync(new byte[] { (byte)'{', (byte)'}' });
+            }
+            using (FileStream fs = File.OpenRead(Path))
+            {
+                var helper = await JsonSerializer.DeserializeAsync<SettingsContainerHelper>(fs);
+                Settings = new SettingsContainer(helper);
+            }
+            return MessageProvider.Success();
         }
         public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter)
         {
-            var buse = new BackUpSettings(path);
-            var get = await buse.GetSettings();
-            if (!get.IsSuccess(messagePrinter))
-                return (null, get);
-
-            return (buse, MessageProvider.Success());
-        }
-        public override string ToString()
-        {
-            string r = String.Empty;
-            r += $"Path: {Path}{Environment.NewLine}";
-            r += $"BackUpPaths:{Environment.NewLine}";
-            for (int i = 0; i < settings.BackUpPaths.Length; i++)
-            {
-                r += $" - {settings.BackUpPaths[i]}{Environment.NewLine}";
-            }
-            return r;
-        }
-        public async Task<MessageHandler> Create(MessagePrinter messagePrinter)
-        {
-            settings = new Settings { BackUpPaths = new string[] { } };
-            var save = await SaveSettings();
-            if (!save.IsSuccess(messagePrinter))
-                return save;
-
-            var get = await GetSettings();
-            if (!get.IsSuccess(messagePrinter))
-                return get;
-
-            return MessageProvider.Success();
-        }
-        private async IAsyncEnumerable<string?> ReadFromFile()
-        {
-            using StreamReader sr = new StreamReader(Path);
-            while (!sr.EndOfStream)
-            {
-                string? line = await sr.ReadLineAsync();
-
-                yield return line;
-            }
-            sr.Close();
-        }
-        public async Task<MessageHandler> GetSettings()
-        {
-            int state = 0;
-            await foreach (string? line in ReadFromFile())
-            {
-                if (line is null)
-                    return MessageProvider.InvalidMethodExecution(null, null, "ReadLine returned null, when EOF was not detected.");
-
-                if (line.StartsWith(';'))
-                    continue;
-
-                switch (state)
-                {
-                    case 0:
-                        {
-                            if (line != FileIdentifier)
-                                return MessageProvider.InvalidFileFormat(Path, 1);
-
-                            state++;
-                            break;
-                        }
-                    case 1:
-                        {
-                            if (!line.StartsWith('*'))
-                                return MessageProvider.InvalidFileFormat(Path, 2);
-
-                            string[] parameters = line.Substring(1).Split('|', StringSplitOptions.RemoveEmptyEntries);
-                            int version = -1;
-                            for (int i = 0; i < parameters.Length; i++)
-                            {
-                                string[] param = parameters[i].Split(':');
-                                if (param.Length != 2)
-                                    return MessageProvider.InvalidFileFormat(Path, 2);
-
-                                switch (param[0])
-                                {
-                                    case "version":
-                                        version = Convert.ToInt32(param[1]);
-                                        break;
-                                    default:
-                                        return MessageProvider.InvalidFileFormat(Path, 2);
-                                }
-                            }
-                            if (version != RequiredVersion)
-                                return MessageProvider.InvalidFileVersion(Path, RequiredVersion, version);
-
-                            state++;
-                            break;
-                        }
-                    case 2:
-                        {
-                            string[] setting = line.Split('?');
-                            if (setting.Length != 2)
-                                return MessageProvider.InvalidFileFormat(Path, line);
-
-                            switch (setting[0])
-                            {
-                                case "paths":
-                                    string[] paths = setting[1].Split('|', StringSplitOptions.RemoveEmptyEntries);
-                                    settings.BackUpPaths = paths;
-                                    break;
-                                default:
-                                    return MessageProvider.InvalidFileFormat(Path, line);
-                            }
-                            break;
-                        }
-                }
-            }
-            return MessageProvider.Success();
-        }
-        public async Task<MessageHandler> SaveSettings()
-        {
-            if (!File.Exists(Path))
-            {
-                if (!Directory.Exists((new FileInfo(Path).Directory).FullName))
-                    Directory.CreateDirectory((new FileInfo(Path).Directory).FullName);
-
-                var f = File.Create(Path);
-                f.Close();
-            }
-
-            using (StreamWriter sw = new StreamWriter(Path))
-            {
-                await sw.WriteAsync(ConstantValues.DEFAULT_BACKUP_SETTINGS_FILE);
-                for (int i = 0; i < settings.BackUpPaths.Length; i++)
-                {
-                    await sw.WriteAsync(settings.BackUpPaths[i] + "|");
-                }
-                sw.Close();
-            }
-            return MessageProvider.Success();
+            var settings = new BackUpSettings(path);
+            var message = await settings.GetSettings();
+            if (message.IsSuccess(messagePrinter) == false)
+                return (null, message);
+            return (settings, MessageProvider.Success());
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using BackingUpConsole.Utilities.Commands;
+﻿using BackingUpConsole.CoreFunctions;
+using BackingUpConsole.Utilities.Commands;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -160,5 +161,9 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler SettingsUpdated(bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsUpdated,
                                                                                                 $"The selected settings file has successfully been updated.",
                                                                                                 MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler InvalidEditType(SettingsProperty.UsedType type, BackUpSettings.EditType editType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidEditType,
+                                                                                                                                                                               $"The applied edit type '{editType}' is not available for property of type '{type}'.",
+                                                                                                                                                                               MessageCollections.Levels.Error,
+                                                                                                                                                                               silent: silent);
     }
 }
