@@ -107,5 +107,7 @@ namespace BackingUpConsole.CoreFunctions
             if ((initialValue is null) == false)
                 Value = initialValue;
         }
+        public override bool Equals(object? obj) => obj is SettingsProperty prop ? Value == prop.Value : Value == obj;
+        public override int GetHashCode() => Value.GetHashCode();
     }
 }

@@ -90,7 +90,7 @@ namespace BackingUpConsole.CoreFunctions
 
             field.Value = editType switch
             {
-                EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
+                EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Contains(new SettingsProperty(field.TypeOfArray ?? SettingsProperty.UsedType.Integer, value)) ? field.Value : ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
                 EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value where entry.Value 
                                                   != (field.TypeOfArray switch
                                                   {
