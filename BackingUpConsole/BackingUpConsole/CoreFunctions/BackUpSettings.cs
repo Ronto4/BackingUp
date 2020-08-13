@@ -91,7 +91,15 @@ namespace BackingUpConsole.CoreFunctions
             field.Value = editType switch
             {
                 EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
-                EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value where entry.Value != (field.TypeOfArray == SettingsProperty.UsedType.String ? (dynamic)value : (field.TypeOfArray == SettingsProperty.UsedType.Integer ? Convert.ToInt32(value) : Convert.ToDouble(value))) select entry).ToArray(),
+                EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value where entry.Value 
+                                                  != (field.TypeOfArray switch
+                                                  {
+                                                      SettingsProperty.UsedType.String => (dynamic)value,
+                                                      SettingsProperty.UsedType.Integer => (dynamic)Convert.ToInt32(value),
+                                                      SettingsProperty.UsedType.FloatingPoint => (dynamic)Convert.ToDouble(value),
+                                                      _ => throw new ArgumentException("Unsupported ArrayType.")
+                                                  })
+                                                  select entry).ToArray(),
                 EditType.SetFieldToValue => value,
                 _ => throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.")
             };
