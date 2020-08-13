@@ -169,5 +169,9 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                                                                        $"The given file '{path}' is of type '{typeReceived}' but type '{typeRequired}' was required.",
                                                                                                                                                        MessageCollections.Levels.Error,
                                                                                                                                                        silent: silent);
+        public static MessageHandler InvalidJsonFileFormat(string path, string jsonError, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidJsonFileFormat,
+                                                                                                                                     $"The JSON file at '{path}' is invalid. JSON Error: {jsonError}",
+                                                                                                                                     MessageCollections.Levels.Error,
+                                                                                                                                     silent: silent);
     }
 }

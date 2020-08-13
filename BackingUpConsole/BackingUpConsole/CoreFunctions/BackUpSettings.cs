@@ -146,12 +146,19 @@ namespace BackingUpConsole.CoreFunctions
             }
             using (FileStream fs = File.OpenRead(Path))
             {
-                var helper = await JsonSerializer.DeserializeAsync<SettingsContainerHelper>(fs);
-                SettingsContainer oldSettings = Settings;
-                Settings = new SettingsContainer(helper);
-                var validate = Settings.Validate(Path);
-                if (validate.IsSuccess(messagePrinter) == false)
-                    return validate;
+                try
+                {
+                    var helper = await JsonSerializer.DeserializeAsync<SettingsContainerHelper>(fs);
+                    SettingsContainer oldSettings = Settings;
+                    Settings = new SettingsContainer(helper);
+                    var validate = Settings.Validate(Path);
+                    if (validate.IsSuccess(messagePrinter) == false)
+                        return validate;
+                }
+                catch (JsonException ex)
+                {
+                    return MessageProvider.InvalidJsonFileFormat(Path, ex.Message);
+                }
             }
             return MessageProvider.Success();
         }
