@@ -162,8 +162,12 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                 $"The selected settings file has successfully been updated.",
                                                                                                 MessageCollections.Levels.Information, silent: silent);
         public static MessageHandler InvalidEditType(SettingsProperty.UsedType type, BackUpSettings.EditType editType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidEditType,
-                                                                                                                                                                               $"The applied edit type '{editType}' is not available for property of type '{type}'.",
-                                                                                                                                                                               MessageCollections.Levels.Error,
-                                                                                                                                                                               silent: silent);
+                                                                                                                                                                  $"The applied edit type '{editType}' is not available for property of type '{type}'.",
+                                                                                                                                                                  MessageCollections.Levels.Error,
+                                                                                                                                                                  silent: silent);
+        public static MessageHandler InvalidFileType(string path, string typeRequired, string typeReceived, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileType,
+                                                                                                                                                       $"The given file '{path}' is of type '{typeReceived}' but type '{typeRequired}' was required.",
+                                                                                                                                                       MessageCollections.Levels.Error,
+                                                                                                                                                       silent: silent);
     }
 }

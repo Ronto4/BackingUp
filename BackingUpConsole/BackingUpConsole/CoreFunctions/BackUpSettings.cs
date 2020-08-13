@@ -21,6 +21,7 @@ namespace BackingUpConsole.CoreFunctions
         }
         public class SettingsContainer
         {
+            // Properties
             public string FileType { get => Fields[nameof(FileType)].Value; set => Fields[nameof(FileType)].Value = value; }
             public int FileVersion { get => Fields[nameof(FileVersion)].Value; set => Fields[nameof(FileVersion)].Value = value; }
             public string SettingsName { get => Fields[nameof(SettingsName)].Value; set => Fields[nameof(SettingsName)].Value = value; }
@@ -40,6 +41,9 @@ namespace BackingUpConsole.CoreFunctions
                 {"excluded-extensions", nameof(BlacklistedExtensions) },
                 {"name", nameof(SettingsName) }
             };
+            internal static int RequiredFileVersion => 1;
+            internal static string RequiredFileType => "BackUpSettings";
+            // Constructors
             internal SettingsContainer(SettingsContainerHelper helper)
             {
                 Paths = helper.Paths;
@@ -49,6 +53,15 @@ namespace BackingUpConsole.CoreFunctions
                 FileVersion = helper.FileVersion;
             }
             public SettingsContainer() { } 
+            // Methods
+            internal MessageHandler Validate(string path)
+            {
+                if (RequiredFileVersion != FileVersion)
+                    return MessageProvider.InvalidFileVersion(path, RequiredFileVersion, FileVersion);
+                if (RequiredFileType != FileType)
+                    return MessageProvider.InvalidFileType(path, RequiredFileType, FileType);
+                return MessageProvider.Success();
+            }
         }
         public enum EditType
         {
@@ -121,7 +134,7 @@ namespace BackingUpConsole.CoreFunctions
             }
             return MessageProvider.Success();
         }
-        private async Task<MessageHandler> GetSettings()
+        private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter)
         {
             if (File.Exists(Path) == false)
             {
@@ -134,14 +147,18 @@ namespace BackingUpConsole.CoreFunctions
             using (FileStream fs = File.OpenRead(Path))
             {
                 var helper = await JsonSerializer.DeserializeAsync<SettingsContainerHelper>(fs);
+                SettingsContainer oldSettings = Settings;
                 Settings = new SettingsContainer(helper);
+                var validate = Settings.Validate(Path);
+                if (validate.IsSuccess(messagePrinter) == false)
+                    return validate;
             }
             return MessageProvider.Success();
         }
         public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter)
         {
             var settings = new BackUpSettings(path);
-            var message = await settings.GetSettings();
+            var message = await settings.GetSettings(messagePrinter);
             if (message.IsSuccess(messagePrinter) == false)
                 return (null, message);
             return (settings, MessageProvider.Success());

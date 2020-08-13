@@ -48,7 +48,8 @@ namespace BackingUpConsole.Utilities.Messages
             ParameterDoesNotExist,
             UnknownSettingsUsage,
             SettingsUpdated,
-            InvalidEditType
+            InvalidEditType,
+            InvalidFileType
         }
         public enum Levels
         {
