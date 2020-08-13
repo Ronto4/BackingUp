@@ -97,6 +97,7 @@ namespace BackingUpConsole.CoreFunctions
                                                       SettingsProperty.UsedType.String => (dynamic)value,
                                                       SettingsProperty.UsedType.Integer => (dynamic)Convert.ToInt32(value),
                                                       SettingsProperty.UsedType.FloatingPoint => (dynamic)Convert.ToDouble(value),
+                                                      SettingsProperty.UsedType.Boolean => (dynamic)Convert.ToBoolean(value),
                                                       _ => throw new ArgumentException("Unsupported ArrayType.")
                                                   })
                                                   select entry).ToArray(),

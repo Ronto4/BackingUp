@@ -11,7 +11,8 @@ namespace BackingUpConsole.CoreFunctions
             Integer,
             FloatingPoint,
             String,
-            Array
+            Array,
+            Boolean
         }
         public UsedType Type { get; set; }
         public UsedType? TypeOfArray { get; set; }
@@ -19,6 +20,7 @@ namespace BackingUpConsole.CoreFunctions
         private string StringValue = string.Empty;
         private double FloatingPointValue = 0.0f;
         private SettingsProperty[] ArrayValue = new SettingsProperty[0];
+        private bool BooleanValue = false;
         public dynamic Value
         {
             get =>
@@ -28,6 +30,7 @@ namespace BackingUpConsole.CoreFunctions
                     UsedType.FloatingPoint => FloatingPointValue,
                     UsedType.String => StringValue,
                     UsedType.Array => ArrayValue,
+                    UsedType.Boolean => BooleanValue,
                     _ => throw new NotImplementedException()
                 };
             set
@@ -72,6 +75,9 @@ namespace BackingUpConsole.CoreFunctions
                         }
                         ArrayValue = array.ToArray();
                         break;
+                    case UsedType.Boolean:
+                        BooleanValue = value is JsonElement elb ? elb.GetBoolean() : Convert.ToBoolean(value);
+                        break;
                 }
             }
         }
@@ -79,10 +85,12 @@ namespace BackingUpConsole.CoreFunctions
         public static implicit operator int(SettingsProperty prop) => prop.Type == UsedType.Integer ? prop.Value : throw new InvalidCastException($"SettingsProperty is of type {prop.Type} and thus cannot be converted to int.");
         public static implicit operator double(SettingsProperty prop) => prop.Type == UsedType.FloatingPoint ? prop.Value : throw new InvalidCastException($"SettingsProperty is of type {prop.Type} and thus cannot be converted to float.");
         public static implicit operator SettingsProperty[](SettingsProperty prop) => prop.Type == UsedType.Array ? prop.Value : throw new InvalidCastException($"SettingsProperty is of type {prop.Type} and thus cannot be converted to Array.");
+        public static implicit operator bool(SettingsProperty prop) => prop.Type == UsedType.Boolean ? prop.Value : throw new InvalidCastException($"SettingsProperty is of type {prop.Type} and thus cannot be converted to Boolean.");
         public static implicit operator SettingsProperty(string value) => new SettingsProperty(UsedType.String, value);
         public static implicit operator SettingsProperty(int value) => new SettingsProperty(UsedType.Integer, value);
         public static implicit operator SettingsProperty(double value) => new SettingsProperty(UsedType.FloatingPoint, value);
         public static implicit operator SettingsProperty(SettingsProperty[] value) => new SettingsProperty(UsedType.Array, value, value.Length > 0 ? value[0].Type : UsedType.Integer);
+        public static implicit operator SettingsProperty(bool value) => new SettingsProperty(UsedType.Boolean, value);
         public SettingsProperty()
         {
         }
