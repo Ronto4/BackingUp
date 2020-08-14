@@ -173,5 +173,9 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                                                      $"The JSON file at '{path}' is invalid. JSON Error: {jsonError}",
                                                                                                                                      MessageCollections.Levels.Error,
                                                                                                                                      silent: silent);
+        public static MessageHandler InvalidType(string varname, SettingsProperty.UsedType requiredType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidType,
+                                                                                                                                                    $"The variable '{varname}' cannot be converted to the required type '{requiredType}'.",
+                                                                                                                                                    MessageCollections.Levels.Error,
+                                                                                                                                                    silent: silent);
     }
 }

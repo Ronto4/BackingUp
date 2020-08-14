@@ -100,23 +100,30 @@ namespace BackingUpConsole.CoreFunctions
         {
             if (((editType == EditType.AddValueToField || editType == EditType.RemoveValueFromField) && field.Type != SettingsProperty.UsedType.Array) || (editType == EditType.SetFieldToValue && field.Type == SettingsProperty.UsedType.Array))
                 return MessageProvider.InvalidEditType(field.Type, editType);
-
-            field.Value = editType switch
+            try
             {
-                EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Contains(new SettingsProperty(field.TypeOfArray ?? SettingsProperty.UsedType.Integer, value)) ? field.Value : ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
-                EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value where entry.Value 
-                                                  != (field.TypeOfArray switch
-                                                  {
-                                                      SettingsProperty.UsedType.String => (dynamic)value,
-                                                      SettingsProperty.UsedType.Integer => (dynamic)Convert.ToInt32(value),
-                                                      SettingsProperty.UsedType.FloatingPoint => (dynamic)Convert.ToDouble(value),
-                                                      SettingsProperty.UsedType.Boolean => (dynamic)Convert.ToBoolean(value),
-                                                      _ => throw new ArgumentException("Unsupported ArrayType.")
-                                                  })
-                                                  select entry).ToArray(),
-                EditType.SetFieldToValue => value,
-                _ => throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.")
-            };
+                field.Value = editType switch
+                {
+                    EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Contains(new SettingsProperty(field.TypeOfArray ?? SettingsProperty.UsedType.Integer, value)) ? field.Value : ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
+                    EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value
+                                                        where entry.Value
+                                                        != (field.TypeOfArray switch
+                                                        {
+                                                            SettingsProperty.UsedType.String => (dynamic)value,
+                                                            SettingsProperty.UsedType.Integer => (dynamic)Convert.ToInt32(value),
+                                                            SettingsProperty.UsedType.FloatingPoint => (dynamic)Convert.ToDouble(value),
+                                                            SettingsProperty.UsedType.Boolean => (dynamic)Convert.ToBoolean(value),
+                                                            _ => throw new ArgumentException("Unsupported ArrayType.")
+                                                        })
+                                                        select entry).ToArray(),
+                    EditType.SetFieldToValue => value,
+                    _ => throw new ArgumentOutOfRangeException(nameof(editType), editType, "Unknown editType.")
+                };
+            }
+            catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+            {
+                return MessageProvider.InvalidType("value", field.TypeOfArray ?? field.Type);
+            }
             var save = await SaveSettings();
             if (save.IsSuccess(messagePrinter) == false)
                 return save;

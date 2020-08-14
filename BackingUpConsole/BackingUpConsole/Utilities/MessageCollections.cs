@@ -50,7 +50,8 @@ namespace BackingUpConsole.Utilities.Messages
             SettingsUpdated,
             InvalidEditType,
             InvalidFileType,
-            InvalidJsonFileFormat
+            InvalidJsonFileFormat,
+            InvalidType
         }
         public enum Levels
         {
