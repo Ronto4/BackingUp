@@ -1,4 +1,5 @@
-﻿using BackingUpConsole.Utilities.Messages;
+﻿using BackingUpConsole.Utilities;
+using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -176,6 +177,14 @@ namespace BackingUpConsole.CoreFunctions
             if (message.IsSuccess(messagePrinter) == false)
                 return (null, message);
             return (settings, MessageProvider.Success());
+        }
+        public override string ToString()
+        {
+            string result = string.Empty;
+            result += $"Path: {Path}{Environment.NewLine}";
+            result += $"Selected paths:{Environment.NewLine}\t{Settings.Paths.CustomToString($"{Environment.NewLine}\t")}{Environment.NewLine}";
+            result += $"Blacklisted extensions:{Environment.NewLine}\t{Settings.BlacklistedExtensions.CustomToString($"{Environment.NewLine}\t")}{Environment.NewLine}";
+            return result;
         }
     }
 }
