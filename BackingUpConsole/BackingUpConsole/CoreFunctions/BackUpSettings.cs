@@ -26,15 +26,15 @@ namespace BackingUpConsole.CoreFunctions
             public string FileType { get => Fields[nameof(FileType)].Value; set => Fields[nameof(FileType)].Value = value; }
             public int FileVersion { get => Fields[nameof(FileVersion)].Value; set => Fields[nameof(FileVersion)].Value = value; }
             public string SettingsName { get => Fields[nameof(SettingsName)].Value; set => Fields[nameof(SettingsName)].Value = value; }
-            public List<string> Paths { get => ((IEnumerable<SettingsProperty>)Fields[nameof(Paths)].Value).Select<SettingsProperty, string>(prop => prop.Value).ToList();  set => Fields[nameof(Paths)].Value = value; }
-            public List<string> BlacklistedExtensions { get => ((IEnumerable<SettingsProperty>)Fields[nameof(BlacklistedExtensions)].Value).Select<SettingsProperty, string>(prop => prop.Value).ToList(); set => Fields[nameof(BlacklistedExtensions)].Value = value; }
-            internal Dictionary<string, SettingsProperty> Fields = new Dictionary<string, SettingsProperty>()
+            public List<string> Paths { get => ((IEnumerable<DynamicJsonProperty>)Fields[nameof(Paths)].Value).Select<DynamicJsonProperty, string>(prop => prop.Value).ToList();  set => Fields[nameof(Paths)].Value = value; }
+            public List<string> BlacklistedExtensions { get => ((IEnumerable<DynamicJsonProperty>)Fields[nameof(BlacklistedExtensions)].Value).Select<DynamicJsonProperty, string>(prop => prop.Value).ToList(); set => Fields[nameof(BlacklistedExtensions)].Value = value; }
+            internal Dictionary<string, DynamicJsonProperty> Fields = new Dictionary<string, DynamicJsonProperty>()
             {
-                {nameof(Paths), new SettingsProperty(SettingsProperty.UsedType.Array, new string[0], SettingsProperty.UsedType.String) },
-                {nameof(BlacklistedExtensions), new SettingsProperty(SettingsProperty.UsedType.Array, new string[0], SettingsProperty.UsedType.String) },
-                {nameof(FileType), new SettingsProperty(SettingsProperty.UsedType.String, string.Empty) },
-                {nameof(SettingsName), new SettingsProperty(SettingsProperty.UsedType.String, string.Empty) },
-                {nameof(FileVersion), new SettingsProperty(SettingsProperty.UsedType.Integer, 0) }
+                {nameof(Paths), new DynamicJsonProperty(DynamicJsonProperty.UsedType.Array, new string[0], DynamicJsonProperty.UsedType.String) },
+                {nameof(BlacklistedExtensions), new DynamicJsonProperty(DynamicJsonProperty.UsedType.Array, new string[0], DynamicJsonProperty.UsedType.String) },
+                {nameof(FileType), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(SettingsName), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(FileVersion), new DynamicJsonProperty(DynamicJsonProperty.UsedType.Integer, 0) }
             };
             internal static Dictionary<string, string> NameTranslate = new Dictionary<string, string>()
             {
@@ -100,29 +100,29 @@ namespace BackingUpConsole.CoreFunctions
             bool success = SettingsContainer.NameTranslate.TryGetValue(fieldName, out string? fieldNameQualified);
             if (success == false)
                 return MessageProvider.ParameterDoesNotExist(fieldName);
-            SettingsProperty field = Settings.Fields[fieldNameQualified!];
+            DynamicJsonProperty field = Settings.Fields[fieldNameQualified!];
             success = EditTypes.TryGetValue(editType, out EditType type);
             if (success == false)
                 return MessageProvider.UnknownSettingsUsage(editType);
             return await UpdateSettings(value, field, type, messagePrinter);
         }
-        private async Task<MessageHandler> UpdateSettings(string value, SettingsProperty field, EditType editType, MessagePrinter messagePrinter)
+        private async Task<MessageHandler> UpdateSettings(string value, DynamicJsonProperty field, EditType editType, MessagePrinter messagePrinter)
         {
-            if (((editType == EditType.AddValueToField || editType == EditType.RemoveValueFromField) && field.Type != SettingsProperty.UsedType.Array) || (editType == EditType.SetFieldToValue && field.Type == SettingsProperty.UsedType.Array))
+            if (((editType == EditType.AddValueToField || editType == EditType.RemoveValueFromField) && field.Type != DynamicJsonProperty.UsedType.Array) || (editType == EditType.SetFieldToValue && field.Type == DynamicJsonProperty.UsedType.Array))
                 return MessageProvider.InvalidEditType(field.Type, editType);
             try
             {
                 field.Value = editType switch
                 {
-                    EditType.AddValueToField => ((SettingsProperty[])field.Value).Cast<dynamic>().Contains(new SettingsProperty(field.TypeOfArray ?? SettingsProperty.UsedType.Integer, value)) ? field.Value : ((SettingsProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
-                    EditType.RemoveValueFromField => (from entry in (SettingsProperty[])field.Value
+                    EditType.AddValueToField => ((DynamicJsonProperty[])field.Value).Cast<dynamic>().Contains(new DynamicJsonProperty(field.TypeOfArray ?? DynamicJsonProperty.UsedType.Integer, value)) ? field.Value : ((DynamicJsonProperty[])field.Value).Cast<dynamic>().Append(value).ToArray(),
+                    EditType.RemoveValueFromField => (from entry in (DynamicJsonProperty[])field.Value
                                                         where entry.Value
                                                         != (field.TypeOfArray switch
                                                         {
-                                                            SettingsProperty.UsedType.String => (dynamic)value,
-                                                            SettingsProperty.UsedType.Integer => (dynamic)Convert.ToInt32(value),
-                                                            SettingsProperty.UsedType.FloatingPoint => (dynamic)Convert.ToDouble(value),
-                                                            SettingsProperty.UsedType.Boolean => (dynamic)Convert.ToBoolean(value),
+                                                            DynamicJsonProperty.UsedType.String => (dynamic)value,
+                                                            DynamicJsonProperty.UsedType.Integer => (dynamic)Convert.ToInt32(value),
+                                                            DynamicJsonProperty.UsedType.FloatingPoint => (dynamic)Convert.ToDouble(value),
+                                                            DynamicJsonProperty.UsedType.Boolean => (dynamic)Convert.ToBoolean(value),
                                                             _ => throw new ArgumentException("Unsupported ArrayType.")
                                                         })
                                                         select entry).ToArray(),

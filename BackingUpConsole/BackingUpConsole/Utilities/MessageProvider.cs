@@ -161,7 +161,7 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler SettingsUpdated(bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsUpdated,
                                                                                                 $"The selected settings file has successfully been updated.",
                                                                                                 MessageCollections.Levels.Information, silent: silent);
-        public static MessageHandler InvalidEditType(SettingsProperty.UsedType type, BackUpSettings.EditType editType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidEditType,
+        public static MessageHandler InvalidEditType(DynamicJsonProperty.UsedType type, BackUpSettings.EditType editType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidEditType,
                                                                                                                                                                   $"The applied edit type '{editType}' is not available for property of type '{type}'.",
                                                                                                                                                                   MessageCollections.Levels.Error,
                                                                                                                                                                   silent: silent);
@@ -173,7 +173,7 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                                                      $"The JSON file at '{path}' is invalid. JSON Error: {jsonError}",
                                                                                                                                      MessageCollections.Levels.Error,
                                                                                                                                      silent: silent);
-        public static MessageHandler InvalidType(string varname, SettingsProperty.UsedType requiredType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidType,
+        public static MessageHandler InvalidType(string varname, DynamicJsonProperty.UsedType requiredType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidType,
                                                                                                                                                     $"The variable '{varname}' cannot be converted to the required type '{requiredType}'.",
                                                                                                                                                     MessageCollections.Levels.Error,
                                                                                                                                                     silent: silent);
