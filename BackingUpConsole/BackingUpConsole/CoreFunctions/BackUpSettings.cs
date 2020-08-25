@@ -63,15 +63,12 @@ namespace BackingUpConsole.CoreFunctions
                     return MessageProvider.InvalidFileType(path, RequiredFileType, FileType);
                 return MessageProvider.Success();
             }
-            public string PropertyToString(string name)
+            public string PropertyToString(string name) => name switch
             {
-                return name switch
-                {
-                    "paths" => $"{Environment.NewLine}\t{Paths.CustomToString($"{Environment.NewLine}\t")}",
-                    "excluded-extensions" => BlacklistedExtensions.CustomToString(),
-                    _ => throw new ArgumentException($"Unknown property '{name}'.")
-                };
-            }
+                "paths" => $"{Environment.NewLine}\t{Paths.CustomToString($"{Environment.NewLine}\t")}",
+                "excluded-extensions" => BlacklistedExtensions.CustomToString(),
+                _ => throw new ArgumentException($"Unknown property '{name}'.")
+            };
         }
         public enum EditType
         {
