@@ -148,7 +148,7 @@ namespace BackingUpConsole.CoreFunctions
             }
             return MessageProvider.Success();
         }
-        private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter)
+        private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter, bool skipValidation = false)
         {
             if (File.Exists(Path) == false)
             {
@@ -165,9 +165,12 @@ namespace BackingUpConsole.CoreFunctions
                     var helper = await JsonSerializer.DeserializeAsync<SettingsContainerHelper>(fs);
                     SettingsContainer oldSettings = Settings;
                     Settings = new SettingsContainer(helper);
-                    var validate = Settings.Validate(Path);
-                    if (validate.IsSuccess(messagePrinter) == false)
-                        return validate;
+                    if (skipValidation == false)
+                    {
+                        var validate = Settings.Validate(Path);
+                        if (validate.IsSuccess(messagePrinter) == false)
+                            return validate;
+                    }
                 }
                 catch (JsonException ex)
                 {
@@ -176,12 +179,25 @@ namespace BackingUpConsole.CoreFunctions
             }
             return MessageProvider.Success();
         }
-        public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter)
+        public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter, bool firstCreation = false)
         {
             var settings = new BackUpSettings(path);
-            var message = await settings.GetSettings(messagePrinter);
+            var message = await settings.GetSettings(messagePrinter, firstCreation);
             if (message.IsSuccess(messagePrinter) == false)
                 return (null, message);
+
+            if (firstCreation)
+            {
+                settings.Settings.FileVersion = 1;
+                settings.Settings.FileType = "BackUpSettings";
+                MessageHandler save = await settings.SaveSettings();
+                if (save.IsSuccess(messagePrinter) == false)
+                    return (null, save);
+
+                var reget = await settings.GetSettings(messagePrinter);
+                if (reget.IsSuccess(messagePrinter) == false)
+                    return (null, reget);
+            }
             return (settings, MessageProvider.Success());
         }
         public override string ToString()

@@ -73,7 +73,7 @@ namespace BackingUpConsole
             if (message == (compile ? MessageProvider.ParsingBackupChanged() : MessageProvider.BackupChanged()))
             {
                 string newPath = compile ? message.Message.Split("> ")[1] : message.Message.Split("th: ")[1];
-                (MessageHandler m, BackUpFile? bu) = await BackUpFile.GetFromFile(newPath, messagePrinter);
+                (BackUpFile? bu, MessageHandler m) = await BackUpFile.GetFromFile(newPath, messagePrinter);
                 if (!m.IsSuccess(messagePrinter, compile))
                     return (m, paths);
 

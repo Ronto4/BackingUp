@@ -62,17 +62,17 @@ namespace BackingUpConsole.CoreFunctions.Commands
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             if (args.CheckLength(1, 1))
-                return MessageProvider.Message($"Currently selected settings:{Environment.NewLine}{paths.SelectedBackup!.Settings}");
+                return MessageProvider.Message($"Currently selected settings:{Environment.NewLine}{paths.SelectedBackup!.Settings}", color: ConsoleColor.White, silent: !flags.IsSet(Flags.VERBOSE));
 
             if (args.CheckLength(2, 2))
             {
                 if (args[1] == "path")
-                    return MessageProvider.Message($"Path of currently selected settings: {paths.SelectedBackup!.Settings.Path}");
+                    return MessageProvider.Message($"Path of currently selected settings: {paths.SelectedBackup!.Settings!.Path}");
 
-                return MessageProvider.Message($"Property '{args[1]}' of currently selected settings: {paths.SelectedBackup!.Settings.Settings.PropertyToString(args[1])}");
+                return MessageProvider.Message($"Property '{args[1]}' of currently selected settings: {paths.SelectedBackup!.Settings!.Settings.PropertyToString(args[1])}");
             }
 
-            var run = await paths.SelectedBackup!.Settings.UpdateSettings(args[3], args[1], args[2], messagePrinter);
+            var run = await paths.SelectedBackup!.Settings!.UpdateSettings(args[3], args[1], args[2], messagePrinter);
             if (!run.IsSuccess(messagePrinter))
                 return run;
 

@@ -56,7 +56,7 @@ namespace BackingUpConsole.Utilities
             {
                 result += $"{enumerator.Current}{delimiter}";
             }
-            result = result.Substring(0, result.Length - delimiter.Length);
+            result = result.Substring(0, Math.Max(result.Length - delimiter.Length, 0));
             return result;
         }
     }

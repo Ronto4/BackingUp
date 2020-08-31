@@ -48,16 +48,18 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!dir.Exists)
                 dir.Create();
 
-            string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
-            origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
+            //string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
+            //origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
 
             string path = PathHandler.Combine(dir.FullName, @"container.bu");
 
-            using (FileStream fs = File.Create(path))
-            {
-                await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
-            }
-            await BackUpFile.GetFromFile(path, messagePrinter, true);
+            //using (FileStream fs = File.Create(path))
+            //{
+            //    await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
+            //}
+            (_, MessageHandler getFromFile) = await BackUpFile.GetFromFile(path, messagePrinter, true);
+            if (getFromFile.IsSuccess(messagePrinter) == false)
+                return getFromFile;
 
             if (args.Length > 2)
             {
