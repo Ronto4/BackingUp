@@ -190,6 +190,7 @@ namespace BackingUpConsole.CoreFunctions
             {
                 settings.Settings.FileVersion = 1;
                 settings.Settings.FileType = "BackUpSettings";
+                settings.Settings.SettingsName = "Default Settings, created by BackingUpConsole";
                 MessageHandler save = await settings.SaveSettings();
                 if (save.IsSuccess(messagePrinter) == false)
                     return (null, save);
