@@ -177,5 +177,9 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                                                                     $"The variable '{varname}' cannot be converted to the required type '{requiredType}'.",
                                                                                                                                                     MessageCollections.Levels.Error,
                                                                                                                                                     silent: silent);
+        public static MessageHandler BackUpSettingsSelected(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackUpSettingsSelected,
+                                                                                                                    $"SUccessfully selected the settings at '{name}'.",
+                                                                                                                    MessageCollections.Levels.Information,
+                                                                                                                    silent: silent);
     }
 }

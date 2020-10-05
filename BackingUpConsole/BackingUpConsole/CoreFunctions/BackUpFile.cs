@@ -118,6 +118,22 @@ namespace BackingUpConsole.CoreFunctions
             }
             return (settings, MessageProvider.Success());
         }
+        internal async Task<MessageHandler> SetSettingsFromFile(string buseName, MessagePrinter messagePrinter)
+        {
+            string currentSettings = FileContainer.SelectedBackupSettings;
+            FileContainer.SelectedBackupSettings = $"{buseName}.buse";
+            MessageHandler result = await GetSettings(messagePrinter);
+            if (result.IsSuccess(messagePrinter) == true)
+                return result;
+
+            FileContainer.SelectedBackupSettings = buseName;
+            result = await GetSettings(messagePrinter);
+            if (result.IsSuccess(messagePrinter) == true)
+                return result;
+
+            FileContainer.SelectedBackupSettings = currentSettings;
+            return result;
+        }
         private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter)
         {
             (BackUpSettings? settings, MessageHandler result) = await BackUpSettings.GetFromFile(PathHandler.Combine(FileContainer.SettingsDir, FileContainer.SelectedBackupSettings), messagePrinter);

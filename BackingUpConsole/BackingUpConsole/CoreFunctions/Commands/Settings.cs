@@ -97,6 +97,24 @@ namespace BackingUpConsole.CoreFunctions.Commands
                         return MessageProvider.Message($"Property '{args[1]}' of currently selected settings: {paths.SelectedBackup!.Settings!.Settings.PropertyToString(args[1])}");
                 }
             }
+            if (args.CheckLength(3, 3))
+            {
+                switch (args[1])
+                {
+                    case "create":
+                        break;
+                    case "select":
+                        MessageHandler result = await paths.SelectedBackup!.SetSettingsFromFile(args[2], messagePrinter);
+                        if (result.IsSuccess(messagePrinter) == false)
+                            return result;
+
+                        return MessageProvider.BackUpSettingsSelected(args[2]);
+                    case "remove":
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             var run = await paths.SelectedBackup!.Settings!.UpdateSettings(args[3], args[1], args[2], messagePrinter);
             if (!run.IsSuccess(messagePrinter))
