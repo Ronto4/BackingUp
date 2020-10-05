@@ -1,8 +1,8 @@
 ﻿using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Messages;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions.Commands
@@ -20,9 +20,15 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (args.CheckLength(1, 1))
                 return MessageProvider.Success();
 
-            if (!paths.SelectedBackup.Settings.ParameterExists(args[1]))
+            if (!paths.SelectedBackup.Settings!.ParameterExists(args[1]))
             {
                 if (args[1] == "path")
+                {
+                    if (args.CheckLength(2, 2))
+                        return MessageProvider.Success();
+                    return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
+                }
+                if (args[1] == "list")
                 {
                     if (args.CheckLength(2, 2))
                         return MessageProvider.Success();
@@ -68,6 +74,23 @@ namespace BackingUpConsole.CoreFunctions.Commands
             {
                 if (args[1] == "path")
                     return MessageProvider.Message($"Path of currently selected settings: {paths.SelectedBackup!.Settings!.Path}");
+
+                if (args[1] == "list")
+                {
+                    //Stopwatch sw = new Stopwatch();
+                    //sw.Start();
+                    (ConcurrentQueue<BackUpSettings>? settings, MessageHandler message) = await paths.SelectedBackup!.GetAllSettingsParallel(messagePrinter);
+                    //(List<BackUpSettings>? settings, MessageHandler message) = await paths.SelectedBackup!.GetAllSettings(messagePrinter);
+                    //sw.Stop();
+                    if (message.IsSuccess(messagePrinter) == false)
+                        return message;
+
+
+                    MessageHandler r = MessageProvider.Message($"All available settings files: {settings.Select(Settings => $"\"{Settings.Settings.SettingsName}\": '{Settings.Path.Split('\\')[^1].Split('.')[0..^1].CustomToString("")}'").ToList().CustomToString()}");
+                    //Console.WriteLine($"It took {sw.ElapsedTicks} ticks ({sw.ElapsedMilliseconds} ms). Found {settings!.Count} elements.");
+                    //return MessageProvider.Success();
+                    return r;
+                }
 
                 return MessageProvider.Message($"Property '{args[1]}' of currently selected settings: {paths.SelectedBackup!.Settings!.Settings.PropertyToString(args[1])}");
             }

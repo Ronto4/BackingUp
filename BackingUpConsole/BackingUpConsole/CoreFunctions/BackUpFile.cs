@@ -1,6 +1,7 @@
 ﻿using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -83,6 +84,40 @@ namespace BackingUpConsole.CoreFunctions
             Settings = settings;
         }
         // Methods
+        public async Task<(List<BackUpSettings>?, MessageHandler)> GetAllSettings(MessagePrinter messagePrinter) // Currently unused, may be returned to function if a method is implemented to select the best GetAllSettings method.
+        {
+            List<BackUpSettings> list = new List<BackUpSettings>();
+            DirectoryInfo di = new DirectoryInfo(FileContainer.SettingsDir);
+            foreach (FileInfo fi in di.EnumerateFiles())
+            {
+                (BackUpSettings? settings, MessageHandler message) = await BackUpSettings.GetFromFile(fi.FullName, messagePrinter);
+                if (message.IsSuccess(messagePrinter) == false)
+                    return (null, message);
+
+                list.Add(settings!);
+            }
+            return (list, MessageProvider.Success());
+        }
+        public async Task<(ConcurrentQueue<BackUpSettings>?, MessageHandler)> GetAllSettingsParallel(MessagePrinter messagePrinter)
+        {
+            ConcurrentQueue<BackUpSettings> settings = new ConcurrentQueue<BackUpSettings>();
+            DirectoryInfo di = new DirectoryInfo(FileContainer.SettingsDir);
+            MessageHandler? exitMessage = null;
+            var tasks = di.EnumerateFiles().Select(async fi =>
+            {
+                (BackUpSettings? setting, MessageHandler message) = await BackUpSettings.GetFromFile(fi.FullName, messagePrinter);
+                if (message.IsSuccess(messagePrinter) == false)
+                    exitMessage = message;
+                else
+                    settings.Enqueue(setting!);
+            });
+            await Task.WhenAll(tasks);
+            if ((exitMessage is null) == false)
+            {
+                return (null, exitMessage);
+            }
+            return (settings, MessageProvider.Success());
+        }
         private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter)
         {
             (BackUpSettings? settings, MessageHandler result) = await BackUpSettings.GetFromFile(PathHandler.Combine(FileContainer.SettingsDir, FileContainer.SelectedBackupSettings), messagePrinter);
