@@ -123,15 +123,19 @@ namespace BackingUpConsole.CoreFunctions
             string currentSettings = FileContainer.SelectedBackupSettings;
             FileContainer.SelectedBackupSettings = $"{buseName}.buse";
             MessageHandler result = await GetSettings(messagePrinter);
-            if (result.IsSuccess(messagePrinter) == true)
+            if (result.IsSuccess(messagePrinter) == false)
+            {
+                FileContainer.SelectedBackupSettings = buseName;
+                result = await GetSettings(messagePrinter);
+            }
+            if (result.IsSuccess(messagePrinter) == false)
+            {
+                FileContainer.SelectedBackupSettings = currentSettings;
                 return result;
-
-            FileContainer.SelectedBackupSettings = buseName;
-            result = await GetSettings(messagePrinter);
-            if (result.IsSuccess(messagePrinter) == true)
-                return result;
-
-            FileContainer.SelectedBackupSettings = currentSettings;
+            }
+            MessageHandler message = await SaveFile();
+            if (message.IsSuccess(messagePrinter) == false)
+                return message;
             return result;
         }
         private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter)
