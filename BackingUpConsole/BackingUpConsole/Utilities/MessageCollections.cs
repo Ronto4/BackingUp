@@ -52,7 +52,9 @@ namespace BackingUpConsole.Utilities.Messages
             InvalidFileType,
             InvalidJsonFileFormat,
             InvalidType,
-            BackUpSettingsSelected
+            BackUpSettingsSelected,
+            TriedRemovingActiveFile,
+            FileRemoved
         }
         public enum Levels
         {

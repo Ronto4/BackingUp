@@ -2,6 +2,7 @@
 using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -110,7 +111,17 @@ namespace BackingUpConsole.CoreFunctions.Commands
 
                         return MessageProvider.BackUpSettingsSelected(args[2]);
                     case "remove":
-                        break;
+                        string buseName = $"{args[2]}.buse";
+                        string path = PathHandler.Combine(paths.SelectedBackup!.FileContainer.SettingsDir, buseName);
+                        if (buseName == paths.SelectedBackup!.FileContainer.SelectedBackupSettings)
+                            return MessageProvider.TriedRemovingActiveFile(path);
+
+                        MessageHandler question = MessageProvider.Message($"This action will DELETE the FILE at '{path}'.", MessageCollections.Levels.Warning);
+                        if (question.IsSuccess(messagePrinter) == false)
+                            return question;
+
+                        File.Delete(path);
+                        return MessageProvider.FileRemoved(path);
                     default:
                         break;
                 }

@@ -178,8 +178,16 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                                                                     MessageCollections.Levels.Error,
                                                                                                                                                     silent: silent);
         public static MessageHandler BackUpSettingsSelected(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackUpSettingsSelected,
-                                                                                                                    $"SUccessfully selected the settings at '{name}'.",
+                                                                                                                    $"Successfully selected the settings at '{name}'.",
                                                                                                                     MessageCollections.Levels.Information,
                                                                                                                     silent: silent);
+        public static MessageHandler TriedRemovingActiveFile(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.TriedRemovingActiveFile,
+                                                                                                                     $"Cannot remove file at '{path}' because it is still in use by this program.",
+                                                                                                                     MessageCollections.Levels.Error,
+                                                                                                                     silent: silent);
+        public static MessageHandler FileRemoved(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.FileRemoved,
+                                                                                                         $"File at '{path}' successfully removed.",
+                                                                                                         MessageCollections.Levels.Information,
+                                                                                                         silent: silent);
     }
 }
