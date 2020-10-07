@@ -103,7 +103,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 switch (args[1])
                 {
                     case "create":
-                        break;
+                        /*MessageHandler createNew =*/return await paths.SelectedBackup!.CreateNewSettings(args[2], messagePrinter);
                     case "select":
                         MessageHandler result = await paths.SelectedBackup!.SetSettingsFromFile(args[2], messagePrinter);
                         if (result.IsSuccess(messagePrinter) == false)

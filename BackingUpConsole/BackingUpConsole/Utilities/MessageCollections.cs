@@ -54,7 +54,10 @@ namespace BackingUpConsole.Utilities.Messages
             InvalidType,
             BackUpSettingsSelected,
             TriedRemovingActiveFile,
-            FileRemoved
+            FileRemoved,
+            SettingsCreated,
+            InvalidPath,
+            FileWillBeOverwritten
         }
         public enum Levels
         {

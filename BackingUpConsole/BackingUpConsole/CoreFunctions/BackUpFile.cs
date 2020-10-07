@@ -236,6 +236,52 @@ namespace BackingUpConsole.CoreFunctions
 
             return (file, MessageProvider.Success());
         }
+        public async Task<MessageHandler> CreateNewSettings(string target, MessagePrinter messagePrinter, string? from = null, string? newName = null)
+        {
+            if (Miscellaneous.FilenameForbiddenChars.Any(target.Contains))
+                return MessageProvider.InvalidPath(target);
+
+            target = PathHandler.Combine(FileContainer.SettingsDir, $"{target}.buse");
+            if (File.Exists(target))
+            {
+                MessageHandler question = MessageProvider.FileWillBeOverwritten(target);
+                if (question.IsSuccess(messagePrinter) == false)
+                    return question;
+            }
+            if ((from is null) == false)
+                from = PathHandler.Combine(FileContainer.SettingsDir, $"{from}.buse");
+
+            if (from is null)
+            {
+                (BackUpSettings? settings, MessageHandler create) = await BackUpSettings.GetFromFile(target, messagePrinter, true);
+                if (create.IsSuccess(messagePrinter) == false)
+                    return create;
+
+                if ((newName is null) == false)
+                {
+                    MessageHandler setName = await settings!.UpdateSettings(newName, "name", "set", messagePrinter);
+                    if (setName.IsSuccess(messagePrinter) == false)
+                        return setName;
+                }
+                return MessageProvider.SettingsCreated(target, settings!.Settings.SettingsName);
+            }
+            else
+            {
+                File.Copy(from, target);
+                (BackUpSettings? settings, MessageHandler get) = await BackUpSettings.GetFromFile(target, messagePrinter);
+                if (get.IsSuccess(messagePrinter) == false)
+                    return get;
+
+                MessageHandler? setName = newName is null
+                    ? await settings!.UpdateSettings($"{settings!.Settings.SettingsName} - Copy", "name", "set", messagePrinter)
+                    : await settings!.UpdateSettings(newName, "name", "set", messagePrinter);
+
+                if (setName.IsSuccess(messagePrinter) == false)
+                    return setName;
+
+                return MessageProvider.SettingsCreated(target, settings!.Settings.SettingsName);
+            }
+        }
         // TODO: Improve Clone quality
         public object Clone() => new BackUpFile(Path, FileContainer, Settings);
     }

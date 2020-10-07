@@ -189,5 +189,17 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                          $"File at '{path}' successfully removed.",
                                                                                                          MessageCollections.Levels.Information,
                                                                                                          silent: silent);
+        public static MessageHandler SettingsCreated(string path, string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsCreated,
+                                                                                                                          $"Successfully created settings '{name}' at '{path}'.",
+                                                                                                                          MessageCollections.Levels.Information,
+                                                                                                                          silent: silent);
+        public static MessageHandler InvalidPath(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidPath,
+                                                                                                         $"The given path or part of a path '{name}' contains one or more forbidden characters. These forbidden characters are the following: {Miscellaneous.FilenameForbiddenChars.CustomToString()}.",
+                                                                                                         MessageCollections.Levels.Error,
+                                                                                                         silent: silent);
+        public static MessageHandler FileWillBeOverwritten(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.FileWillBeOverwritten,
+                                                                                                                   $"The file at '{path}' already exists and will be overwritten.",
+                                                                                                                   MessageCollections.Levels.Warning,
+                                                                                                                   silent: silent);
     }
 }

@@ -59,5 +59,7 @@ namespace BackingUpConsole.Utilities
             result = result.Substring(0, Math.Max(result.Length - delimiter.Length, 0));
             return result;
         }
+
+        public static char[] FilenameForbiddenChars { get; } = new char[] { '/', '\\', ':', '*', '?', '"', '<', '>', '|' };
     }
 }
