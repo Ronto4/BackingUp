@@ -208,6 +208,7 @@ namespace BackingUpConsole.CoreFunctions
         {
             string result = string.Empty;
             result += $"Path: {Path}{Environment.NewLine}";
+            result += $"Name: {Settings.SettingsName}{Environment.NewLine}";
             result += $"Selected paths:{Environment.NewLine}\t{Settings.Paths.CustomToString($"{Environment.NewLine}\t")}{Environment.NewLine}";
             result += $"Blacklisted extensions:{Environment.NewLine}\t{Settings.BlacklistedExtensions.CustomToString($"{Environment.NewLine}\t")}{Environment.NewLine}";
             return result;
