@@ -181,6 +181,9 @@ namespace BackingUpConsole.CoreFunctions
         }
         public static async Task<(BackUpSettings?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter, bool firstCreation = false)
         {
+            if (firstCreation == false && File.Exists(path) == false)
+                return (null, MessageProvider.FileNotFound(path));
+
             var settings = new BackUpSettings(path);
             var message = await settings.GetSettings(messagePrinter, firstCreation);
             if (message.IsSuccess(messagePrinter) == false)
