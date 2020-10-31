@@ -127,6 +127,9 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 }
             }
 
+            if (args[1] == "create")
+                return await paths.SelectedBackup!.CreateNewSettings(args[2], messagePrinter, args[3]);
+
             var run = await paths.SelectedBackup!.Settings!.UpdateSettings(args[3], args[1], args[2], messagePrinter);
             if (!run.IsSuccess(messagePrinter))
                 return run;
