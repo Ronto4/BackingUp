@@ -201,5 +201,9 @@ namespace BackingUpConsole.Utilities.Messages
                                                                                                                    $"The file at '{path}' already exists and will be overwritten.",
                                                                                                                    MessageCollections.Levels.Warning,
                                                                                                                    silent: silent);
+        public static MessageHandler SettingsFileNamesIdentical(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsFileNamesIdentical,
+                                                                                                                        $"The target and the source are both named '{name}'. This is not possible. You must specify two different names.",
+                                                                                                                        MessageCollections.Levels.Error,
+                                                                                                                        silent: silent);
     }
 }

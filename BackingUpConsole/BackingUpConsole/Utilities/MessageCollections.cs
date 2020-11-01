@@ -57,7 +57,8 @@ namespace BackingUpConsole.Utilities.Messages
             FileRemoved,
             SettingsCreated,
             InvalidPath,
-            FileWillBeOverwritten
+            FileWillBeOverwritten,
+            SettingsFileNamesIdentical
         }
         public enum Levels
         {

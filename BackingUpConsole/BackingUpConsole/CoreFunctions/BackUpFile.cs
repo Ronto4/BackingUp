@@ -241,15 +241,22 @@ namespace BackingUpConsole.CoreFunctions
             if (Miscellaneous.FilenameForbiddenChars.Any(target.Contains))
                 return MessageProvider.InvalidPath(target);
 
+            if (from is string && target == from)
+                return MessageProvider.SettingsFileNamesIdentical(from);
+
             target = PathHandler.Combine(FileContainer.SettingsDir, $"{target}.buse");
+            if (from is string)
+                from = PathHandler.Combine(FileContainer.SettingsDir, $"{from}.buse");
+
+            if (target == Settings!.Path)
+                return MessageProvider.TriedRemovingActiveFile(target);
+
             if (File.Exists(target))
             {
                 MessageHandler question = MessageProvider.FileWillBeOverwritten(target);
                 if (question.IsSuccess(messagePrinter) == false)
                     return question;
             }
-            if ((from is null) == false)
-                from = PathHandler.Combine(FileContainer.SettingsDir, $"{from}.buse");
 
             if (from is null)
             {
