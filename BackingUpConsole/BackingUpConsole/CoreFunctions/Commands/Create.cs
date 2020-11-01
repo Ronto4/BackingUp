@@ -42,22 +42,24 @@ namespace BackingUpConsole.CoreFunctions.Commands
 
             return MessageProvider.Success();
         }
-        public static async Task<MessageHandler> Run(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
+        public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             DirectoryInfo dir = new DirectoryInfo(args[1]);
             if (!dir.Exists)
                 dir.Create();
 
-            string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
-            origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
+            //string origContent = ConstantValues.DEFAULT_BACKUP_FILE;
+            //origContent = origContent.Replace("*\\", $"{dir.FullName}\\");
 
             string path = PathHandler.Combine(dir.FullName, @"container.bu");
 
-            using (FileStream fs = File.Create(path))
-            {
-                await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
-            }
-            BackUpFile.GetFromFile(path, true);
+            //using (FileStream fs = File.Create(path))
+            //{
+            //    await fs.WriteAsync(origContent.ToCharArray().Select(c => (byte)c).ToArray().AsMemory());
+            //}
+            (_, MessageHandler getFromFile) = await BackUpFile.GetFromFile(path, messagePrinter, true);
+            if (getFromFile.IsSuccess(messagePrinter) == false)
+                return getFromFile;
 
             if (args.Length > 2)
             {

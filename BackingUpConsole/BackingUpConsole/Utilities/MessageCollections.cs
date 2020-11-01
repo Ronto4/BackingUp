@@ -39,9 +39,26 @@ namespace BackingUpConsole.Utilities.Messages
             BackupNotFound,
             BackupEntryRemoved,
             BackupChanged,
+            ParsingBackupChanged,
             DirectoryNotEmpty,
             BackingUpUnknownUsage,
-            BackupCreated
+            BackupCreated,
+            InvalidFileVersion,
+            NoBackupSelected,
+            ParameterDoesNotExist,
+            UnknownSettingsUsage,
+            SettingsUpdated,
+            InvalidEditType,
+            InvalidFileType,
+            InvalidJsonFileFormat,
+            InvalidType,
+            BackUpSettingsSelected,
+            TriedRemovingActiveFile,
+            FileRemoved,
+            SettingsCreated,
+            InvalidPath,
+            FileWillBeOverwritten,
+            SettingsFileNamesIdentical
         }
         public enum Levels
         {

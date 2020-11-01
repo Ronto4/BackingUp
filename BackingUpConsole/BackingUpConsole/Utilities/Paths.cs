@@ -21,7 +21,7 @@ namespace BackingUpConsole.Utilities
 
         public override string ToString()
         {
-            return CurrentWorkingDirectory;
+            return $"CurrentWorkingDirectory = {CurrentWorkingDirectory} | SelectedBackup = {(SelectedBackup is null ? "<NULL>" : SelectedBackup.Path)}";
         }
 
         public object Clone()

@@ -1,5 +1,6 @@
 ﻿#define DEBUG_MSG
 
+using BackingUpConsole.CoreFunctions;
 using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Commands;
 using BackingUpConsole.Utilities.Messages;
@@ -66,8 +67,18 @@ namespace BackingUpConsole
             Command cmd = CommandCollections.GetCommand(arg[0]);
             string[] args = arg[1..];
             (MessageHandler message, string? path) = await Interpreter.Interprete(cmd, args, messagePrinter, flags, paths);
-            if (compile ? message == MessageProvider.ParseDirectoryChanged() : message == MessageProvider.DirectoryChanged())
-                paths.CurrentWorkingDirectory = path ?? paths.CurrentWorkingDirectory;
+            if (message == (compile ? MessageProvider.ParseDirectoryChanged() : MessageProvider.DirectoryChanged()) && !(path is null))
+                paths.CurrentWorkingDirectory = path;
+
+            if (message == (compile ? MessageProvider.ParsingBackupChanged() : MessageProvider.BackupChanged()))
+            {
+                string newPath = compile ? message.Message.Split("> ")[1] : message.Message.Split("th: ")[1];
+                (BackUpFile? bu, MessageHandler m) = await BackUpFile.GetFromFile(newPath, messagePrinter);
+                if (!m.IsSuccess(messagePrinter, compile))
+                    return (m, paths);
+
+                paths.SelectedBackup = bu;
+            }
 
             return (message, paths);
         }

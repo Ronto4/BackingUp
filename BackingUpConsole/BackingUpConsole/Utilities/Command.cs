@@ -12,7 +12,8 @@ namespace BackingUpConsole.Utilities.Commands
         public readonly string[]? ArgOrder;
 
         public bool IsComment => cmd.StartsWith(";");
-        public bool IsInvalid => properties.Parse == null;
+        //public bool IsInvalid => properties.Parse == null && properties.Parse_Async is null;
+        public bool IsInvalid => properties.ParseIsAsync ? properties.Parse_Async is null : properties.Parse is null;
 
         //Constructors
         public Command(string cmd)

@@ -16,13 +16,18 @@ namespace BackingUpConsole.CoreFunctions.Commands
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
             (MessageHandler success, Dictionary<string, string>? result) = Utilities.ScanList();
-            if (!success.IsSuccess(true, messagePrinter))
+            if (!success.IsSuccess(messagePrinter, true))
                 return success;
 
             if (args.CheckLength(2, 2) && !result!.ContainsKey(args[1]))
                 return MessageProvider.BackupNotFound(args[1], silent: !flags.IsSet(Flags.VERBOSE));
 
-            return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+            //return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+            if (args.CheckLength(1, 1))
+                return MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
+
+            //Console.WriteLine($"---{Environment.NewLine}{Environment.StackTrace}{Environment.NewLine}---");
+            return flags.IsSet(Flags.IN_SCRIPT) ? MessageProvider.ParsingBackupChanged(result![args[1]], silent: !flags.IsSet(Flags.VERBOSE)) : MessageProvider.Success(silent: !flags.IsSet(Flags.VERBOSE));
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
@@ -37,12 +42,14 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!success)
                 return MessageProvider.BackupNotFound(args[1], silent: !flags.IsSet(Flags.VERBOSE));
 
-            (MessageHandler message, BackUpFile? backup) = BackUpFile.GetFromFile(path!);
-            if (!message.IsSuccess(false, messagePrinter))
+            (BackUpFile? backup, MessageHandler message) = await BackUpFile.GetFromFile(path!, messagePrinter);
+            if (!message.IsSuccess(messagePrinter))
                 return message;
 
             paths.SelectedBackup = backup;
-            return MessageProvider.BackupChanged(args[1], paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path, silent: !flags.IsSet(Flags.VERBOSE));
+            var m = MessageProvider.BackupChanged(args[1], paths.SelectedBackup is null ? "<NULL>" : paths.SelectedBackup.Path, silent: !flags.IsSet(Flags.VERBOSE));
+            //Console.WriteLine(backup!.Settings);
+            return m;
         }
     }
 }

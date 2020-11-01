@@ -17,7 +17,7 @@ namespace BackingUpConsole
             MessageHandler message;
             //(message, flags) = flags.SetFromArgs(ref args);
             (message, args, flags) = ArgumentHandler.ParseArguments(args, flags, messagePrinter, command);
-            if (!message.IsSuccess(false, messagePrinter))
+            if (!message.IsSuccess(messagePrinter))
                 return (message, null);
 
 
@@ -40,7 +40,7 @@ namespace BackingUpConsole
 
                 pResult = properties.ParseIsAsync ? await properties.Parse_Async!(args, flags, paths, messagePrinter) : properties.Parse!(args, flags, paths, messagePrinter);
                 var result = pResult.Value;
-                if (!result.message.IsSuccess(true, messagePrinter))
+                if (!result.message.IsSuccess(messagePrinter, true))
                     return result;
             }
             return flags.IsSet(Flags.RUN) ? (properties.RunIsAsync ? await properties.Run_Async!(args, flags, paths, messagePrinter) : properties.Run!(args, flags, paths, messagePrinter)) : (pResult ?? (MessageProvider.Success(), (string?)null));

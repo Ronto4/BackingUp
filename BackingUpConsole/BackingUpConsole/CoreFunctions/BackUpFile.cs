@@ -1,160 +1,295 @@
 ﻿using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace BackingUpConsole.CoreFunctions
 {
     public class BackUpFile : ICloneable
     {
-        private static readonly string FileIdentifier = $"[BackUpContainer]";
-        //Attributes
-        public string Path { get; }
-        public BackUpSettings Settings { get; private set; }
-        public DirectoryInfo SummaryDirectory { get; private set; }
-        public DirectoryInfo LogDirectory { get; private set; }
-        public DirectoryInfo SettingsPath { get; private set; }
-        public DirectoryInfo BackUpPath { get; private set; }
-        private int Version { get; }
-        //Constructors
-        private BackUpFile(string path, BackUpSettings settings, DirectoryInfo summaryDir, DirectoryInfo logDir, DirectoryInfo settingsDir, DirectoryInfo backupDir, int version, bool create)
+        // Types
+        internal class BackUpFileContainerHelper
         {
+            public string FileType { get; set; } = string.Empty;
+            public int FileVersion { get; set; } = 0;
+            public string SelectedBackupSettings { get; set; } = string.Empty;
+            public string SettingsDir { get; set; } = string.Empty;
+            public string SummaryDir { get; set; } = string.Empty;
+            public string LogDir { get; set; } = string.Empty;
+            public string DataDir { get; set; } = string.Empty;
+        }
+        public class BackUpFileContainer
+        {
+            // Properties
+            public string FileType { get => Fields[nameof(FileType)].Value; set => Fields[nameof(FileType)].Value = value; }
+            public int FileVersion { get => Fields[nameof(FileVersion)].Value; set => Fields[nameof(FileVersion)].Value = value; }
+            public string SelectedBackupSettings { get => Fields[nameof(SelectedBackupSettings)].Value; set => Fields[nameof(SelectedBackupSettings)].Value = value; }
+            public string SettingsDir { get => Fields[nameof(SettingsDir)].Value; set => Fields[nameof(SettingsDir)].Value = value; }
+            public string SummaryDir { get => Fields[nameof(SummaryDir)].Value; set => Fields[nameof(SummaryDir)].Value = value; }
+            public string LogDir { get => Fields[nameof(LogDir)].Value; set => Fields[nameof(LogDir)].Value = value; }
+            public string DataDir { get => Fields[nameof(DataDir)].Value; set => Fields[nameof(DataDir)].Value = value; }
+            internal Dictionary<string, DynamicJsonProperty> Fields = new Dictionary<string, DynamicJsonProperty>()
+            {
+                {nameof(FileType), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(FileVersion), new DynamicJsonProperty(DynamicJsonProperty.UsedType.Integer, 0) },
+                {nameof(SelectedBackupSettings), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(SettingsDir), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(SummaryDir), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(LogDir), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) },
+                {nameof(DataDir), new DynamicJsonProperty(DynamicJsonProperty.UsedType.String, string.Empty) }
+            };
+            internal static int RequiredFileVersion => 2;
+            internal static string RequiredFileType => "BackUpFile";
+            // Constructors
+            internal BackUpFileContainer(BackUpFileContainerHelper helper)
+            {
+                FileType = helper.FileType;
+                FileVersion = helper.FileVersion;
+                SelectedBackupSettings = helper.SelectedBackupSettings;
+                SettingsDir = helper.SettingsDir;
+                SummaryDir = helper.SummaryDir;
+                LogDir = helper.LogDir;
+                DataDir = helper.DataDir;
+            }
+            public BackUpFileContainer() { }
+            // Methods
+            internal MessageHandler Validate(string path)
+            {
+                if (RequiredFileVersion != FileVersion)
+                    return MessageProvider.InvalidFileVersion(path, RequiredFileVersion, FileVersion);
+                if (RequiredFileType != FileType)
+                    return MessageProvider.InvalidFileType(path, RequiredFileType, FileType);
+                return MessageProvider.Success();
+            }
+        }
+        // Properties
+        public BackUpFileContainer FileContainer { get; private set; }
+        public string Path { get; }
+        public BackUpSettings? Settings { get; private set; }
+        // Constructors
+        private BackUpFile(string path)
+        {
+            FileContainer = new BackUpFileContainer();
+            Path = path;
+        }
+        private BackUpFile(string path, BackUpFileContainer fileContainer, BackUpSettings? settings)
+        {
+            FileContainer = fileContainer;
             Path = path;
             Settings = settings;
-            SettingsPath = settingsDir;
-            SummaryDirectory = summaryDir;
-            LogDirectory = logDir;
-            BackUpPath = backupDir;
-            Version = version;
-            if (create)
-                Create();
         }
-        //static methods
-        public static (MessageHandler, BackUpFile?) GetFromFile(string path, bool firstCreation = false)
+        // Methods
+        public async Task<(List<BackUpSettings>?, MessageHandler)> GetAllSettings(MessagePrinter messagePrinter) // Currently unused, may be returned to function if a method is implemented to select the best GetAllSettings method.
         {
-            List<string?> results = new List<string?>();
-            using (StreamReader sr = new StreamReader(path))
+            List<BackUpSettings> list = new List<BackUpSettings>();
+            DirectoryInfo di = new DirectoryInfo(FileContainer.SettingsDir);
+            foreach (FileInfo fi in di.EnumerateFiles())
             {
-                while (!sr.EndOfStream)
-                {
-                    results.Add(sr.ReadLine());
-                    if (results[^1] is null)
-                    {
-                        var message = MessageProvider.InvalidMethodExecution(null, null, $"StreamReader.ReadLine returned null string when EOF was not detected in file '{path}' on line {results.Count}.");
-                        return (message, null);
-                    }
-                    if (results[^1]!.StartsWith(';'))
-                        results.RemoveAt(results.Count - 1);
-                }
-            }
-            if (results.Count != 7)
-                return (MessageProvider.InvalidFileFormat(path, 0), null);
+                (BackUpSettings? settings, MessageHandler message) = await BackUpSettings.GetFromFile(fi.FullName, messagePrinter);
+                if (message.IsSuccess(messagePrinter) == false)
+                    return (null, message);
 
-            if (results[0] != FileIdentifier)
-            {
-                var message = MessageProvider.InvalidFileFormat(path, 1);
-                return (message, null);
+                list.Add(settings!);
             }
-            if (!results[1]!.StartsWith('*'))
+            return (list, MessageProvider.Success());
+        }
+        public async Task<(ConcurrentQueue<BackUpSettings>?, MessageHandler)> GetAllSettingsParallel(MessagePrinter messagePrinter)
+        {
+            ConcurrentQueue<BackUpSettings> settings = new ConcurrentQueue<BackUpSettings>();
+            DirectoryInfo di = new DirectoryInfo(FileContainer.SettingsDir);
+            MessageHandler? exitMessage = null;
+            var tasks = di.EnumerateFiles().Select(async fi =>
             {
-                var message = MessageProvider.InvalidFileFormat(path, 2);
-                return (message, null);
-            }
-            string[] parameter = results[1]!.Substring(1).Split('|');
-            if (parameter.Length != 1)
-            {
-                var message = MessageProvider.InvalidFileFormat(path, 2);
-                return (message, null);
-            }
-            int version = -1;
-            for (int i = 0; i < parameter.Length; i++)
-            {
-                string[] param = parameter[i].Split(':');
-                if (param.Length != 2)
-                {
-                    var message = MessageProvider.InvalidFileFormat(path, 2);
-                    return (message, null);
-                }
-                if (param[0] == "version")
-                    version = Convert.ToInt32(param[1]);
+                (BackUpSettings? setting, MessageHandler message) = await BackUpSettings.GetFromFile(fi.FullName, messagePrinter);
+                if (message.IsSuccess(messagePrinter) == false)
+                    exitMessage = message;
                 else
-                {
-                    var message = MessageProvider.InvalidFileFormat(path, 2);
-                    return (message, null);
-                }
-            }
-            if (version == -1)
+                    settings.Enqueue(setting!);
+            });
+            await Task.WhenAll(tasks);
+            if ((exitMessage is null) == false)
             {
-                var message = MessageProvider.InvalidFileFormat(path, 2);
-                return (message, null);
+                return (null, exitMessage);
             }
-            DirectoryInfo? settingsPath, summaryDir, logDir, backupDir;
-            settingsPath = summaryDir = logDir = backupDir = null;
-            BackUpSettings? settings = null;
-            for (int i = 2; i < results.Count; i++)
-            {
-                string[] value = results[i]!.Split('?');
-                if (value.Length != 2)
-                {
-                    var message = MessageProvider.InvalidFileFormat(path, i + 1);
-                    return (message, null);
-                }
-                switch (value[0])
-                {
-                    case "settings":
-                        {
-                            settingsPath = new DirectoryInfo(value[1]);
-                            break;
-                        }
-                    case "selectedsettings":
-                        {
-                            settings = new BackUpSettings(value[1]);
-                            break;
-                        }
-                    case "summaries":
-                        {
-                            summaryDir = new DirectoryInfo(value[1]);
-                            break;
-                        }
-                    case "logs":
-                        {
-                            logDir= new DirectoryInfo(value[1]);
-                            break;
-                        }
-                    case "backups":
-                        {
-                            backupDir = new DirectoryInfo(value[1]);
-                            break;
-                        }
-                    default:
-                        {
-                            var message = MessageProvider.InvalidFileFormat(path, i + 1);
-                            return (message, null);
-                        }
-                }
-            }
-            if (settings is null || settingsPath is null || summaryDir is null || logDir is null || backupDir is null)
-            {
-                var message = MessageProvider.InvalidFileFormat(path, 0);
-                return (message, null);
-            }
-            return (MessageProvider.Success(), new BackUpFile(path, settings, summaryDir, logDir, settingsPath, backupDir, version, firstCreation));
+            return (settings, MessageProvider.Success());
         }
-        //Methods
-        public void Create()
+        internal async Task<MessageHandler> SetSettingsFromFile(string buseName, MessagePrinter messagePrinter)
         {
-            SummaryDirectory.Create();
-            LogDirectory.Create();
-            SettingsPath.Create();
-            Settings.Create();
-            BackUpPath.Create();
+            string currentSettings = FileContainer.SelectedBackupSettings;
+            FileContainer.SelectedBackupSettings = $"{buseName}.buse";
+            MessageHandler result = await GetSettings(messagePrinter);
+            if (result.IsSuccess(messagePrinter) == false)
+            {
+                FileContainer.SelectedBackupSettings = buseName;
+                result = await GetSettings(messagePrinter);
+            }
+            if (result.IsSuccess(messagePrinter) == false)
+            {
+                FileContainer.SelectedBackupSettings = currentSettings;
+                return result;
+            }
+            MessageHandler message = await SaveFile();
+            if (message.IsSuccess(messagePrinter) == false)
+                return message;
+            return result;
         }
-        //Override methods
-        public object Clone()
+        private async Task<MessageHandler> GetSettings(MessagePrinter messagePrinter)
         {
-            return new BackUpFile(this.Path, this.Settings, this.SummaryDirectory, this.LogDirectory, this.SettingsPath, this.BackUpPath, this.Version, false);
+            (BackUpSettings? settings, MessageHandler result) = await BackUpSettings.GetFromFile(PathHandler.Combine(FileContainer.SettingsDir, FileContainer.SelectedBackupSettings), messagePrinter);
+            if (result.IsSuccess(messagePrinter) == false)
+                return result;
+
+            Settings = settings!;
+            return MessageProvider.Success();
         }
+        private async Task<MessageHandler> SaveFile()
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+            using (FileStream fs = File.Create(Path))
+            {
+                await JsonSerializer.SerializeAsync(fs, FileContainer, options);
+            }
+            return MessageProvider.Success();
+        }
+        private async Task<MessageHandler> GetFile(MessagePrinter messagePrinter, bool skipValidation = false)
+        {
+            if (File.Exists(Path) == false)
+            {
+                FileInfo file = new FileInfo(Path);
+                if (file.Directory.Exists == false)
+                    file.Directory.Create();
+                using FileStream fs = file.Create();
+                await fs.WriteAsync(new byte[] { (byte)'{', (byte)'}' });
+            }
+            using (FileStream fs = File.OpenRead(Path))
+            {
+                try
+                {
+                    var helper = await JsonSerializer.DeserializeAsync<BackUpFileContainerHelper>(fs);
+                    BackUpFileContainer oldBackUpFile = FileContainer;
+                    FileContainer = new BackUpFileContainer(helper);
+                    if (skipValidation == false)
+                    {
+                        var validate = FileContainer.Validate(Path);
+                        if (validate.IsSuccess(messagePrinter) == false)
+                            return validate;
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    return MessageProvider.InvalidJsonFileFormat(Path, ex.Message);
+                }
+            }
+            return MessageProvider.Success();
+        }
+        public static async Task<(BackUpFile?, MessageHandler)> GetFromFile(string path, MessagePrinter messagePrinter, bool firstCreation = false)
+        {
+            Console.WriteLine($"1 firstCreation: {firstCreation}");
+            var file = new BackUpFile(path);
+            var message = await file.GetFile(messagePrinter, firstCreation);
+            if (message.IsSuccess(messagePrinter) == false)
+                return (null, message);
+
+            if (firstCreation)
+            {
+                string basePath = string.Join('\\', file.Path.Split('\\')[0..^1]);
+                string settings = $"settings";
+                string logs = $"logs";
+                string summaries = $"summaries";
+                string data = $"data";
+                string defaultSettings = $"default.buse";
+                Console.WriteLine($"2 SettingsPath: {PathHandler.Combine(basePath, settings)}");
+                Directory.CreateDirectory(PathHandler.Combine(basePath, settings));
+                Directory.CreateDirectory(PathHandler.Combine(basePath, logs));
+                Directory.CreateDirectory(PathHandler.Combine(basePath, summaries));
+                Directory.CreateDirectory(PathHandler.Combine(basePath, data));
+                file.FileContainer.DataDir = PathHandler.Combine(basePath, data);
+                file.FileContainer.SummaryDir = PathHandler.Combine(basePath, summaries);
+                file.FileContainer.LogDir = PathHandler.Combine(basePath, logs);
+                file.FileContainer.SettingsDir = PathHandler.Combine(basePath, settings);
+                var createSettings = await BackUpSettings.GetFromFile(PathHandler.Combine(file.FileContainer.SettingsDir, defaultSettings), messagePrinter, true);
+                if (createSettings.Item2.IsSuccess(messagePrinter) == false)
+                    return (null, createSettings.Item2);
+
+                file.FileContainer.SelectedBackupSettings = defaultSettings;
+                file.FileContainer.FileVersion = 2;
+                file.FileContainer.FileType = "BackUpFile";
+                MessageHandler save = await file.SaveFile();
+                if (save.IsSuccess(messagePrinter) == false)
+                    return (null, save);
+
+                var reget = await file.GetFile(messagePrinter);
+                if (reget.IsSuccess(messagePrinter) == false)
+                    return (null, reget);
+            }
+            var getSettings = await file.GetSettings(messagePrinter);
+            if (getSettings.IsSuccess(messagePrinter) == false)
+                return (null, getSettings);
+
+            return (file, MessageProvider.Success());
+        }
+        public async Task<MessageHandler> CreateNewSettings(string target, MessagePrinter messagePrinter, string? from = null, string? newName = null)
+        {
+            if (Miscellaneous.FilenameForbiddenChars.Any(target.Contains))
+                return MessageProvider.InvalidPath(target);
+
+            if (from is string && target == from)
+                return MessageProvider.SettingsFileNamesIdentical(from);
+
+            target = PathHandler.Combine(FileContainer.SettingsDir, $"{target}.buse");
+            if (from is string)
+                from = PathHandler.Combine(FileContainer.SettingsDir, $"{from}.buse");
+
+            if (target == Settings!.Path)
+                return MessageProvider.TriedRemovingActiveFile(target);
+
+            if (File.Exists(target))
+            {
+                MessageHandler question = MessageProvider.FileWillBeOverwritten(target);
+                if (question.IsSuccess(messagePrinter) == false)
+                    return question;
+            }
+
+            if (from is null)
+            {
+                (BackUpSettings? settings, MessageHandler create) = await BackUpSettings.GetFromFile(target, messagePrinter, true);
+                if (create.IsSuccess(messagePrinter) == false)
+                    return create;
+
+                if ((newName is null) == false)
+                {
+                    MessageHandler setName = await settings!.UpdateSettings(newName, "name", "set", messagePrinter);
+                    if (setName.IsSuccess(messagePrinter) == false)
+                        return setName;
+                }
+                return MessageProvider.SettingsCreated(target, settings!.Settings.SettingsName);
+            }
+            else
+            {
+                File.Copy(from, target);
+                (BackUpSettings? settings, MessageHandler get) = await BackUpSettings.GetFromFile(target, messagePrinter);
+                if (get.IsSuccess(messagePrinter) == false)
+                    return get;
+
+                MessageHandler? setName = newName is null
+                    ? await settings!.UpdateSettings($"{settings!.Settings.SettingsName} - Copy", "name", "set", messagePrinter)
+                    : await settings!.UpdateSettings(newName, "name", "set", messagePrinter);
+
+                if (setName.IsSuccess(messagePrinter) == false)
+                    return setName;
+
+                return MessageProvider.SettingsCreated(target, settings!.Settings.SettingsName);
+            }
+        }
+        // TODO: Improve Clone quality
+        public object Clone() => new BackUpFile(Path, FileContainer, Settings);
     }
 }

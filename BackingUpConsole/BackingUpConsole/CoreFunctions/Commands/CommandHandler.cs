@@ -16,7 +16,8 @@ namespace BackingUpConsole.CoreFunctions
             {"add", Commands.Add.Parse },
             {"remove", Commands.Remove.Parse },
             {"select", Commands.Select.Parse },
-            {"create", Commands.Create.Parse }
+            {"create", Commands.Create.Parse },
+            {"settings", Commands.Settings.Parse }
         };
         private static readonly Dictionary<string, Func<string[], UInt16, Paths, MessagePrinter, Task<MessageHandler>>> Run_Funcs = new Dictionary<string, Func<string[], ushort, Paths, MessagePrinter, Task<MessageHandler>>>()
         {
@@ -24,7 +25,8 @@ namespace BackingUpConsole.CoreFunctions
             {"add", Commands.Add.RunAsync },
             {"remove", Commands.Remove.RunAsync },
             {"select", Commands.Select.RunAsync },
-            {"create", Commands.Create.Run }
+            {"create", Commands.Create.RunAsync },
+            {"settings", Commands.Settings.RunAsync }
         };
 
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)

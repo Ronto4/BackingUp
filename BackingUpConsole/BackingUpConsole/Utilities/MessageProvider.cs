@@ -1,4 +1,5 @@
-﻿using BackingUpConsole.Utilities.Commands;
+﻿using BackingUpConsole.CoreFunctions;
+using BackingUpConsole.Utilities.Commands;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -130,9 +131,12 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackupEntryRemoved(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupEntryAdded,
                                                                                                                    $"Entry '{name}' successfully removed from the list.",
                                                                                                                    MessageCollections.Levels.Information, silent: silent);
-        public static MessageHandler BackupChanged(string name, string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupChanged,
-                                                                                                                        $"The current backup has successfully been updated to '{name}' in path '{path}'.",
+        public static MessageHandler BackupChanged(string name = "", string path = "", bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupChanged,
+                                                                                                                        $"The current backup has successfully been updated to '{name}' in path: {path}",
                                                                                                                         MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler ParsingBackupChanged(string path = "", bool silent = false) => new MessageHandler(MessageCollections.Codes.ParsingBackupChanged,
+                                                                                              $"Back up path can be updated to > {path}",
+                                                                                              MessageCollections.Levels.Debug, silent: silent);
         public static MessageHandler DirectoryNotEmpty(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.DirectoryNotEmpty,
                                                                                                                $"The given directory '{path}' is not empty. Would you still like to use this directory as your back up directory? Please note that this could lead to unexpected errors due to files that exist when they should not.",
                                                                                                                MessageCollections.Levels.Warning, silent: silent);
@@ -142,5 +146,64 @@ namespace BackingUpConsole.Utilities.Messages
         public static MessageHandler BackupCreated(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackupCreated,
                                                                                                            $"The back up at '{path}' was successfully created.",
                                                                                                            MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler InvalidFileVersion(string path, int versionRequired, int versionGiven, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileVersion,
+                                                                                                                                                       $"The given file '{path}' is of version '{versionGiven}' but version '{versionRequired}' was required.",
+                                                                                                                                                       MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler NoBackupSelected(bool silent = false) => new MessageHandler(MessageCollections.Codes.NoBackupSelected,
+                                                                                                 $"No backup was selected. The given command could not be executed",
+                                                                                                 MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler ParameterDoesNotExist(string param, bool silent = false) => new MessageHandler(MessageCollections.Codes.ParameterDoesNotExist,
+                                                                                                                    $"The given parameter '{param}' does not exist",
+                                                                                                                    MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler UnknownSettingsUsage(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.UnknownSettingsUsage,
+                                                                                                                  $"The given settings usage '{name}' does not exist.",
+                                                                                                                  MessageCollections.Levels.Error, silent: silent);
+        public static MessageHandler SettingsUpdated(bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsUpdated,
+                                                                                                $"The selected settings file has successfully been updated.",
+                                                                                                MessageCollections.Levels.Information, silent: silent);
+        public static MessageHandler InvalidEditType(DynamicJsonProperty.UsedType type, BackUpSettings.EditType editType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidEditType,
+                                                                                                                                                                  $"The applied edit type '{editType}' is not available for property of type '{type}'.",
+                                                                                                                                                                  MessageCollections.Levels.Error,
+                                                                                                                                                                  silent: silent);
+        public static MessageHandler InvalidFileType(string path, string typeRequired, string typeReceived, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidFileType,
+                                                                                                                                                       $"The given file '{path}' is of type '{typeReceived}' but type '{typeRequired}' was required.",
+                                                                                                                                                       MessageCollections.Levels.Error,
+                                                                                                                                                       silent: silent);
+        public static MessageHandler InvalidJsonFileFormat(string path, string jsonError, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidJsonFileFormat,
+                                                                                                                                     $"The JSON file at '{path}' is invalid. JSON Error: {jsonError}",
+                                                                                                                                     MessageCollections.Levels.Error,
+                                                                                                                                     silent: silent);
+        public static MessageHandler InvalidType(string varname, DynamicJsonProperty.UsedType requiredType, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidType,
+                                                                                                                                                    $"The variable '{varname}' cannot be converted to the required type '{requiredType}'.",
+                                                                                                                                                    MessageCollections.Levels.Error,
+                                                                                                                                                    silent: silent);
+        public static MessageHandler BackUpSettingsSelected(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.BackUpSettingsSelected,
+                                                                                                                    $"Successfully selected the settings at '{name}'.",
+                                                                                                                    MessageCollections.Levels.Information,
+                                                                                                                    silent: silent);
+        public static MessageHandler TriedRemovingActiveFile(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.TriedRemovingActiveFile,
+                                                                                                                     $"Cannot remove file at '{path}' because it is still in use by this program.",
+                                                                                                                     MessageCollections.Levels.Error,
+                                                                                                                     silent: silent);
+        public static MessageHandler FileRemoved(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.FileRemoved,
+                                                                                                         $"File at '{path}' successfully removed.",
+                                                                                                         MessageCollections.Levels.Information,
+                                                                                                         silent: silent);
+        public static MessageHandler SettingsCreated(string path, string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsCreated,
+                                                                                                                          $"Successfully created settings '{name}' at '{path}'.",
+                                                                                                                          MessageCollections.Levels.Information,
+                                                                                                                          silent: silent);
+        public static MessageHandler InvalidPath(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.InvalidPath,
+                                                                                                         $"The given path or part of a path '{name}' contains one or more forbidden characters. These forbidden characters are the following: {Miscellaneous.FilenameForbiddenChars.CustomToString()}.",
+                                                                                                         MessageCollections.Levels.Error,
+                                                                                                         silent: silent);
+        public static MessageHandler FileWillBeOverwritten(string path, bool silent = false) => new MessageHandler(MessageCollections.Codes.FileWillBeOverwritten,
+                                                                                                                   $"The file at '{path}' already exists and will be overwritten.",
+                                                                                                                   MessageCollections.Levels.Warning,
+                                                                                                                   silent: silent);
+        public static MessageHandler SettingsFileNamesIdentical(string name, bool silent = false) => new MessageHandler(MessageCollections.Codes.SettingsFileNamesIdentical,
+                                                                                                                        $"The target and the source are both named '{name}'. This is not possible. You must specify two different names.",
+                                                                                                                        MessageCollections.Levels.Error,
+                                                                                                                        silent: silent);
     }
 }
