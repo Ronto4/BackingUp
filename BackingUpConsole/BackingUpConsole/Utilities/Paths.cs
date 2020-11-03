@@ -49,5 +49,6 @@ namespace BackingUpConsole.Utilities
             return Flatten(path);
         }
         private static string Flatten(string path) => path.LastIndexOf(':') != 1 ? Combine(path.Split(':')[1][^1].ToString() + ":", path.Split(':')[2]) : Path.GetFullPath(path);
+        public static bool IsFullyQualifiedPath(this string path) => path.Contains(':');
     }
 }

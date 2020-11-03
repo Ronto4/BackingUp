@@ -15,7 +15,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!args.CheckLength(3, 3))
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
-            string path = PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]);
+            string path = args[1].IsFullyQualifiedPath() ? args[1] : PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]);
             if (!File.Exists(path))
                 return MessageProvider.FileNotFound(path, !flags.IsSet(Flags.VERBOSE));
 
@@ -35,7 +35,8 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (entries is null)
                 return MessageProvider.InvalidMethodExecution(flags, args, $"'BackingUpConsole.CoreFunctions.Utilities.ScanListAsync' returned null Dictionary in mode 'run'", silent: !flags.IsSet(Flags.VERBOSE));
 
-            bool success = entries.TryAdd(args[2], args[1]);
+            string path = args[1].IsFullyQualifiedPath() ? args[1] : PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]);
+            bool success = entries.TryAdd(args[2], path);
 
             if (!success)
                 return MessageProvider.DoubledName(args[2], !flags.IsSet(Flags.VERBOSE));
@@ -44,7 +45,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!message.IsSuccess(false, messagePrinter))
                 return message;
 
-            return MessageProvider.BackupEntryAdded(args[2], args[1], silent: !flags.IsSet(Flags.VERBOSE));
+            return MessageProvider.BackupEntryAdded(args[2], path, silent: !flags.IsSet(Flags.VERBOSE));
         }
     }
 }

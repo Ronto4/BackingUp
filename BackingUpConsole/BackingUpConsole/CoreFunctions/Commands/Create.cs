@@ -44,7 +44,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            DirectoryInfo dir = new DirectoryInfo(PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]));
+            DirectoryInfo dir = new DirectoryInfo(args[1].IsFullyQualifiedPath() ? args[1] : PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]));
             if (!dir.Exists)
                 dir.Create();
 
