@@ -1,4 +1,5 @@
-﻿using BackingUpConsole.Utilities;
+﻿using BackingUpConsole.CoreFunctions.BackingUp;
+using BackingUpConsole.Utilities;
 using BackingUpConsole.Utilities.Messages;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,17 @@ namespace BackingUpConsole.CoreFunctions.Commands
     {
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return MessageProvider.ParseSuccess();
+            if (args.CheckLength(1, 1) == false)
+                return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
+
+            if (paths.SelectedBackup is null)
+                return MessageProvider.NoBackupSelected(!flags.IsSet(Flags.VERBOSE));
+
+            return MessageProvider.Success();
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return MessageProvider.Success();
+            return await paths.SelectedBackup!.PerformBackup(messagePrinter);
         }
     }
 }
