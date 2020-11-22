@@ -15,8 +15,11 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
 {
     internal static class Handler
     {
-        private static int MaxBlockSize => 1;
-        private static string Path => @"N:\Clemens\Dateien\Verkehr";
+        //private static int MaxBlockSize => 1048576;
+        private const int DefaultMaxBlockSize = 65536;
+        private static int MaxBlockSize { get; set; }
+#if FALSE
+        private static string Path => @"P:\Trend\EEP16\Resourcen\Rollmaterial";
         public static async Task<MessageHandler> PerformBackup(this BackUpFile backUp, MessagePrinter messagePrinter)
         {
             Stopwatch sw = new Stopwatch();
@@ -26,70 +29,115 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
             //long medium = sw.ElapsedMilliseconds;
             //messagePrinter.Print(MessageProvider.Message("---- Next ----", color: ConsoleColor.Red));
             //sw = new Stopwatch();
-            //sw.Start();
-            //Classic.ClassicBackup(Path);
-            //sw.Stop();
-            //long classic = sw.ElapsedMilliseconds;
-            //messagePrinter.Print(MessageProvider.Message("---- Next ----", color: ConsoleColor.Red));
-            //sw = new Stopwatch();
+            sw.Start();
+            await SequentialBackup.PerformBackup(new DirectoryInfo(Path), new DirectoryInfo(backUp.FileContainer.DataDir), messagePrinter);
+            sw.Stop();
+            long classic = sw.ElapsedMilliseconds;
+            messagePrinter.Print(MessageProvider.Message("---- Next ----", color: ConsoleColor.Red));
+            messagePrinter.Print(MessageProvider.Message("---- Press <Enter> to continue ----", color: ConsoleColor.Red));
+            Console.ReadLine();
+            sw = new Stopwatch();
             sw.Start();
             await Parallel.PerformBackup(new DirectoryInfo(Path), new DirectoryInfo(backUp.FileContainer.DataDir), messagePrinter);
             sw.Stop();
             long parallel = sw.ElapsedMilliseconds;
-            Console.WriteLine($"Time: {parallel} ms.");
+            //Console.WriteLine($"Time: {parallel} ms.");
+            Console.WriteLine($"Time: Sequential: {classic} ms, Parallel: {parallel} ms.");
             //Console.WriteLine($"Time: Classic: {classic} ms, Medium: {medium} ms, Parallel: {parallel} ms.");
             return MessageProvider.Success();
         }
-        private static class Parallel
+#endif
+        public static async Task<MessageHandler> PerformBackup(this BackUpFile backUp, MessagePrinter messagePrinter, bool useSequential = false, int maxBlockSize = DefaultMaxBlockSize)
         {
-            private static async Task<MessageHandler> BackUpFile(FileInfo file, FileInfo target, bool doArchive, CancellationToken cancellationToken)
+            MaxBlockSize = maxBlockSize;
+            Stopwatch sw = new Stopwatch();
+            if (useSequential)
             {
-                try
+                sw.Start();
+                await SequentialBackup.PerformBackup(new DirectoryInfo(backUp.Settings!.Settings.Paths[0]), new DirectoryInfo(backUp.FileContainer.DataDir), messagePrinter);
+                sw.Stop();
+            }
+            else
+            {
+                sw.Start();
+                await Parallel.PerformBackup(new DirectoryInfo(backUp.Settings!.Settings.Paths[0]), new DirectoryInfo(backUp.FileContainer.DataDir), messagePrinter);
+                sw.Stop();
+            }
+            return MessageProvider.Message($"The process took {sw.ElapsedMilliseconds} ms in {(useSequential ? "sequential" : "parallel")} mode with a MaxBlockSize of {MaxBlockSize}.");
+        }
+        //private static async Task<MessageHandler> BackUpFile(FileInfo file, FileInfo target, bool doArchive, CancellationToken cancellationToken)
+        //{
+        //    try
+        //    {
+        //        bool differenceFound = (await Miscellaneous.FilesAreIdentical(file, target, MaxBlockSize)) == false;
+        //        if (differenceFound)
+        //        {
+        //            using StreamReader sourceStream = new StreamReader(file.FullName);
+        //            using StreamWriter targetStream = new StreamWriter(Miscellaneous.CreateFileAndDirectoryIfNotExist(target));
+        //            char[] sourceBuffer = new char[MaxBlockSize];
+        //            while (sourceStream.EndOfStream == false)
+        //            {
+        //                int saved = await sourceStream.ReadAsync(sourceBuffer, 0, MaxBlockSize);
+        //                Task write = targetStream.WriteAsync(sourceBuffer, 0, saved);
+        //                if (doArchive)
+        //                {
+        //                    // Process archive, still missing.
+        //                }
+        //                await write;
+        //            }
+        //            return MessageProvider.Message($"Successfully copied file at '{file.FullName}' to '{target.FullName}'.", color: ConsoleColor.Green);
+        //        }
+        //        else
+        //        {
+        //            return MessageProvider.Message($"File at '{file.FullName}' already exists at '{target.FullName}'.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return MessageProvider.Message($"An error occurred while backing up file at '{file.FullName}':{Environment.NewLine}{ex.Message}", MessageCollections.Levels.Error);
+        //    }
+        //}
+        private static async Task<MessageHandler> BackUpFile(FileInfo file, FileInfo target, bool doArchive, CancellationToken cancellationToken)
+        {
+            try
+            {
+                bool differenceFound = (await Miscellaneous.FilesAreIdentical(file, target, MaxBlockSize)) == false;
+                if (differenceFound)
                 {
-                    bool differenceFound = false;
-                    FileInfo copyFile = new FileInfo($"{target.FullName}.butmp-{DateTime.UtcNow.Ticks}");
+                    byte[] msBuffer = new byte[MaxBlockSize];
+                    using FileStream sourceStream = new FileStream(file.FullName, FileMode.Open);
+                    //using StreamWriter targetStream = new StreamWriter(Miscellaneous.CreateFileAndDirectoryIfNotExist(target));
+                    using FileStream targetStream = Miscellaneous.CreateFileAndDirectoryIfNotExist(target);
+                    //using MemoryStream sourceMSStream = new MemoryStream(msBuffer);
+                    //char[] sourceBuffer = new char[MaxBlockSize];
+                    int read = 1;
+                    while (read > 0)
                     {
-                        using StreamReader sourceStream = new StreamReader(file.FullName);
-                        using StreamReader? targetStream = target.Exists ? new StreamReader(target.FullName) : null;
-                        using StreamWriter copyStream = new StreamWriter(File.Create(copyFile.FullName));
-                        differenceFound = targetStream is null || file.Length != target.Length;
-                        char[] buffer = new char[MaxBlockSize];
-                        char[] secondaryBuffer = new char[MaxBlockSize];
-                        while (sourceStream.EndOfStream == false)
+                        read = await sourceStream.ReadAsync(msBuffer, 0, MaxBlockSize);
+                        Task write = targetStream.WriteAsync(msBuffer, 0, read);
+                        //int saved = await sourceStream.ReadAsync(sourceBuffer, 0, MaxBlockSize);
+                        //Task write = targetStream.WriteAsync(sourceBuffer, 0, saved);
+                        if (doArchive)
                         {
-                            int saved = await sourceStream.ReadAsync(buffer, 0, MaxBlockSize);
-                            Task write = copyStream.WriteAsync(buffer, 0, saved);
-                            if (differenceFound == false && targetStream is StreamReader)
-                            {
-                                await targetStream.ReadAsync(secondaryBuffer, 0, saved);
-                                for (int i = 0; i < saved; i++)
-                                {
-                                    if (buffer[i] != secondaryBuffer[i])
-                                    {
-                                        differenceFound = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            await write;
+                            // Process archive, still missing.
                         }
+                        await write;
                     }
-                    if (differenceFound)
-                    {
-                        copyFile.MoveTo(target.FullName, true);
-                        return MessageProvider.Message($"Successfully copied file at '{file.FullName}' to '{target.FullName}'.", color: ConsoleColor.Green);
-                    }
-                    else
-                    {
-                        copyFile.Delete();
-                        return MessageProvider.Message($"File at '{file.FullName}' already exists at '{target.FullName}'.");
-                    }
+                    return MessageProvider.Message($"Successfully copied file at '{file.FullName}' to '{target.FullName}'.", color: ConsoleColor.Green);
                 }
-                catch(Exception ex)
+                else
                 {
-                    return MessageProvider.Message($"An error occurred while backing up file at '{file.FullName}':{Environment.NewLine}{ex.Message}", MessageCollections.Levels.Error);
+                    return MessageProvider.Message($"File at '{file.FullName}' already exists at '{target.FullName}'.");
                 }
             }
+            catch (Exception ex)
+            {
+                return MessageProvider.Message($"An error occurred while backing up file at '{file.FullName}':{Environment.NewLine}{ex.Message}", MessageCollections.Levels.Error);
+            }
+        }
+
+        private static class Parallel
+        {
             private static async Task<List<FileInfo>> EnumerateAllFilesRecursively(DirectoryInfo root, CancellationToken cancellationToken)
             {
                 List<FileInfo> files = new List<FileInfo>();
@@ -115,13 +163,12 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                 yield return MessageProvider.Message($"Enumerating done! Found {files.Count} files.");
                 List<Task<MessageHandler>> tasks = new List<Task<MessageHandler>>();
                 tasks.AddRange(files.Select(file => Task.Run(() => BackUpFile(file, new FileInfo(PathHandler.Combine(backupDir.FullName, file.FullName.Replace(':', '-'))), false, cancellationToken))));
-                //yield return MessageProvider.Message("Starting...");
                 foreach (var bucket in Miscellaneous.Interleaved(tasks))
                 {
                     var t = await bucket;
                     yield return await t;
                 }
-                //while (tasks.Any())
+                //while (tasks.Any()) // -> probably slower than solution above
                 //{
                 //    Task<MessageHandler> message = await Task.WhenAny(tasks);
                 //    tasks.Remove(message);
@@ -137,6 +184,7 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                 }
             }
         }
+#if FALSE // MediumParallel
         private static class MediumParallel
         {
             private static async Task BackUpFile(FileInfo file, CancellationToken cancellationToken, MessagePrinter messagePrinter)
@@ -191,63 +239,61 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                 //return sw.ElapsedMilliseconds;
             }
         }
-        private static class Classic
+#endif
+        private static class SequentialBackup
         {
-            private static void Dir(DirectoryInfo directory)
+            private static async Task Dir(DirectoryInfo directory, DirectoryInfo backupDir, bool doArchive, MessagePrinter messagePrinter, CancellationToken cancellationToken)
             {
                 try
                 {
                     foreach (var dir in directory.EnumerateDirectories())
                     {
-                        Dir(dir);
+                        await Dir(dir, backupDir, doArchive, messagePrinter, cancellationToken);
                     }
+                }
+                catch { }
+                try { 
                     foreach (var file in directory.EnumerateFiles())
                     {
-                        bool? success = File(file);
-                        Console.WriteLine($"File at directory '{file.Directory.FullName}': '{file.FullName}': {success.ToString() ?? "Error"}");
+                        MessageHandler message = await BackUpFile(file, new FileInfo(PathHandler.Combine(backupDir.FullName, file.FullName.Replace(':', '-'))), false, cancellationToken);
+                        messagePrinter.Print(message);
                     }
                 }
                 catch { }
             }
-            internal static void ClassicBackup(string path)
+            internal static async Task PerformBackup(DirectoryInfo backupRoot, DirectoryInfo backupDir, MessagePrinter messagePrinter)
             {
-                DirectoryInfo directory = new DirectoryInfo(path);
-                //Stopwatch sw = new Stopwatch();
-                //sw.Start();
-                Dir(directory);
-                //sw.Stop();
-                //return sw.ElapsedMilliseconds;
-                //Console.WriteLine($"Sync Time: {sw.ElapsedMilliseconds} ms");
+                await Dir(backupRoot, backupDir, false, messagePrinter, new CancellationTokenSource().Token);
             }
-            private static bool? File(FileInfo file)
-            {
-                bool? success = false;
-                try
-                {
-                    using StreamReader sr = new StreamReader(file.FullName);
-                    char[] buffer = new char[MaxBlockSize];
-                    while (sr.EndOfStream == false)
-                    {
-                        int saved = sr.Read(buffer, 0, MaxBlockSize);
-                        for (int i = 0; i < buffer.Length && i < saved; i++)
-                        {
-                            if (buffer[i] == '~')
-                            {
-                                success = true;
-                                //goto BreakOuterSync;
-                            }
-                        }
-                        success = false;
-                    }
-                }
-                catch
-                {
-                    success = null;
-                }
-            BreakOuterSync:
-                return success;
-                //messageCollection.Add(MessageProvider.Message($"File at directory '{file.Directory.FullName}': '{file.FullName}': {success.ToString() ?? "Error"}"));
-            }
+            //private static bool? File(FileInfo file)
+            //{
+            //    bool? success = false;
+            //    try
+            //    {
+            //        using StreamReader sr = new StreamReader(file.FullName);
+            //        char[] buffer = new char[MaxBlockSize];
+            //        while (sr.EndOfStream == false)
+            //        {
+            //            int saved = sr.Read(buffer, 0, MaxBlockSize);
+            //            for (int i = 0; i < buffer.Length && i < saved; i++)
+            //            {
+            //                if (buffer[i] == '~')
+            //                {
+            //                    success = true;
+            //                    //goto BreakOuterSync;
+            //                }
+            //            }
+            //            success = false;
+            //        }
+            //    }
+            //    catch
+            //    {
+            //        success = null;
+            //    }
+            //BreakOuterSync:
+            //    return success;
+            //    //messageCollection.Add(MessageProvider.Message($"File at directory '{file.Directory.FullName}': '{file.FullName}': {success.ToString() ?? "Error"}"));
+            //}
         }
     }
 }

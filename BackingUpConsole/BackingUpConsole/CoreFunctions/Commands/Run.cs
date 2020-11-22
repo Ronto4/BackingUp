@@ -12,7 +12,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
     {
         public static MessageHandler Parse(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            if (args.CheckLength(1, 1) == false)
+            if (args.CheckLength(1, 2) == false)
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
             if (paths.SelectedBackup is null)
@@ -22,7 +22,10 @@ namespace BackingUpConsole.CoreFunctions.Commands
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            return await paths.SelectedBackup!.PerformBackup(messagePrinter);
+            return args.CheckLength(2, 2)
+                ? await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP), Convert.ToInt32(args[1]))
+                : await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP));
+            //return await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP));
         }
     }
 }

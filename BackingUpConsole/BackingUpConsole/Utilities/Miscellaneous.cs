@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -89,6 +90,40 @@ namespace BackingUpConsole.Utilities
                 inputTask.ContinueWith(continuation, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 
             return results;
+        }
+
+        public static FileStream CreateFileAndDirectoryIfNotExist(FileInfo file)
+        {
+            if (file.Directory.Exists == false)
+                file.Directory.Create();
+
+            return File.Create(file.FullName);
+        }
+
+        public static async Task<bool> FilesAreIdentical(FileInfo fileA, FileInfo fileB, int maxBlockSize)
+        {
+            if ((fileA.Exists && fileB.Exists) == false)
+                return false;
+
+            if (fileA.Length != fileB.Length)
+                return false;
+
+            using StreamReader srA = new StreamReader(fileA.FullName);
+            using StreamReader srB = new StreamReader(fileB.FullName);
+            char[] bufferA = new char[maxBlockSize], bufferB = new char[maxBlockSize];
+            while (srA.EndOfStream == false)
+            {
+                Task<int> readA = srA.ReadAsync(bufferA, 0, maxBlockSize);
+                Task readB = srB.ReadAsync(bufferB, 0, maxBlockSize);
+                int saved = await readA;
+                await readB;
+                for (int i = 0; i < saved; i++)
+                {
+                    if (bufferA[i] != bufferB[i])
+                        return false;
+                }
+            }
+            return true;
         }
     }
 }
