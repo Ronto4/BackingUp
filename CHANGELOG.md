@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.0.2.0; 2020-11-24:
+
+- Feature [#41](https://github.com/Ronto4/BackingUp/issues/41): You can now create back-up files by using `backup create`.
+- Feature [#47](https://github.com/Ronto4/BackingUp/issues/47): There is now a fully functional back-up settings file. Note that the structure of the file (mainly its content fields) may change at any point in the future. Note also that because the program is still in pre-release mode there might not be an automatic conversion when the files change.
+- Feature [#53](https://github.com/Ronto4/BackingUp/issues/53) (not fully included in this release): You can now back up files. The function is still very basic, but works. For details, check the [message](https://github.com/Ronto4/BackingUp/pull/52#issuecomment-731734839) in the pull request.
+- Note: This version is from the branch `backup-function`. It is possible that the `master` or the `master-backup` branch receives updates independently which will not be included in this branch.
+
 ## Version 0.0.1.0; 2020-04-04:
 
 - Feature [#33](https://github.com/Ronto4/BackingUp/issues/33): Added list of back ups. This list has the following features:  
