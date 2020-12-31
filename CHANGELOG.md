@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.0.2.1; 2020-12-31:
+
+- Feature [#53] (not fully included in this release): You can now specify multiple paths to back up files from in the settings file. For other restrictions on the usage of the back up function see this [message](https://github.com/Ronto4/BackingUp/pull/52#issuecomment-731734839) in the pull request.
+- Note: This version is from the branch `backup-function`. It is possible that the `master` or the `master-backup` branch receives updates independently which will not be included in this branch.
+
 ## Version 0.0.2.0; 2020-11-24:
 
 - Feature [#41](https://github.com/Ronto4/BackingUp/issues/41): You can now create back-up files by using `backup create`.
