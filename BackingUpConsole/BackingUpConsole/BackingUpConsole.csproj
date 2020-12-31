@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Compression\Compression.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="BackUp_0_3">
       <HintPath>src\BackUp_0_3.dll</HintPath>
     </Reference>
