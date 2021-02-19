@@ -99,8 +99,8 @@ namespace BackingUpConsole.Utilities
 
             return File.Create(file.FullName);
         }
-
-        public static async Task<bool> FilesAreIdentical(FileInfo fileA, FileInfo fileB, int maxBlockSize)
+        
+        public static async Task<bool> FilesAreIdentical(FileInfo fileA, FileInfo fileB)
         {
             if ((fileA.Exists && fileB.Exists) == false)
                 return false;
@@ -108,22 +108,14 @@ namespace BackingUpConsole.Utilities
             if (fileA.Length != fileB.Length)
                 return false;
 
-            using StreamReader srA = new StreamReader(fileA.FullName);
-            using StreamReader srB = new StreamReader(fileB.FullName);
-            char[] bufferA = new char[maxBlockSize], bufferB = new char[maxBlockSize];
-            while (srA.EndOfStream == false)
-            {
-                Task<int> readA = srA.ReadAsync(bufferA, 0, maxBlockSize);
-                Task readB = srB.ReadAsync(bufferB, 0, maxBlockSize);
-                int saved = await readA;
-                await readB;
-                for (int i = 0; i < saved; i++)
-                {
-                    if (bufferA[i] != bufferB[i])
-                        return false;
-                }
-            }
-            return true;
+            await using FileStream sourceStreamA = new FileStream(fileA.FullName, FileMode.Open);
+            using FileStream sourceStreamB = new FileStream(fileB.FullName, FileMode.Open);
+            int currentValue = -1;
+            while ((currentValue = sourceStreamA.ReadByte()) == sourceStreamB.ReadByte())
+                if (currentValue == -1)
+                    return true;
+            
+            return false;
         }
     }
 }

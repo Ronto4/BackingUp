@@ -100,7 +100,7 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
         {
             try
             {
-                bool differenceFound = (await Miscellaneous.FilesAreIdentical(file, target, MaxBlockSize)) == false;
+                bool differenceFound = (await Miscellaneous.FilesAreIdentical(file, target)) == false;
                 if (differenceFound)
                 {
                     byte[] buffer = new byte[MaxBlockSize];
