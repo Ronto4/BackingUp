@@ -1,6 +1,4 @@
-﻿//#nullable disable
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,7 +53,7 @@ namespace BackingUpConsole.Utilities
         public static string CustomToString<T>(this ICollection<T> collection, string delimiter = ", ")  // TODO: Find a better name for this function
         {
             string result = string.Empty;
-            var enumerator = collection.GetEnumerator();
+            using IEnumerator<T> enumerator = collection.GetEnumerator();
             while(enumerator.MoveNext())
             {
                 result += $"{enumerator.Current}{delimiter}";
@@ -109,8 +107,8 @@ namespace BackingUpConsole.Utilities
                 return false;
 
             await using FileStream sourceStreamA = new FileStream(fileA.FullName, FileMode.Open);
-            using FileStream sourceStreamB = new FileStream(fileB.FullName, FileMode.Open);
-            int currentValue = -1;
+            await using FileStream sourceStreamB = new FileStream(fileB.FullName, FileMode.Open);
+            int currentValue;
             while ((currentValue = sourceStreamA.ReadByte()) == sourceStreamB.ReadByte())
                 if (currentValue == -1)
                     return true;
