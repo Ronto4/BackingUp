@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.0.0.4+
+
+- Feature [#58](https://github.com/Ronto4/BackingUp/pull/58): Move project from .NET Core 3.1 to .NET 5
+
 ## Version 0.0.0.4; 2020-04-02
 
 - Fix [#38](https://github.com/Ronto4/BackingUp/issues/38): Wrong changelog included in release 0.0.0.3.
