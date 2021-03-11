@@ -18,4 +18,8 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ArgumentGetter\ArgumentGetter.csproj" />
+  </ItemGroup>
+
 </Project>
