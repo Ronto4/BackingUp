@@ -72,8 +72,8 @@ namespace BackingUpConsole.Utilities
 
         public static bool IsFullyQualifiedPath(this string path) => Environment.OSVersion.Platform switch
         {
-            PlatformID.Unix => path[0] == '/',
-            PlatformID.Win32NT => path[1] == ':',
+            PlatformID.Unix => path.Length > 0 && path[0] == '/',
+            PlatformID.Win32NT => path.Length > 1 && path[1] == ':',
             _ => throw new OSNotSupportedException(Environment.OSVersion)
         };
     }
