@@ -1,6 +1,7 @@
 ﻿using BackingUpConsole.CoreFunctions;
 using System;
 using System.IO;
+using BackingUpConsole.Utilities.Exceptions;
 
 namespace BackingUpConsole.Utilities
 {
@@ -32,7 +33,24 @@ namespace BackingUpConsole.Utilities
 
     public static class PathHandler
     {
-        public static string Combine(params string[] paths)
+        public static string Combine(params string[] paths) => Environment.OSVersion.Platform switch
+        {
+            PlatformID.Unix => UnixCombine(paths),
+            PlatformID.Win32NT => WindowsCombine(paths),
+            _ => throw new OSNotSupportedException(Environment.OSVersion)
+        };
+
+        private static string UnixCombine(params string[] paths)
+        {
+            for (int i = paths.Length - 1; i >= 0; i--)
+            {
+                if (paths[i].IsFullyQualifiedPath())
+                    return UnixFlatten(paths[i..].CustomToString("/"));
+            }
+
+            return UnixFlatten(string.Concat(paths));
+        }
+        private static string WindowsCombine(params string[] paths)
         {
             for (int i = 0; i < paths.Length; i++)
             {
@@ -46,9 +64,17 @@ namespace BackingUpConsole.Utilities
             {
                 path += paths[i];
             }
-            return Flatten(path);
+            return WindowsFlatten(path);
         }
-        private static string Flatten(string path) => path.LastIndexOf(':') != 1 ? Combine(path.Split(':')[1][^1].ToString() + ":", path.Split(':')[2]) : Path.GetFullPath(path);
-        public static bool IsFullyQualifiedPath(this string path) => path.Contains(':');
+
+        private static string UnixFlatten(string path) => Path.GetFullPath(path);
+        private static string WindowsFlatten(string path) => path.LastIndexOf(':') != 1 ? WindowsCombine(path.Split(':')[1][^1].ToString() + ":", path.Split(':')[2]) : Path.GetFullPath(path);
+
+        public static bool IsFullyQualifiedPath(this string path) => Environment.OSVersion.Platform switch
+        {
+            PlatformID.Unix => path[0] == '/',
+            PlatformID.Win32NT => path[1] == ':',
+            _ => throw new OSNotSupportedException(Environment.OSVersion)
+        };
     }
 }

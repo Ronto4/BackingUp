@@ -1,10 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using BackingUpConsole.Utilities.Exceptions;
 
 namespace BackingUpConsole.Utilities
 {
@@ -12,12 +16,47 @@ namespace BackingUpConsole.Utilities
     {
         //#pragma warning disable
 #nullable disable
+        public static string[] CommandLineToArgs(string commandLine) => Environment.OSVersion.Platform switch
+        {
+            PlatformID.Unix => UnixCommandLineToArgs(commandLine),
+            PlatformID.Win32NT => WindowsCommandLineToArgs(commandLine),
+            _ => throw new OSNotSupportedException(Environment.OSVersion)
+        };
+        private static string[] UnixCommandLineToArgs(string commandLine)
+        {
+            string dllPath = PathHandler.Combine(Assembly.GetExecutingAssembly().Location.Split('/')[0..^1].CustomToString("/"), "ArgumentGetter.dll");
+            string dotnetPath = "/usr/share/dotnet/dotnet";
+            Process executor = new();
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                FileName = dotnetPath,
+                Arguments = $"{dllPath} {commandLine}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
+            };
+            executor.StartInfo = startInfo;
+            executor.Start();
+            List<string> args = new List<string>();
+            while (!executor.StandardOutput.EndOfStream)
+            {
+                string line = executor.StandardOutput.ReadLine();
+                args.Add(line);
+                // do something with line
+            }
+            // executor.WaitForExit();
+            // var output = executor.StandardOutput;
+            // Console.WriteLine($"Read: <<<{output.ReadToEnd()}>>>");
+            return args.ToArray();
+        }
+#pragma warning disable
         //Source: https://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp
         [DllImport("shell32.dll", SetLastError = true)]
         static extern IntPtr CommandLineToArgvW(
     [MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
 
-        public static string[] CommandLineToArgs(string commandLine)
+        private static string[] WindowsCommandLineToArgs(string commandLine)
         {
             int argc;
             var argv = CommandLineToArgvW(commandLine, out argc);
