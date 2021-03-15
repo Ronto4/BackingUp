@@ -128,19 +128,20 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                     if(messagesRead == 2 && verbose == false)
                         messagePrinter.Print(MessageProvider.Message("Copying files... This may take a while."));
                 }
-                if(verbose == false)
+
+                if (verbose == false)
                     messagePrinter.Print(MessageProvider.Message("Done.", color: ConsoleColor.Green));
             }
         }
         private static class SequentialBackup
         {
-            private static async Task Dir(DirectoryInfo directory, DirectoryInfo backupDir, bool doArchive, MessagePrinter messagePrinter, CancellationToken cancellationToken)
+            private static async Task Dir(DirectoryInfo directory, DirectoryInfo backupDir, bool doArchive, MessagePrinter messagePrinter, bool verbose, CancellationToken cancellationToken)
             {
                 try
                 {
                     foreach (var dir in directory.EnumerateDirectories())
                     {
-                        await Dir(dir, backupDir, doArchive, messagePrinter, cancellationToken);
+                        await Dir(dir, backupDir, doArchive, messagePrinter, verbose, cancellationToken);
                     }
                 }
                 catch { }
@@ -148,15 +149,22 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                     foreach (var file in directory.EnumerateFiles())
                     {
                         MessageHandler message = await BackUpFile(file, new FileInfo(PathHandler.Combine(backupDir.FullName, file.FullName.Replace(':', '-'))), false, cancellationToken);
-                        messagePrinter.Print(message);
+                        if(verbose || message.Level <= MessageCollections.Levels.Warning)
+                            messagePrinter.Print(message);
                     }
                 }
                 catch { }
             }
             internal static async Task PerformBackup(IEnumerable<DirectoryInfo> backupRoots, DirectoryInfo backupDir, bool verbose, MessagePrinter messagePrinter)
             {
+                if(verbose == false)
+                    messagePrinter.Print(MessageProvider.Message("Copying files... This may take a while."));
+                
                 foreach (DirectoryInfo backupRoot in backupRoots)
-                    await Dir(backupRoot, backupDir, false, messagePrinter, new CancellationTokenSource().Token);
+                    await Dir(backupRoot, backupDir, false, messagePrinter, verbose, new CancellationTokenSource().Token);
+                
+                if (verbose == false)
+                    messagePrinter.Print(MessageProvider.Message("Done.", color: ConsoleColor.Green));
             }
         }
     }
