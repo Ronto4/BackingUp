@@ -16,7 +16,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
             if (!args.CheckLength(2, 4))
                 return MessageProvider.IncorrectArgumentCount(!flags.IsSet(Flags.VERBOSE));
 
-            DirectoryInfo dir = new DirectoryInfo(args[1]);
+            DirectoryInfo dir = new(args[1].IsFullyQualifiedPath() ? args[1] : PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]));
             if (dir.Exists)
             {
                 if (dir.GetDirectories().Length + dir.GetFiles().Length != 0)
@@ -44,7 +44,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
         }
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            DirectoryInfo dir = new DirectoryInfo(args[1].IsFullyQualifiedPath() ? args[1] : PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]));
+            DirectoryInfo dir = new(args[1].IsFullyQualifiedPath() ? args[1] : PathHandler.Combine(paths.CurrentWorkingDirectory, args[1]));
             if (!dir.Exists)
                 dir.Create();
 

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using BackingUpConsole.Utilities.Exceptions;
 
 namespace BackingUpConsole.CoreFunctions.BackingUp
 {
@@ -15,7 +16,7 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
     {
         private const int DefaultMaxBlockSize = 65536;
         private static int MaxBlockSize { get; set; }
-        public static async Task<MessageHandler> PerformBackup(this BackUpFile backUp, MessagePrinter messagePrinter, bool useSequential = false, int maxBlockSize = DefaultMaxBlockSize)
+        public static async Task<MessageHandler> PerformBackup(this BackUpFile backUp, MessagePrinter messagePrinter, bool useSequential, bool verbose, int maxBlockSize = DefaultMaxBlockSize)
         {
             MaxBlockSize = maxBlockSize;
             Stopwatch sw = new Stopwatch();
@@ -98,7 +99,15 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                 List<FileInfo> files = await EnumerateAllFilesRecursively(directories, cancellationToken);
                 yield return MessageProvider.Message($"Enumerating done! Found {files.Count} files.");
                 List<Task<MessageHandler>> tasks = new List<Task<MessageHandler>>();
-                tasks.AddRange(files.Select(file => Task.Run(() => BackUpFile(file, new FileInfo(PathHandler.Combine(backupDir.FullName, file.FullName.Replace(':', '-'))), false, cancellationToken), cancellationToken)));
+
+                string GetTargetPath(FileInfo file) => PathHandler.Combine(backupDir.FullName,
+                    Environment.OSVersion.Platform switch
+                    {
+                        PlatformID.Unix => file.FullName[1..],
+                        PlatformID.Win32NT => file.FullName.Replace(':', '-'),
+                        _ => throw new OSNotSupportedException(Environment.OSVersion)
+                    });
+                tasks.AddRange(files.Select(file => Task.Run(() => BackUpFile(file, new FileInfo(GetTargetPath(file)), false, cancellationToken), cancellationToken)));
                 foreach (var bucket in Miscellaneous.Interleaved(tasks))
                 {
                     var t = await bucket;

@@ -14,8 +14,12 @@ namespace BackingUpConsole.Utilities
 {
     internal static class Miscellaneous
     {
-        //#pragma warning disable
-#nullable disable
+        public static string DllFolderPath => Environment.OSVersion.Platform switch
+        {
+            PlatformID.Unix => string.Join('/', Assembly.GetExecutingAssembly().Location.Split('/')[0..^1]),
+            PlatformID.Win32NT => string.Join('\\', Assembly.GetExecutingAssembly().Location.Split('\\')[0..^1]),
+            _ => throw new OSNotSupportedException(Environment.OSVersion)
+        };
         public static string[] CommandLineToArgs(string commandLine) => Environment.OSVersion.Platform switch
         {
             PlatformID.Unix => UnixCommandLineToArgs(commandLine),
@@ -24,7 +28,7 @@ namespace BackingUpConsole.Utilities
         };
         private static string[] UnixCommandLineToArgs(string commandLine)
         {
-            string dllPath = PathHandler.Combine(Assembly.GetExecutingAssembly().Location.Split('/')[0..^1].CustomToString("/"), "ArgumentGetter.dll");
+            string dllPath = PathHandler.Combine(DllFolderPath, "ArgumentGetter.dll");
             string dotnetPath = "/usr/share/dotnet/dotnet";
             Process executor = new();
             ProcessStartInfo startInfo = new ProcessStartInfo
@@ -50,7 +54,7 @@ namespace BackingUpConsole.Utilities
             // Console.WriteLine($"Read: <<<{output.ReadToEnd()}>>>");
             return args.ToArray();
         }
-#pragma warning disable
+#nullable disable
         //Source: https://stackoverflow.com/questions/298830/split-string-containing-command-line-parameters-into-string-in-c-sharp
         [DllImport("shell32.dll", SetLastError = true)]
         static extern IntPtr CommandLineToArgvW(
@@ -78,7 +82,6 @@ namespace BackingUpConsole.Utilities
                 Marshal.FreeHGlobal(argv);
             }
         }
-        //#pragma warning enable
 #nullable enable
 
         public static void ExitProgram(int exitCode, string source)

@@ -23,8 +23,8 @@ namespace BackingUpConsole.CoreFunctions.Commands
         public static async Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
             return args.CheckLength(2, 2)
-                ? await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP), Convert.ToInt32(args[1]))
-                : await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP));
+                ? await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP), flags.IsSet(Flags.VERBOSE), Convert.ToInt32(args[1]))
+                : await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP), flags.IsSet(Flags.VERBOSE));
             //return await paths.SelectedBackup!.PerformBackup(messagePrinter, flags.IsSet(Flags.USE_SEQUENTIAL_BACKUP));
         }
     }

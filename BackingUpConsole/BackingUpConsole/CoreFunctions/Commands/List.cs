@@ -23,7 +23,7 @@ namespace BackingUpConsole.CoreFunctions.Commands
         }
         public async static Task<MessageHandler> RunAsync(string[] args, UInt16 flags, Paths paths, MessagePrinter messagePrinter)
         {
-            string listDir = PathHandler.Combine(Environment.CurrentDirectory, "data");
+            string listDir = PathHandler.Combine(Miscellaneous.DllFolderPath, "data");
             string listPath = PathHandler.Combine(listDir, "backups.bul");
             if (!File.Exists(listPath))
             {

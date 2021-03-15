@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BackingUpConsole.Utilities.Exceptions;
 
 namespace BackingUpConsole.CoreFunctions
 {
@@ -200,7 +201,12 @@ namespace BackingUpConsole.CoreFunctions
 
             if (firstCreation)
             {
-                string basePath = string.Join('\\', file.Path.Split('\\')[0..^1]);
+                string basePath = Environment.OSVersion.Platform switch
+                {
+                    PlatformID.Unix => string.Join('/', file.Path.Split('/')[0..^1]),
+                    PlatformID.Win32NT => string.Join('\\', file.Path.Split('\\')[0..^1]),
+                    _ => throw new OSNotSupportedException(Environment.OSVersion)
+                };
                 string settings = $"settings";
                 string logs = $"logs";
                 string summaries = $"summaries";

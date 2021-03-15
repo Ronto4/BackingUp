@@ -13,7 +13,7 @@ namespace BackingUpConsole.CoreFunctions
         private static readonly string ListIndentifier = $"BackUpList";
         internal static (MessageHandler message, Dictionary<string, string>? entries) ScanList()
         {
-            string path = PathHandler.Combine(Environment.CurrentDirectory, @"data\backups.bul");
+            string path = PathHandler.Combine(Miscellaneous.DllFolderPath, "data", "backups.bul");
             if (!File.Exists(path))
                 return (MessageProvider.Success(), new Dictionary<string, string>());
 
@@ -53,7 +53,7 @@ namespace BackingUpConsole.CoreFunctions
 
         internal static async Task<(MessageHandler message, Dictionary<string, string>? entries)> ScanListAsync()
         {
-            string path = PathHandler.Combine(Environment.CurrentDirectory, @"data\backups.bul");
+            string path = PathHandler.Combine(Miscellaneous.DllFolderPath, "data", "backups.bul");
             if (!File.Exists(path))
                 return (MessageProvider.Success(), new Dictionary<string, string>());
 
@@ -133,7 +133,7 @@ namespace BackingUpConsole.CoreFunctions
         {
             try
             {
-                string listDir = PathHandler.Combine(Environment.CurrentDirectory, "data");
+                string listDir = PathHandler.Combine(Miscellaneous.DllFolderPath, "data");
                 string listPath = PathHandler.Combine(listDir, "backups.bul");
                 if (!Directory.Exists(listDir))
                     Directory.CreateDirectory(listDir);
