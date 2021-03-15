@@ -23,13 +23,13 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
             if (useSequential)
             {
                 sw.Start();
-                await SequentialBackup.PerformBackup(backUp.Settings!.Settings.Paths.Select(path => new DirectoryInfo(path)), new DirectoryInfo(backUp.FileContainer.DataDir), messagePrinter);
+                await SequentialBackup.PerformBackup(backUp.Settings!.Settings.Paths.Select(path => new DirectoryInfo(path)), new DirectoryInfo(backUp.FileContainer.DataDir), verbose, messagePrinter);
                 sw.Stop();
             }
             else
             {
                 sw.Start();
-                await Parallel.PerformBackup(backUp.Settings!.Settings.Paths.Select(path => new DirectoryInfo(path)), new DirectoryInfo(backUp.FileContainer.DataDir), messagePrinter);
+                await Parallel.PerformBackup(backUp.Settings!.Settings.Paths.Select(path => new DirectoryInfo(path)), new DirectoryInfo(backUp.FileContainer.DataDir), verbose, messagePrinter);
                 sw.Stop();
             }
             return MessageProvider.Message($"The process took {sw.ElapsedMilliseconds} ms in {(useSequential ? "sequential" : "parallel")} mode with a MaxBlockSize of {MaxBlockSize}.");
@@ -114,12 +114,22 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                     yield return await t;
                 }
             }
-            internal static async Task PerformBackup(IEnumerable<DirectoryInfo> backupRoots, DirectoryInfo backupDir, MessagePrinter messagePrinter)
+            internal static async Task PerformBackup(IEnumerable<DirectoryInfo> backupRoots, DirectoryInfo backupDir, bool verbose, MessagePrinter messagePrinter)
             {
+                int messagesRead = 0;
                 await foreach (MessageHandler message in BackupDirectory(backupRoots, backupDir, new CancellationTokenSource().Token))
                 {
+                    messagesRead++;
+                    // Show the second message, containing the count of the files.
+                    if (verbose == false && message.Level > MessageCollections.Levels.Warning && messagesRead != 2)
+                        continue;
+                    
                     messagePrinter.Print(message);
+                    if(messagesRead == 2 && verbose == false)
+                        messagePrinter.Print(MessageProvider.Message("Copying files... This may take a while."));
                 }
+                if(verbose == false)
+                    messagePrinter.Print(MessageProvider.Message("Done.", color: ConsoleColor.Green));
             }
         }
         private static class SequentialBackup
@@ -143,7 +153,7 @@ namespace BackingUpConsole.CoreFunctions.BackingUp
                 }
                 catch { }
             }
-            internal static async Task PerformBackup(IEnumerable<DirectoryInfo> backupRoots, DirectoryInfo backupDir, MessagePrinter messagePrinter)
+            internal static async Task PerformBackup(IEnumerable<DirectoryInfo> backupRoots, DirectoryInfo backupDir, bool verbose, MessagePrinter messagePrinter)
             {
                 foreach (DirectoryInfo backupRoot in backupRoots)
                     await Dir(backupRoot, backupDir, false, messagePrinter, new CancellationTokenSource().Token);
